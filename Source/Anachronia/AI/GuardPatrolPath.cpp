@@ -3,13 +3,17 @@
 
 #include "GuardPatrolPath.h"
 
+#include "DrawDebugHelpers.h"
 #include "Components/SplineComponent.h"
 
 // Sets default values
 AGuardPatrolPath::AGuardPatrolPath()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = false;
+	// Tick is only used to draw editor visualizers
+#if WITH_EDITOR
+	PrimaryActorTick.bCanEverTick = true;
+#endif // WITH_EDITOR
+
 
 	SplineComponent = CreateDefaultSubobject<USplineComponent>(TEXT("Spline"));
 	RootComponent = SplineComponent;
@@ -34,6 +38,20 @@ void AGuardPatrolPath::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (GetWorld() && SplineComponent)
+	{
+		for (FPatrolStop& Stop : PatrolStops)
+		{
+			const float Length = 100.0f;
+			FVector LineStart = SplineComponent->GetLocationAtSplineInputKey(Stop.InputKey, ESplineCoordinateSpace::World);
+			FVector LineEnd = LineStart + FVector(0.0f, 0.0, Length);
+			FVector Tangent = SplineComponent->GetTangentAtSplineInputKey(Stop.InputKey, ESplineCoordinateSpace::World);
+			Tangent.Normalize();
+			Tangent = FVector::CrossProduct(Tangent, FVector::UpVector); // We want the bitangent, actually
+			DrawDebugLine(GetWorld(), LineStart, LineEnd, FColor::Yellow);
+			DrawDebugLine(GetWorld(), LineStart - Tangent * 0.5f * Length, LineStart + Tangent * 0.5f * Length, FColor::Yellow);
+		}
+	}
 }
 
 void AGuardPatrolPath::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
@@ -53,6 +71,11 @@ void AGuardPatrolPath::PostEditChangeProperty(FPropertyChangedEvent& PropertyCha
 		}
 	}
 
+}
+
+bool AGuardPatrolPath::ShouldTickIfViewportsOnly() const
+{
+	return true;
 }
 
 // This function is include in a more recent Unreal version (4.26 I think), I retrieved it from GitHub
