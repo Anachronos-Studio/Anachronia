@@ -1,4 +1,6 @@
 #include "GuardAIController.h"
+
+#include "GuardPatrolPath.h"
 #include "GuardPawn.h"
 #include "BehaviorTree/BehaviorTree.h"
 
@@ -18,8 +20,6 @@ AGuardAIController::AGuardAIController()
 void AGuardAIController::BeginPlay()
 {
 	Super::BeginPlay();
-
-	UE_LOG(LogTemp, Display, TEXT("Beging play"));
 }
 
 AGuardPawn* AGuardAIController::GetGuardPawn() const

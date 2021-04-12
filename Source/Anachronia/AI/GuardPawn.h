@@ -4,11 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "Components/CapsuleComponent.h"
-#include "Components/SphereComponent.h"
 #include "GameFramework/Pawn.h"
 #include "GuardPawn.generated.h"
 
+class AGuardPatrolPath;
 class UGuardPawnMovementComponent;
+
+UENUM(BlueprintType)
+enum class EGuardPathFollowState : uint8
+{
+	Stopped,
+	Following
+};
 
 UCLASS()
 class ANACHRONIA_API AGuardPawn : public APawn
@@ -24,12 +31,40 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+
+	void StartFollowingPath();
+	void StopFollowingPath();
+
+	FORCEINLINE EGuardPathFollowState GetPathFollowState() const { return PathFollowState; }
+
+protected:
+	UPROPERTY(Category = Guard, EditInstanceOnly)
+	AGuardPatrolPath* PatrolPath;
+
+	// If true, will snap the pawn to the path spline before playing
+	UPROPERTY(Category = Guard, EditInstanceOnly, Meta = (EditCondition = "PatrolPath != nullptr"))
+	bool bStartOnPath;
+
+	UPROPERTY(Category = Guard, EditAnywhere)
+	float WalkSpeed = 200.0f;
+
 	UPROPERTY(VisibleAnywhere)
 	UGuardPawnMovementComponent* MovementComponent;
 
 	UPROPERTY(VisibleAnywhere)
 	UCapsuleComponent* CapsuleComponent;
 
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
+	UPROPERTY(VisibleAnywhere)
+	USkeletalMeshComponent* MeshComponent;
+	
+private:
+	float DistanceAlongPath;
+	float PatrolStopTimer;
+	float PatrolDirection = 1.0f;
+	EGuardPathFollowState PathFollowState;
+
+	void StepAlongPatrolPath(float DeltaTime);
+	virtual void OnConstruction(const FTransform& Transform) override;
 };

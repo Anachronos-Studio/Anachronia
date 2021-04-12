@@ -8,6 +8,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GuardAIController.generated.h"
 
+class AGuardPatrolPath;
 class AGuardPawn;
 
 /**
@@ -17,8 +18,8 @@ UCLASS()
 class ANACHRONIA_API AGuardAIController : public AAIController
 {
 	GENERATED_BODY()
-public:
 
+public:
 	AGuardAIController();
 	virtual void BeginPlay() override;
 	AGuardPawn* GetGuardPawn() const;
