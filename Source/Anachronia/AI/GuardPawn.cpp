@@ -33,9 +33,33 @@ AGuardPawn::AGuardPawn()
 void AGuardPawn::BeginPlay()
 {
 	Super::BeginPlay();
+
+	bStartOnPath = false; // Don't want to keep snapping to path if moved in editor while playing for debug purposes
+
+	UE_LOG(LogTemp, Display, TEXT("ID: %d"), GetUniqueID());
 }
 
 // Called every frame
+void AGuardPawn::StartFollowingPath()
+{
+	if (PatrolPath == nullptr) return;
+
+	USplineComponent* Spline = PatrolPath->GetSpline();
+	const FVector CurrentLocation = GetActorLocation();
+	const float ClosestInputKey = Spline->FindInputKeyClosestToWorldLocation(CurrentLocation);
+
+	PatrolStopTimer = -1.0f;
+	
+	if (CheckIfCloseEnoughToPatrolPath())
+	{
+		DistanceAlongPath = PatrolPath->GetDistanceAlongSplineAtSplineInputKey(ClosestInputKey);
+		PathFollowState = EGuardPathFollowState::Following;
+	}
+	else
+	{
+		StopFollowingPath(EGuardPathFollowState::TooFarAway);
+	}
+}
 void AGuardPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -48,23 +72,9 @@ void AGuardPawn::Tick(float DeltaTime)
 	SetActorRotation(FMath::RInterpConstantTo(GetActorRotation(), DesiredRotation, DeltaTime, TurnSpeed));
 }
 
-void AGuardPawn::StartFollowingPath()
+void AGuardPawn::StopFollowingPath(EGuardPathFollowState NewState)
 {
-	if (PatrolPath == nullptr) return;
-
-	USplineComponent* Spline = PatrolPath->GetSpline();
-	const FVector CurrentLocation = GetActorLocation();
-	const float ClosestInputKey = Spline->FindInputKeyClosestToWorldLocation(CurrentLocation);
-	const FVector ClosestLocationOnPath = Spline->GetLocationAtSplineInputKey(ClosestInputKey, ESplineCoordinateSpace::World);
-	DistanceAlongPath = PatrolPath->GetDistanceAlongSplineAtSplineInputKey(ClosestInputKey);
-
-	PathFollowState = EGuardPathFollowState::Following;
-	PatrolStopTimer = -1.0f;
-}
-
-void AGuardPawn::StopFollowingPath()
-{
-	PathFollowState = EGuardPathFollowState::Stopped;
+	PathFollowState = NewState;
 	PatrolStopTimer = -1.0f;
 }
 
@@ -75,6 +85,11 @@ void AGuardPawn::StepAlongPatrolPath(float DeltaTime)
 		StopFollowingPath();
 	}
 
+	if (!CheckIfCloseEnoughToPatrolPath())
+	{
+		StopFollowingPath(EGuardPathFollowState::TooFarAway);
+	}
+	
 	if (PatrolStopTimer > 0.0f)
 	{
 		PatrolStopTimer -= DeltaTime;
@@ -85,7 +100,7 @@ void AGuardPawn::StepAlongPatrolPath(float DeltaTime)
 		const bool bLoop = Spline->IsClosedLoop();
 
 		const float OldDistance = DistanceAlongPath;
-		float NewDistance = DistanceAlongPath + WalkSpeed * DeltaTime * PatrolDirection;
+		float NewDistance = DistanceAlongPath + MovementComponent->WalkSpeed * DeltaTime * PatrolDirection;
 		
 		if (PatrolPath->PatrolStops.Num() > 0)
 		{
@@ -138,18 +153,25 @@ void AGuardPawn::StepAlongPatrolPath(float DeltaTime)
 		
 		FVector NewLocation = Spline->GetLocationAtDistanceAlongSpline(NewDistance, ESplineCoordinateSpace::World);
 		NewLocation.Z = GetActorLocation().Z;
-		const FVector DeltaLoc = NewLocation - GetActorLocation();
+		MovementComponent->MoveToLocation(NewLocation, DeltaTime);
 		const FVector NewDirection = Spline->GetDirectionAtDistanceAlongSpline(NewDistance, ESplineCoordinateSpace::World) * PatrolDirection;
 		const FRotator NewRotation = NewDirection.Rotation();
 		DesiredRotation = NewRotation;
-
-		FHitResult Hit;
-		MovementComponent->SafeMoveUpdatedComponent(DeltaLoc, GetActorRotation(), true, Hit);
-		if (Hit.IsValidBlockingHit())
-		{
-			MovementComponent->SlideAlongSurface(DeltaLoc, 1.0f - Hit.Time, Hit.Normal, Hit);
-		}
 	}
+}
+
+bool AGuardPawn::CheckIfCloseEnoughToPatrolPath()
+{
+	const FVector ClosestLocationOnPath = PatrolPath->GetSpline()->FindLocationClosestToWorldLocation(GetActorLocation(), ESplineCoordinateSpace::World);
+	FVector LocationDifference = ClosestLocationOnPath - GetActorLocation();
+	LocationDifference.Z = 0;
+	const bool bOnPath = LocationDifference.IsNearlyZero(1.0f);
+	if (!bOnPath)
+	{
+		PathReturnToLocation = ClosestLocationOnPath;
+		return false;
+	}
+	return true;
 }
 
 void AGuardPawn::OnConstruction(const FTransform& Transform)

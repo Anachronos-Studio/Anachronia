@@ -14,7 +14,9 @@ UENUM(BlueprintType)
 enum class EGuardPathFollowState : uint8
 {
 	Stopped,
-	Following
+	Following,
+	TooFarAway,
+	Blocked,
 };
 
 UCLASS()
@@ -35,9 +37,10 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	void StartFollowingPath();
-	void StopFollowingPath();
+	void StopFollowingPath(EGuardPathFollowState NewState = EGuardPathFollowState::Stopped);
 
 	FORCEINLINE EGuardPathFollowState GetPathFollowState() const { return PathFollowState; }
+	FORCEINLINE FVector GetPathReturnToLocation() const { return PathReturnToLocation; }
 
 protected:
 	UPROPERTY(Category = Guard, EditInstanceOnly)
@@ -46,9 +49,6 @@ protected:
 	// If true, will snap the pawn to the path spline before playing
 	UPROPERTY(Category = Guard, EditInstanceOnly, Meta = (EditCondition = "PatrolPath != nullptr"))
 	bool bStartOnPath;
-
-	UPROPERTY(Category = Guard, EditAnywhere)
-	float WalkSpeed = 200.0f;
 
 	UPROPERTY(Category = Guard, EditAnywhere)
 	float TurnSpeed = 800.0f;
@@ -67,8 +67,15 @@ private:
 	float DistanceAlongPath;
 	float PatrolStopTimer;
 	float PatrolDirection = 1.0f;
+	FVector PathReturnToLocation;
 	EGuardPathFollowState PathFollowState;
 
 	void StepAlongPatrolPath(float DeltaTime);
+
+	/**
+	 * Returns true if close enough to be considered being on the path. If not close, will update PathReturnToLocation.
+	 */
+	bool CheckIfCloseEnoughToPatrolPath();
+	
 	virtual void OnConstruction(const FTransform& Transform) override;
 };
