@@ -39,12 +39,13 @@ void AGuardPawn::BeginPlay()
 void AGuardPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 	if (PathFollowState == EGuardPathFollowState::Following)
 	{
 		StepAlongPatrolPath(DeltaTime);
 	}
 
+	SetActorRotation(FMath::RInterpConstantTo(GetActorRotation(), DesiredRotation, DeltaTime, TurnSpeed));
 }
 
 void AGuardPawn::StartFollowingPath()
@@ -85,8 +86,7 @@ void AGuardPawn::StepAlongPatrolPath(float DeltaTime)
 
 		const float OldDistance = DistanceAlongPath;
 		float NewDistance = DistanceAlongPath + WalkSpeed * DeltaTime * PatrolDirection;
-		DistanceAlongPath = NewDistance;
-
+		
 		if (PatrolPath->PatrolStops.Num() > 0)
 		{
 			int32 NumKeys = Spline->GetNumberOfSplinePoints();
@@ -108,12 +108,7 @@ void AGuardPawn::StepAlongPatrolPath(float DeltaTime)
 				else bPassedStop = NewInputKey <= StopPoint.InputKey && OldInputKey > StopPoint.InputKey;
 				if (bPassedStop)
 				{
-					// Purposefully *not* setting DistanceAlongPath here. This is just a hack to keep old rotation
-					// when at end of a ping-pong path, but applying it to DistanceAlongPath will mess up movement
-					if (!bLoop && PatrolPath->bPingPong)
-					{
-						NewDistance = OldDistance;
-					}
+					NewDistance = PatrolPath->GetDistanceAlongSplineAtSplineInputKey(StopPoint.InputKey);
 					PatrolStopTimer = StopPoint.Duration;
 					break;
 				}
@@ -124,30 +119,32 @@ void AGuardPawn::StepAlongPatrolPath(float DeltaTime)
 		if (bLoop)
 		{
 			NewDistance = FMath::Fmod(NewDistance, PathLength);
-			DistanceAlongPath = NewDistance;
 		}
 		else if (PatrolPath->bPingPong)
 		{
-			if (NewDistance >= PathLength && PatrolDirection > 0.0f)
+			if (NewDistance > PathLength && PatrolDirection > 0.0f)
 			{
 				NewDistance = PathLength - (NewDistance - PathLength);
 				PatrolDirection  = -PatrolDirection;
 			}
-			else if (NewDistance <= 0.0f && PatrolDirection < 0.0f)
+			else if (NewDistance < 0.0f && PatrolDirection < 0.0f)
 			{
 				NewDistance = -NewDistance;
 				PatrolDirection = -PatrolDirection;
 			}
 		}
+
+		DistanceAlongPath = NewDistance;
 		
 		FVector NewLocation = Spline->GetLocationAtDistanceAlongSpline(NewDistance, ESplineCoordinateSpace::World);
 		NewLocation.Z = GetActorLocation().Z;
 		const FVector DeltaLoc = NewLocation - GetActorLocation();
 		const FVector NewDirection = Spline->GetDirectionAtDistanceAlongSpline(NewDistance, ESplineCoordinateSpace::World) * PatrolDirection;
 		const FRotator NewRotation = NewDirection.Rotation();
+		DesiredRotation = NewRotation;
 
 		FHitResult Hit;
-		MovementComponent->SafeMoveUpdatedComponent(DeltaLoc, NewRotation, true, Hit);
+		MovementComponent->SafeMoveUpdatedComponent(DeltaLoc, GetActorRotation(), true, Hit);
 		if (Hit.IsValidBlockingHit())
 		{
 			MovementComponent->SlideAlongSurface(DeltaLoc, 1.0f - Hit.Time, Hit.Normal, Hit);
@@ -159,10 +156,12 @@ void AGuardPawn::OnConstruction(const FTransform& Transform)
 {
 	Super::OnConstruction(Transform);
 
-	if (PatrolPath != nullptr && bStartOnPath)
+	if (bStartOnPath && PatrolPath != nullptr && PatrolPath->GetSpline() != nullptr)
 	{
 		FVector NewLocation = PatrolPath->GetSpline()->FindLocationClosestToWorldLocation(GetActorLocation(), ESplineCoordinateSpace::World);
 		NewLocation.Z = GetActorLocation().Z;
 		SetActorLocation(NewLocation);
+		const FRotator NewRotation = PatrolPath->GetSpline()->FindRotationClosestToWorldLocation(GetActorLocation(), ESplineCoordinateSpace::World);
+		SetActorRotation(NewRotation);
 	}
 }
