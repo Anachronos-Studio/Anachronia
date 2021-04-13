@@ -42,10 +42,25 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 	Mesh1P->SetRelativeRotation(FRotator(1.9f, -19.19f, 5.2f));
 	Mesh1P->SetRelativeLocation(FVector(-0.5f, -4.4f, -155.7f));
 
+	// Create a box that will catch the lighing
+	LightReceiver = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LightReceiver"));
+	LightReceiver->SetupAttachment(GetCapsuleComponent());
+	LightReceiver->SetCastShadow(false);
+	LightReceiver->bCastDynamicShadow = false;
+	LightReceiver->SetRelativeScale3D(FVector(0.2f));
+
+	// Initiate the stealth attributes
+	PlayerVisibility = 0.f;
+	PlayerLuminance = 0.f;
+	PlayerNoiseLevel = 0.f;
+	PlayerMotionLevel = 0.f;
+
+	// Initiate base attributes
 	GetCharacterMovement()->JumpZVelocity = JumpVelocity;
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
 	CrouchedEyeHeight = 20.f;
+	
 }
 
 // Called when the game starts or when spawned
@@ -153,4 +168,12 @@ void  AAnachroniaPlayer::ToggleCrouchOff() {
 	}
 }
 
+float AAnachroniaPlayer::CalculateLuminance(FVector V) {
 
+	/* NOTE: Check if the input value of the RGB vector is normalized (0.0-1.0) or not. if it's not, 
+			 then divide the values with 255 and then do the Sqrt-calculation */
+	float R = V.X, G = V.Y, B = V.Z;
+	float L = 0.f;
+	L = FMath::Sqrt(FMath::Pow(0.299 * R, 2) + FMath::Pow(0.587 * G, 2) + FMath::Pow(0.114 * B, 2));
+	return L;
+}
