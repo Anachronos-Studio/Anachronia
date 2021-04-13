@@ -25,7 +25,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FirstPersonCameraComponent;
 
-
+	/** To catch the global lighting to determine player visibility */
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Mesh)
+	class UStaticMeshComponent* LightReceiver;
 
 protected:
 	// Called when the game starts or when spawned
