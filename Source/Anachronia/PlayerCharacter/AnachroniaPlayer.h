@@ -51,6 +51,24 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
 	float JumpVelocity;
 
+	// Stealth properties below
+
+	/** This value will determine the overall visibility of the player to the AI */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = StealthLevelAttributes)
+	float PlayerVisibility;
+
+	/** The Luminance value will handle the visual luminosity of the player */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = StealthLevelAttributes)
+	float PlayerLuminance;
+
+	/** The Noise level is dependent on player movement types as well as floor material*/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = StealthLevelAttributes)
+	float PlayerNoiseLevel;
+
+	/** The player motion level determines how much motion player makes, to get noticeable */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = StealthLevelAttributes)
+	float PlayerMotionLevel;
+
 protected:
 
 	/** Handles moving forward/backward */
@@ -74,6 +92,8 @@ protected:
 	void ToggleCrouch();
 	bool bIsCrouched;
 
+	/** Calculate the luminosity. This function should be called when setting up player visibility check */
+	float CalculateLuminance(FVector V);
 
 public:
 	UFUNCTION(BlueprintCallable, Category = BasicAttributes)
