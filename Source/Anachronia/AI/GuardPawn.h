@@ -50,6 +50,9 @@ protected:
 	UPROPERTY(Category = Guard, EditAnywhere)
 	float WalkSpeed = 200.0f;
 
+	UPROPERTY(Category = Guard, EditAnywhere)
+	float TurnSpeed = 800.0f;
+
 	UPROPERTY(VisibleAnywhere)
 	UGuardPawnMovementComponent* MovementComponent;
 
@@ -60,6 +63,7 @@ protected:
 	USkeletalMeshComponent* MeshComponent;
 	
 private:
+	FRotator DesiredRotation;
 	float DistanceAlongPath;
 	float PatrolStopTimer;
 	float PatrolDirection = 1.0f;
