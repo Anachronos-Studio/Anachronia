@@ -52,5 +52,6 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	virtual bool ShouldTickIfViewportsOnly() const override;
 	float GetDistanceAlongSplineAtSplineInputKey(float InKey) const;
 };
