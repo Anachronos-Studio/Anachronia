@@ -95,6 +95,8 @@ protected:
 	/** Calculate the luminosity. This function should be called when setting up player visibility check */
 	float CalculateLuminance(FVector V);
 
+
+
 public:
 	UFUNCTION(BlueprintCallable, Category = BasicAttributes)
 	void ToggleCrouchOn();

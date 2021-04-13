@@ -43,6 +43,14 @@ void ABaseEquipItem::Action() {
 	}
 }
 
+void ABaseEquipItem::ChargeWeapon() {
+
+}
+
+void ABaseEquipItem::UseTool() {
+
+}
+
 
 
 
