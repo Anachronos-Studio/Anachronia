@@ -26,8 +26,13 @@ public:
 	class UCameraComponent* FirstPersonCameraComponent;
 
 	/** To catch the global lighting to determine player visibility */
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Mesh)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
 	class UStaticMeshComponent* LightReceiver;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
+	UCameraComponent* LightCamTop;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
+	UCameraComponent* LightCamBottom;
 
 protected:
 	// Called when the game starts or when spawned
@@ -112,13 +117,19 @@ protected:
 	 */
 	void LookUpAtRate(float Rate);
 
+	void Sprint();
+	void UnSprint();
+	float InitiatedWalkingSpeed;
+
 	void ToggleCrouch();
 	bool bIsCrouched;
 
 	/** Calculate the luminosity. This function should be called when setting up player visibility check */
-	float CalculateLuminance(FVector V);
+	float CalculateLuminance(const FVector &V);
 
-
+	UPROPERTY(BlueprintReadOnly)
+	FVector GloabalLuminanceOnPlayer;
+	
 
 public:
 	UFUNCTION(BlueprintCallable, Category = BasicAttributes)
@@ -127,10 +138,20 @@ public:
 	UFUNCTION(BlueprintCallable, Category = BasicAttributes)
 	void ToggleCrouchOff();
 
+	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
+	void SetLuminance(float Value) { PlayerLuminance = Value; }
+	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
+	void SetMotionLevel(float Value) { PlayerMotionLevel = Value; }
+	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
+	void SetVisibility(float L, float M) { PlayerVisibility = (L + M) / 2.f; }
 
-	void SetLuminance(float Value);
-	void SetMotionLevel(float Value);
-	void SetVisibility(float L, float M);
+	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
+	float GetLuminance(){ return PlayerLuminance; }
+	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
+	float GetMotionLevel(){ return PlayerMotionLevel; }
+	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
+	float GetVisibility(){ return PlayerVisibility; }
 
-	float GetLuminance();
+	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
+	void SetGlobalLuminanceOnPlayer(FVector L){ GloabalLuminanceOnPlayer = L; }
 };
