@@ -7,17 +7,7 @@
 #include "GameFramework/Pawn.h"
 #include "GuardPawn.generated.h"
 
-class AGuardPatrolPath;
 class UGuardPawnMovementComponent;
-
-UENUM(BlueprintType)
-enum class EGuardPathFollowState : uint8
-{
-	Stopped,
-	Following,
-	TooFarAway,
-	Blocked,
-};
 
 UCLASS()
 class ANACHRONIA_API AGuardPawn : public APawn
@@ -36,21 +26,13 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void StartFollowingPath();
-	void StopFollowingPath(EGuardPathFollowState NewState = EGuardPathFollowState::Stopped);
-
-	FORCEINLINE EGuardPathFollowState GetPathFollowState() const { return PathFollowState; }
-	FORCEINLINE FVector GetPathReturnToLocation() const { return PathReturnToLocation; }
+	FORCEINLINE UGuardPawnMovementComponent* GetGuardMovement() const { return MovementComponent; }
 
 protected:
-	UPROPERTY(Category = Guard, EditInstanceOnly)
-	AGuardPatrolPath* PatrolPath;
-
-	// If true, will snap the pawn to the path spline before playing
-	UPROPERTY(Category = Guard, EditInstanceOnly, Meta = (EditCondition = "PatrolPath != nullptr"))
+	UPROPERTY(Category = Guard, EditAnywhere, BlueprintReadWrite, Meta = (EditCondition = "MovementComponent && MovementComponent->PatrolPath"))
 	bool bStartOnPath;
-
-	UPROPERTY(Category = Guard, EditAnywhere)
+	
+	UPROPERTY(Category = Guard, EditAnywhere, BlueprintReadWrite)
 	float TurnSpeed = 800.0f;
 
 	UPROPERTY(VisibleAnywhere)
@@ -62,20 +44,6 @@ protected:
 	UPROPERTY(VisibleAnywhere)
 	USkeletalMeshComponent* MeshComponent;
 	
-private:
-	FRotator DesiredRotation;
-	float DistanceAlongPath;
-	float PatrolStopTimer;
-	float PatrolDirection = 1.0f;
-	FVector PathReturnToLocation;
-	EGuardPathFollowState PathFollowState;
-
-	void StepAlongPatrolPath(float DeltaTime);
-
-	/**
-	 * Returns true if close enough to be considered being on the path. If not close, will update PathReturnToLocation.
-	 */
-	bool CheckIfCloseEnoughToPatrolPath();
-	
+private:	
 	virtual void OnConstruction(const FTransform& Transform) override;
 };

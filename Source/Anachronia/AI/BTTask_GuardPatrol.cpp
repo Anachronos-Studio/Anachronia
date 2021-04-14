@@ -3,7 +3,7 @@
 
 #include "BTTask_GuardPatrol.h"
 
-#include "GuardPawn.h"
+#include "GuardPawnMovementComponent.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 UBTTask_GuardPatrol::UBTTask_GuardPatrol()
@@ -16,16 +16,16 @@ EBTNodeResult::Type UBTTask_GuardPatrol::ExecuteTask(UBehaviorTreeComponent& Own
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
-	AGuardPawn* Guard = GetGuardPawn(OwnerComp);
-	Guard->StartFollowingPath();
-	if (Guard->GetPathFollowState() == EGuardPathFollowState::Following)
+	UGuardPawnMovementComponent* GuardMovement = GetGuardMovement(OwnerComp);
+	GuardMovement->StartFollowingPath();
+	if (GuardMovement->GetPathFollowState() == EGuardPathFollowState::Following)
 	{
 		return EBTNodeResult::InProgress;
 	}
 	else
 	{
 		UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
-		Blackboard->SetValueAsVector("PatrolReturnLocation", Guard->GetPathReturnToLocation());
+		Blackboard->SetValueAsVector("PatrolReturnLocation", GuardMovement->GetPathReturnToLocation());
 		return EBTNodeResult::Failed;
 	}
 }
@@ -34,19 +34,19 @@ EBTNodeResult::Type UBTTask_GuardPatrol::AbortTask(UBehaviorTreeComponent& Owner
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
-	GetGuardPawn(OwnerComp)->StopFollowingPath();
+	GetGuardMovement(OwnerComp)->StopFollowingPath();
 
 	return EBTNodeResult::Aborted;
 }
 
 void UBTTask_GuardPatrol::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
-	AGuardPawn* Guard = GetGuardPawn(OwnerComp);
-	const EGuardPathFollowState GuardState = Guard->GetPathFollowState();
+	UGuardPawnMovementComponent* GuardMovement = GetGuardMovement(OwnerComp);
+	const EGuardPathFollowState GuardState = GuardMovement->GetPathFollowState();
 	if (GuardState != EGuardPathFollowState::Following)
 	{
 		UBlackboardComponent* Blackboard = OwnerComp.GetBlackboardComponent();
-		Blackboard->SetValueAsVector("PatrolReturnLocation", Guard->GetPathReturnToLocation());
+		Blackboard->SetValueAsVector("PatrolReturnLocation", GuardMovement->GetPathReturnToLocation());
 		FinishLatentTask(OwnerComp, EBTNodeResult::Failed);
 	}
 }
