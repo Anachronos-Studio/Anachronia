@@ -18,10 +18,14 @@ AGuardPawn::AGuardPawn()
 	RootComponent = CapsuleComponent;
 	CapsuleComponent->SetCapsuleHalfHeight(88.0f);
 	CapsuleComponent->SetCapsuleRadius(22.0f);
+	SetActorEnableCollision(true);
+	CapsuleComponent->SetCollisionProfileName(TEXT("Pawn"));
+	CapsuleComponent->SetCanEverAffectNavigation(false);
 
 	MeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
 	MeshComponent->SetupAttachment(RootComponent);
 	MeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -CapsuleComponent->GetScaledCapsuleHalfHeight()));
+	MeshComponent->SetCanEverAffectNavigation(false);
 	
 	MovementComponent = CreateDefaultSubobject<UGuardPawnMovementComponent>(TEXT("MovementComponent"));
 	MovementComponent->UpdatedComponent = RootComponent;

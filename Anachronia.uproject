@@ -33,6 +33,14 @@
 				"Linux",
 				"Mac"
 			]
+		},
+		{
+			"Name": "FMODStudio",
+			"Enabled": true
+		},
+		{
+			"Name": "UnrealInk",
+			"Enabled": true
 		}
 	]
 }
