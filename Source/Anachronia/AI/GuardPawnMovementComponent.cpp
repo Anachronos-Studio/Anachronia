@@ -169,6 +169,12 @@ void UGuardPawnMovementComponent::StepAlongPatrolPath(float DeltaTime)
 		}
 
 		DistanceAlongPath = NewDistance;
+		
+		float LookAheadDistance = DistanceAlongPath + 100.0f;
+		FVector LookAheadLocation = Spline->GetLocationAtDistanceAlongSpline(LookAheadDistance, ESplineCoordinateSpace::World);
+		FQuat LookAheadRotation = Spline->GetQuaternionAtDistanceAlongSpline(LookAheadDistance, ESplineCoordinateSpace::World);
+
+		WouldPenetrateAt(LookAheadLocation, LookAheadRotation);
 
 		const FVector OldLocation = UpdatedComponent->GetComponentLocation();
 		FVector DesiredLocation = Spline->GetLocationAtDistanceAlongSpline(NewDistance, ESplineCoordinateSpace::World);
@@ -179,14 +185,32 @@ void UGuardPawnMovementComponent::StepAlongPatrolPath(float DeltaTime)
 		FHitResult Hit;
 		const FQuat Rotation = UpdatedComponent->GetComponentQuat();
 		SafeMoveUpdatedComponent(DeltaMove, Rotation, true, Hit);
-		if (Hit.IsValidBlockingHit())
-		{
-			SlideAlongSurface(DeltaMove, 1.0f - Hit.Time, Hit.Normal, Hit);
-		}
+		//if (Hit.IsValidBlockingHit())
+		//{
+		//	SlideAlongSurface(DeltaMove, 1.0f - Hit.Time, Hit.Normal, Hit);
+		//}
 
 		const FVector NewLocation = UpdatedComponent->GetComponentLocation();
 		Velocity = (NewLocation - OldLocation) / DeltaTime;
 	}
+}
+
+bool UGuardPawnMovementComponent::WouldPenetrateAt(FVector Location, FQuat Rotation)
+{
+	FHitResult Hit;
+	const FVector OldLocation = UpdatedComponent->GetComponentLocation();
+	const FQuat OldRotation = UpdatedComponent->GetComponentQuat();
+	FVector Delta = Location - OldLocation;
+	Delta.Z = 0;
+	MoveUpdatedComponent(Delta, Rotation, false, &Hit, ETeleportType::ResetPhysics);
+	MoveUpdatedComponent(-Delta, OldRotation, false, nullptr, ETeleportType::ResetPhysics);
+	if (Hit.IsValidBlockingHit())
+	{
+		UE_LOG(LogTemp, Display, TEXT("About to penetrate!"));
+		return true;
+	}
+
+	return false;
 }
 
 bool UGuardPawnMovementComponent::CheckIfCloseEnoughToPatrolPath()

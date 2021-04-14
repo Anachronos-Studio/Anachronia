@@ -33,7 +33,7 @@ protected:
 	bool bStartOnPath;
 	
 	UPROPERTY(Category = Guard, EditAnywhere, BlueprintReadWrite)
-	float TurnSpeed = 800.0f;
+	float TurnSpeed = 500.0f;
 
 	UPROPERTY(VisibleAnywhere)
 	UGuardPawnMovementComponent* MovementComponent;

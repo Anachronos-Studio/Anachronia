@@ -54,6 +54,7 @@ private:
 	EGuardPathFollowState PathFollowState;
 
 	void StepAlongPatrolPath(float DeltaTime);
+	bool WouldPenetrateAt(FVector Location, FQuat Rotation);
 
 	/**
 	 * Returns true if close enough to be considered being on the path. If not close, will update PathReturnToLocation.
