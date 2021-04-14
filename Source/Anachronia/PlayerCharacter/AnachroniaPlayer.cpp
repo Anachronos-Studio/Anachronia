@@ -45,6 +45,9 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 	// Create a box that will catch the lighing
 	LightReceiver = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LightReceiver"));
 	LightReceiver->SetupAttachment(GetCapsuleComponent());
+	static ConstructorHelpers::FObjectFinder<UStaticMesh> Octahedron(TEXT("StaticMesh'/Game/Anachronia/Meshes/Oct.Oct'"));
+	if (Octahedron.Succeeded()) 
+		LightReceiver->SetStaticMesh(Octahedron.Object);
 	LightReceiver->SetCastShadow(false);
 	LightReceiver->bCastDynamicShadow = false;
 	LightReceiver->SetRelativeScale3D(FVector(0.2f));
@@ -60,7 +63,6 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 
 	CrouchedEyeHeight = 20.f;
-	
 }
 
 // Called when the game starts or when spawned
@@ -137,12 +139,17 @@ void AAnachroniaPlayer::LookUpAtRate(float Rate)
 }
 
 void AAnachroniaPlayer::ToggleCrouch() {
-	if (GetCharacterMovement()->IsCrouching())
-		AAnachroniaPlayer::ToggleCrouchOff();
-	else {
-		AAnachroniaPlayer::ToggleCrouchOn();
-		GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
-	}
+	if (!GetCharacterMovement()->IsCrouching())
+		Crouch();
+	else
+		UnCrouch();
+
+	//if (GetCharacterMovement()->IsCrouching())
+	//	/*AAnachroniaPlayer::ToggleCrouchOff();*/
+	//else {
+	//	/*AAnachroniaPlayer::ToggleCrouchOn();*/
+	//	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
+	//}
 }
 
 void  AAnachroniaPlayer::ToggleCrouchOn() {
@@ -176,4 +183,20 @@ float AAnachroniaPlayer::CalculateLuminance(FVector V) {
 	float L = 0.f;
 	L = FMath::Sqrt(FMath::Pow(0.299 * R, 2) + FMath::Pow(0.587 * G, 2) + FMath::Pow(0.114 * B, 2));
 	return L;
+}
+
+void AAnachroniaPlayer::SetLuminance(float Value) {
+
+}
+
+void AAnachroniaPlayer::SetMotionLevel(float Value) {
+
+}
+
+void AAnachroniaPlayer::SetVisibility(float L, float M) {
+
+}
+
+float AAnachroniaPlayer::GetLuminance() {
+	return PlayerLuminance;
 }
