@@ -2,6 +2,7 @@
 
 #include "BTTask_GuardBase.h"
 #include "GuardAIController.h"
+#include "GuardPawn.h"
 
 AGuardAIController* UBTTask_GuardBase::GetGuardController(UBehaviorTreeComponent& OwnerComp) const
 {
@@ -11,4 +12,9 @@ AGuardAIController* UBTTask_GuardBase::GetGuardController(UBehaviorTreeComponent
 AGuardPawn* UBTTask_GuardBase::GetGuardPawn(UBehaviorTreeComponent& OwnerComp) const
 {
 	return GetGuardController(OwnerComp)->GetGuardPawn();
+}
+
+UGuardPawnMovementComponent* UBTTask_GuardBase::GetGuardMovement(UBehaviorTreeComponent& OwnerComp) const
+{
+	return GetGuardPawn(OwnerComp)->GetGuardMovement();
 }

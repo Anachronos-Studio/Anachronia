@@ -6,6 +6,7 @@
 #include "BehaviorTree/BTTaskNode.h"
 #include "BTTask_GuardBase.generated.h"
 
+class UGuardPawnMovementComponent;
 class AGuardPawn;
 class AGuardAIController;
 
@@ -20,4 +21,5 @@ class ANACHRONIA_API UBTTask_GuardBase : public UBTTaskNode
 public:
 	AGuardAIController* GetGuardController(UBehaviorTreeComponent& OwnerComp) const;
 	AGuardPawn* GetGuardPawn(UBehaviorTreeComponent& OwnerComp) const;
+	UGuardPawnMovementComponent* GetGuardMovement(UBehaviorTreeComponent& OwnerComp) const;
 };
