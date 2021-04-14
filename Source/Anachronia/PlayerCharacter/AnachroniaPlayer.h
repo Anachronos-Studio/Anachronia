@@ -63,11 +63,34 @@ public:
 
 	/** The Noise level is dependent on player movement types as well as floor material*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = StealthLevelAttributes)
-	float PlayerNoiseLevel;
+	float PlayerNoiseLevel;																				//Separera från visibility
 
 	/** The player motion level determines how much motion player makes, to get noticeable */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = StealthLevelAttributes)
 	float PlayerMotionLevel;
+
+	// Player Main Attributes below
+
+	/** The maximum health of the player*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MainAttributes)
+	float MaxHealth;
+
+	/** The current health of the player*/
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MainAttributes)
+	float CurrentHealth;
+
+	/** The Basic damage player can do, affects both lethal damage and blunt damage by addition */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MainAttributes)
+	float BaseDamage;
+
+	/** The lethal damage that will get it's value from weapons */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MainAttributes)
+	float LethalDamage;
+
+	/** The blunt damage that will get it's value from weapons */
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MainAttributes)
+	float BluntDamage;
+
 
 protected:
 
@@ -104,4 +127,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = BasicAttributes)
 	void ToggleCrouchOff();
 
+
+	void SetLuminance(float Value);
+	void SetMotionLevel(float Value);
+	void SetVisibility(float L, float M);
+
+	float GetLuminance();
 };
