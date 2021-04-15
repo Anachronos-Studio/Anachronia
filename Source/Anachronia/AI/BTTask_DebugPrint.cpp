@@ -9,8 +9,8 @@ UBTTask_DebugPrint::UBTTask_DebugPrint()
 EBTNodeResult::Type UBTTask_DebugPrint::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	GEngine->AddOnScreenDebugMessage
-	(-1, MessageDuration, MessageColor, FString::Printf(TEXT("%s AI: %s"), *OwnerComp.GetOwner()->GetName(), *NodeName));
-	UE_LOG(LogTemp, Display, TEXT("%s AI: %s"), *OwnerComp.GetOwner()->GetName(), *NodeName);
+	(-1, MessageDuration, MessageColor, FString::Printf(TEXT("%s: %s"), *OwnerComp.GetOwner()->GetName(), *NodeName));
+	UE_LOG(LogTemp, Display, TEXT("%s: %s"), *OwnerComp.GetOwner()->GetName(), *NodeName);
 
 	return EBTNodeResult::Succeeded;
 }

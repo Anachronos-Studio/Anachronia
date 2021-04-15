@@ -8,6 +8,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "GuardAIController.generated.h"
 
+struct FPatrolStop;
 class AGuardPatrolPath;
 class AGuardPawn;
 
@@ -23,13 +24,22 @@ public:
 	AGuardAIController();
 	virtual void BeginPlay() override;
 	AGuardPawn* GetGuardPawn() const;
+	AGuardPatrolPath* GetPatrolPath() const;
+	FVector GetCurrentPatrolGoal() const;
+	void PickNextPatrolPoint();
+	FPatrolStop* GetCurrentPatrolStopInfo() const;
 
-protected:
+private:
 	UPROPERTY(VisibleInstanceOnly)
 	AGuardPawn* GuardPawn;
 
 	UPROPERTY()
 	UBehaviorTree* BTAsset;
+
+	UPROPERTY(Transient, VisibleInstanceOnly)
+	int32 NextPatrolPoint = 0;
+	
+	int32 PatrolDirection = 1;
 
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;

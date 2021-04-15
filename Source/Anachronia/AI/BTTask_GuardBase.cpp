@@ -13,8 +13,3 @@ AGuardPawn* UBTTask_GuardBase::GetGuardPawn(UBehaviorTreeComponent& OwnerComp) c
 {
 	return GetGuardController(OwnerComp)->GetGuardPawn();
 }
-
-UGuardPawnMovementComponent* UBTTask_GuardBase::GetGuardMovement(UBehaviorTreeComponent& OwnerComp) const
-{
-	return GetGuardPawn(OwnerComp)->GetGuardMovement();
-}

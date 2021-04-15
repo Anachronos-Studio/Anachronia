@@ -4,13 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Components/CapsuleComponent.h"
-#include "GameFramework/Pawn.h"
+#include "GameFramework/Character.h"
 #include "GuardPawn.generated.h"
 
+class AGuardPatrolPath;
 class UGuardPawnMovementComponent;
 
 UCLASS()
-class ANACHRONIA_API AGuardPawn : public APawn
+class ANACHRONIA_API AGuardPawn : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -22,28 +23,14 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+
 public:
+	UPROPERTY(Category = Guard, EditInstanceOnly)
+	AGuardPatrolPath* PatrolPath;
+	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	FORCEINLINE UGuardPawnMovementComponent* GetGuardMovement() const { return MovementComponent; }
-
-protected:
-	UPROPERTY(Category = Guard, EditAnywhere, BlueprintReadWrite, Meta = (EditCondition = "MovementComponent && MovementComponent->PatrolPath"))
-	bool bStartOnPath;
-	
-	UPROPERTY(Category = Guard, EditAnywhere, BlueprintReadWrite)
-	float TurnSpeed = 500.0f;
-
-	UPROPERTY(VisibleAnywhere)
-	UGuardPawnMovementComponent* MovementComponent;
-
-	UPROPERTY(VisibleAnywhere)
-	UCapsuleComponent* CapsuleComponent;
-
-	UPROPERTY(VisibleAnywhere)
-	USkeletalMeshComponent* MeshComponent;
-	
-private:	
+private:
 	virtual void OnConstruction(const FTransform& Transform) override;
 };
