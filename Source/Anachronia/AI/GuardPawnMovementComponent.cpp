@@ -3,6 +3,10 @@
 #include "GuardPatrolPath.h"
 #include "Components/SplineComponent.h"
 
+/*
+ * No longer used
+ */
+
 UGuardPawnMovementComponent::UGuardPawnMovementComponent()
 {
 	NavAgentProps.bCanWalk = true;
@@ -99,100 +103,100 @@ void UGuardPawnMovementComponent::FindClosestLocationAndRotationOnPath(FVector F
 
 void UGuardPawnMovementComponent::StepAlongPatrolPath(float DeltaTime)
 {
-	if (PatrolPath == nullptr)
-	{
-		StopFollowingPath();
-	}
+	//if (PatrolPath == nullptr)
+	//{
+	//	StopFollowingPath();
+	//}
 
-	if (!CheckIfCloseEnoughToPatrolPath())
-	{
-		StopFollowingPath(EGuardPathFollowState::TooFarAway);
-	}
+	//if (!CheckIfCloseEnoughToPatrolPath())
+	//{
+	//	StopFollowingPath(EGuardPathFollowState::TooFarAway);
+	//}
 
-	if (PatrolStopTimer > 0.0f)
-	{
-		PatrolStopTimer -= DeltaTime;
-	}
-	else
-	{
-		USplineComponent* Spline = PatrolPath->GetSpline();
-		const bool bLoop = Spline->IsClosedLoop();
+	//if (PatrolStopTimer > 0.0f)
+	//{
+	//	PatrolStopTimer -= DeltaTime;
+	//}
+	//else
+	//{
+	//	USplineComponent* Spline = PatrolPath->GetSpline();
+	//	const bool bLoop = Spline->IsClosedLoop();
 
-		const float OldDistance = DistanceAlongPath;
-		float NewDistance = DistanceAlongPath + WalkSpeed * DeltaTime * PatrolDirection;
+	//	const float OldDistance = DistanceAlongPath;
+	//	float NewDistance = DistanceAlongPath + WalkSpeed * DeltaTime * PatrolDirection;
 
-		if (PatrolPath->PatrolStops.Num() > 0)
-		{
-			int32 NumKeys = Spline->GetNumberOfSplinePoints();
-			if (!bLoop)
-			{
-				NumKeys = NumKeys - 1;
-			}
-			// In the spline editor, it looks like Input Keys go from 0.0 to <Number of points> along the whole spline
-			// But the return value of GetInputKey... is apparently always in the range 0.0-1.0 instead
-			const float OldInputKey = Spline->GetInputKeyAtDistanceAlongSpline(OldDistance) * NumKeys;
-			const float NewInputKey = Spline->GetInputKeyAtDistanceAlongSpline(NewDistance) * NumKeys;
+	//	if (PatrolPath->PatrolStops.Num() > 0)
+	//	{
+	//		int32 NumKeys = Spline->GetNumberOfSplinePoints();
+	//		if (!bLoop)
+	//		{
+	//			NumKeys = NumKeys - 1;
+	//		}
+	//		// In the spline editor, it looks like Input Keys go from 0.0 to <Number of points> along the whole spline
+	//		// But the return value of GetInputKey... is apparently always in the range 0.0-1.0 instead
+	//		const float OldInputKey = Spline->GetInputKeyAtDistanceAlongSpline(OldDistance) * NumKeys;
+	//		const float NewInputKey = Spline->GetInputKeyAtDistanceAlongSpline(NewDistance) * NumKeys;
 
-			//GEngine->AddOnScreenDebugMessage(41, 2.0, FColor::Yellow, FString::Printf(TEXT("%f"), NewInputKey));
+	//		//GEngine->AddOnScreenDebugMessage(41, 2.0, FColor::Yellow, FString::Printf(TEXT("%f"), NewInputKey));
 
-			for (FPatrolStop& StopPoint : PatrolPath->PatrolStops)
-			{
-				bool bPassedStop;
-				if (PatrolDirection > 0.0f) bPassedStop = NewInputKey >= StopPoint.InputKey && OldInputKey < StopPoint.InputKey;
-				else bPassedStop = NewInputKey <= StopPoint.InputKey && OldInputKey > StopPoint.InputKey;
-				if (bPassedStop)
-				{
-					NewDistance = PatrolPath->GetDistanceAlongSplineAtSplineInputKey(StopPoint.InputKey);
-					PatrolStopTimer = StopPoint.Duration;
-					break;
-				}
-			}
-		}
+	//		for (FPatrolStop& StopPoint : PatrolPath->PatrolStops)
+	//		{
+	//			bool bPassedStop;
+	//			if (PatrolDirection > 0.0f) bPassedStop = NewInputKey >= StopPoint.InputKey && OldInputKey < StopPoint.InputKey;
+	//			else bPassedStop = NewInputKey <= StopPoint.InputKey && OldInputKey > StopPoint.InputKey;
+	//			if (bPassedStop)
+	//			{
+	//				NewDistance = PatrolPath->GetDistanceAlongSplineAtSplineInputKey(StopPoint.InputKey);
+	//				PatrolStopTimer = StopPoint.Duration;
+	//				break;
+	//			}
+	//		}
+	//	}
 
-		const float PathLength = Spline->GetSplineLength();
-		if (bLoop)
-		{
-			NewDistance = FMath::Fmod(NewDistance, PathLength);
-		}
-		else if (PatrolPath->bPingPong)
-		{
-			if (NewDistance > PathLength && PatrolDirection > 0.0f)
-			{
-				NewDistance = PathLength - (NewDistance - PathLength);
-				PatrolDirection = -PatrolDirection;
-			}
-			else if (NewDistance < 0.0f && PatrolDirection < 0.0f)
-			{
-				NewDistance = -NewDistance;
-				PatrolDirection = -PatrolDirection;
-			}
-		}
+	//	const float PathLength = Spline->GetSplineLength();
+	//	if (bLoop)
+	//	{
+	//		NewDistance = FMath::Fmod(NewDistance, PathLength);
+	//	}
+	//	else if (PatrolPath->bPingPong)
+	//	{
+	//		if (NewDistance > PathLength && PatrolDirection > 0.0f)
+	//		{
+	//			NewDistance = PathLength - (NewDistance - PathLength);
+	//			PatrolDirection = -PatrolDirection;
+	//		}
+	//		else if (NewDistance < 0.0f && PatrolDirection < 0.0f)
+	//		{
+	//			NewDistance = -NewDistance;
+	//			PatrolDirection = -PatrolDirection;
+	//		}
+	//	}
 
-		DistanceAlongPath = NewDistance;
-		
-		float LookAheadDistance = DistanceAlongPath + 100.0f;
-		FVector LookAheadLocation = Spline->GetLocationAtDistanceAlongSpline(LookAheadDistance, ESplineCoordinateSpace::World);
-		FQuat LookAheadRotation = Spline->GetQuaternionAtDistanceAlongSpline(LookAheadDistance, ESplineCoordinateSpace::World);
+	//	DistanceAlongPath = NewDistance;
+	//	
+	//	float LookAheadDistance = DistanceAlongPath + 100.0f;
+	//	FVector LookAheadLocation = Spline->GetLocationAtDistanceAlongSpline(LookAheadDistance, ESplineCoordinateSpace::World);
+	//	FQuat LookAheadRotation = Spline->GetQuaternionAtDistanceAlongSpline(LookAheadDistance, ESplineCoordinateSpace::World);
 
-		WouldPenetrateAt(LookAheadLocation, LookAheadRotation);
+	//	WouldPenetrateAt(LookAheadLocation, LookAheadRotation);
 
-		const FVector OldLocation = UpdatedComponent->GetComponentLocation();
-		FVector DesiredLocation = Spline->GetLocationAtDistanceAlongSpline(NewDistance, ESplineCoordinateSpace::World);
-		DesiredLocation.Z = OldLocation.Z;
+	//	const FVector OldLocation = UpdatedComponent->GetComponentLocation();
+	//	FVector DesiredLocation = Spline->GetLocationAtDistanceAlongSpline(NewDistance, ESplineCoordinateSpace::World);
+	//	DesiredLocation.Z = OldLocation.Z;
 
-		const FVector DeltaMove = DesiredLocation - OldLocation;
+	//	const FVector DeltaMove = DesiredLocation - OldLocation;
 
-		FHitResult Hit;
-		const FQuat Rotation = UpdatedComponent->GetComponentQuat();
-		SafeMoveUpdatedComponent(DeltaMove, Rotation, true, Hit);
-		//if (Hit.IsValidBlockingHit())
-		//{
-		//	SlideAlongSurface(DeltaMove, 1.0f - Hit.Time, Hit.Normal, Hit);
-		//}
+	//	FHitResult Hit;
+	//	const FQuat Rotation = UpdatedComponent->GetComponentQuat();
+	//	SafeMoveUpdatedComponent(DeltaMove, Rotation, true, Hit);
+	//	//if (Hit.IsValidBlockingHit())
+	//	//{
+	//	//	SlideAlongSurface(DeltaMove, 1.0f - Hit.Time, Hit.Normal, Hit);
+	//	//}
 
-		const FVector NewLocation = UpdatedComponent->GetComponentLocation();
-		Velocity = (NewLocation - OldLocation) / DeltaTime;
-	}
+	//	const FVector NewLocation = UpdatedComponent->GetComponentLocation();
+	//	Velocity = (NewLocation - OldLocation) / DeltaTime;
+//	}
 }
 
 bool UGuardPawnMovementComponent::WouldPenetrateAt(FVector Location, FQuat Rotation)

@@ -13,9 +13,9 @@ struct FPatrolStop
 {
 	GENERATED_BODY()
 
-	// Where on the spline to stop. Doesn't need to be an integer, guard can stop between spline points too
+	// At which point on spline to stop
 	UPROPERTY(EditAnywhere)
-	float InputKey;
+	int Where;
 
 	// How long to stop for in seconds
 	UPROPERTY(EditAnywhere)
@@ -51,7 +51,7 @@ public:
 	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
+	virtual void OnConstruction(const FTransform& Transform) override;
 	virtual bool ShouldTickIfViewportsOnly() const override;
 	float GetDistanceAlongSplineAtSplineInputKey(float InKey) const;
 };
