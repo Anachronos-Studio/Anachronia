@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BTTask_GuardBase.h"
-#include "BTTask_GuardPatrol.generated.h"
+#include "BTTask_GuardPatrolReachedGoal.generated.h"
 
 struct FBTPatrolTaskMemory
 {
@@ -15,12 +15,12 @@ struct FBTPatrolTaskMemory
  * 
  */
 UCLASS()
-class ANACHRONIA_API UBTTask_GuardPatrol : public UBTTask_GuardBase
+class ANACHRONIA_API UBTTask_GuardPatrolReachedGoal : public UBTTask_GuardBase
 {
 	GENERATED_BODY()
 
 public:
-	UBTTask_GuardPatrol();
+	UBTTask_GuardPatrolReachedGoal();
 
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;

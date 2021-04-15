@@ -31,13 +31,6 @@ void AGuardPawn::BeginPlay()
 void AGuardPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	//if (!GetVelocity().IsNearlyZero())
-	//{
-	//	const FVector MovementDirection = GetVelocity().GetUnsafeNormal2D();
-	//	const FRotator DesiredRotation = MovementDirection.ToOrientationRotator();
-	//	SetActorRotation(FMath::RInterpConstantTo(GetActorRotation(), DesiredRotation, DeltaTime, TurnSpeed));
-	//}
 }
 
 

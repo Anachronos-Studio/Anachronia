@@ -39,7 +39,7 @@ void UBTTask_PatrolMoveTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* No
 	{
 		if (Guard->GetCurrentPatrolStopInfo() == nullptr)
 		{
-			UE_LOG(LogTemp, Display, TEXT("Haha, moving goalpost fucker!"));
+			UE_LOG(LogTemp, Display, TEXT("Haha, moving goalpost fucker!!"));
 			Guard->PickNextPatrolPoint();
 			const FVector GoalLocation = Guard->GetCurrentPatrolGoal();
 			OwnerComp.GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", GoalLocation);

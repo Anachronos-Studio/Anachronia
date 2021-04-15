@@ -1,19 +1,19 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "BTTask_GuardPatrol.h"
+#include "BTTask_GuardPatrolReachedGoal.h"
 
 #include "GuardAIController.h"
 #include "GuardPatrolPath.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
-UBTTask_GuardPatrol::UBTTask_GuardPatrol()
+UBTTask_GuardPatrolReachedGoal::UBTTask_GuardPatrolReachedGoal()
 {
 	NodeName = "Patrol move completed";
 	bNotifyTick = true;
 }
 
-EBTNodeResult::Type UBTTask_GuardPatrol::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+EBTNodeResult::Type UBTTask_GuardPatrolReachedGoal::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 	
@@ -38,7 +38,7 @@ EBTNodeResult::Type UBTTask_GuardPatrol::ExecuteTask(UBehaviorTreeComponent& Own
 	return EBTNodeResult::Succeeded;
 }
 
-void UBTTask_GuardPatrol::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+void UBTTask_GuardPatrolReachedGoal::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	FBTPatrolTaskMemory* MyMemory = (FBTPatrolTaskMemory*)NodeMemory;
 	MyMemory->RemainingStopTime -= DeltaSeconds;
@@ -48,12 +48,12 @@ void UBTTask_GuardPatrol::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* Nod
 	}
 }
 
-uint16 UBTTask_GuardPatrol::GetInstanceMemorySize() const
+uint16 UBTTask_GuardPatrolReachedGoal::GetInstanceMemorySize() const
 {
 	return sizeof(FBTPatrolTaskMemory);
 }
 
-void UBTTask_GuardPatrol::DescribeRuntimeValues(const UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTDescriptionVerbosity::Type Verbosity, TArray<FString>& Values) const
+void UBTTask_GuardPatrolReachedGoal::DescribeRuntimeValues(const UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTDescriptionVerbosity::Type Verbosity, TArray<FString>& Values) const
 {
 	Super::DescribeRuntimeValues(OwnerComp, NodeMemory, Verbosity, Values);
 	FBTPatrolTaskMemory* MyMemory = (FBTPatrolTaskMemory*)NodeMemory;
