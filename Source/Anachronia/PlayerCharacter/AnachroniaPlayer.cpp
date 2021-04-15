@@ -76,6 +76,11 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 	CrouchedEyeHeight = 20.f;
 
 	// Initiate Main attributes
+	MaxHealth = 100.f;
+	SetCurrentHealth(GetMaxHealth());
+	BaseDamage = 10.f;
+	SetLethalDamage(BaseDamage, 0.f);	// The second argument should call the equipped weapon/tool fuction
+	SetBluntDamage(BaseDamage, 0.f);	// When these functions are called outside the constructor
 
 }
 
