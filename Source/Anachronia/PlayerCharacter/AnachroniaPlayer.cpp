@@ -73,8 +73,10 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
 	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 300.f;
-
 	CrouchedEyeHeight = 20.f;
+
+	// Initiate Main attributes
+
 }
 
 // Called when the game starts or when spawned

@@ -138,6 +138,37 @@ public:
 	UFUNCTION(BlueprintCallable, Category = BasicAttributes)
 	void ToggleCrouchOff();
 
+	// Main attributes functions
+	UFUNCTION(BlueprintCallable, Category = MainAttributes)
+	void SetCurrentHealth(float Value) { CurrentHealth = Value; }
+	UFUNCTION(BlueprintCallable, Category = MainAttributes)
+	float GetCurrentHealth() { return CurrentHealth; }
+	UFUNCTION(BlueprintCallable, Category = MainAttributes)
+	void SetMaxHealth(float Value) { MaxHealth = Value; }
+	UFUNCTION(BlueprintCallable, Category = MainAttributes)
+	float GetMaxHealth() { return MaxHealth; }
+
+	UFUNCTION(BlueprintCallable, Category = MainAttributes)
+	void SetBaseDamage(float Value) { BaseDamage = Value; }
+	UFUNCTION(BlueprintCallable, Category = MainAttributes)
+	float GetBaseDamage() { return BaseDamage; }
+
+	UFUNCTION(BlueprintCallable, Category = MainAttributes)
+	void SetLethalDamage(float PlayerBaseDamage, float WeaponLeathalDamage) { 
+		LethalDamage = PlayerBaseDamage + WeaponLeathalDamage;
+	}
+	UFUNCTION(BlueprintCallable, Category = MainAttributes)
+	float GetLethalDamage() { return LethalDamage; }
+
+	UFUNCTION(BlueprintCallable, Category = MainAttributes)
+	void SetBluntDamage(float PlayerBaseDamage, float WeaponBluntDamage) {
+		BluntDamage = PlayerBaseDamage + WeaponBluntDamage;
+	}
+	UFUNCTION(BlueprintCallable, Category = MainAttributes)
+	float GetBluntDamage() { return BluntDamage; }
+
+
+	// Stealth attributes functions
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
 	void SetLuminance(float Value) { PlayerLuminance = Value; }
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
