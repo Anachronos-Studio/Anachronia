@@ -43,9 +43,9 @@ void AGuardPatrolPath::Tick(float DeltaTime)
 		for (FPatrolStop& Stop : PatrolStops)
 		{
 			const float Length = 100.0f;
-			FVector LineStart = SplineComponent->GetLocationAtSplineInputKey(Stop.InputKey, ESplineCoordinateSpace::World);
+			FVector LineStart = SplineComponent->GetLocationAtSplinePoint(Stop.Where, ESplineCoordinateSpace::World);
 			FVector LineEnd = LineStart + FVector(0.0f, 0.0, Length);
-			FVector Tangent = SplineComponent->GetTangentAtSplineInputKey(Stop.InputKey, ESplineCoordinateSpace::World);
+			FVector Tangent = SplineComponent->GetTangentAtSplinePoint(Stop.Where, ESplineCoordinateSpace::World);
 			Tangent.Normalize();
 			Tangent = FVector::CrossProduct(Tangent, FVector::UpVector); // We want the bitangent, actually
 			DrawDebugLine(GetWorld(), LineStart, LineEnd, FColor::Yellow);
@@ -54,23 +54,23 @@ void AGuardPatrolPath::Tick(float DeltaTime)
 	}
 }
 
-void AGuardPatrolPath::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+void AGuardPatrolPath::OnConstruction(const FTransform& Transform)
 {
-	Super::PostEditChangeProperty(PropertyChangedEvent);
+	Super::OnConstruction(Transform);
 
 	if (SplineComponent != nullptr)
 	{
-		float LastInputKey = SplineComponent->GetNumberOfSplinePoints();
-		if (!SplineComponent->IsClosedLoop())
-		{
-			LastInputKey = LastInputKey - 1.0f;
-		}
+		const int NumPoints = SplineComponent->GetNumberOfSplinePoints();
 		for (FPatrolStop& Stop : PatrolStops)
 		{
-			Stop.InputKey = FMath::Clamp(Stop.InputKey, 0.0f, LastInputKey);
+			Stop.Where = FMath::Clamp(Stop.Where, 0, NumPoints - 1);
+		}
+		
+		for (int32 PointIndex = 0; PointIndex < SplineComponent->GetNumberOfSplinePoints(); PointIndex++)
+		{
+			SplineComponent->SetSplinePointType(PointIndex, ESplinePointType::Linear);
 		}
 	}
-
 }
 
 bool AGuardPatrolPath::ShouldTickIfViewportsOnly() const
