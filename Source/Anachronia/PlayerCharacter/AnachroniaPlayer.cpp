@@ -52,6 +52,16 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 	LightReceiver->bCastDynamicShadow = false;
 	LightReceiver->SetRelativeScale3D(FVector(0.2f));
 
+	// Create LightCameras
+	LightCamTop = CreateDefaultSubobject<UCameraComponent>(TEXT("LightCamTop"));
+	LightCamBottom = CreateDefaultSubobject<UCameraComponent>(TEXT("LightCamBottom"));
+	LightCamTop->SetupAttachment(LightReceiver);
+	LightCamBottom->SetupAttachment(LightReceiver);
+	LightCamTop->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
+	LightCamTop->SetRelativeLocation(FVector(0.f, 0.f, 300.f));
+	LightCamBottom->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
+	LightCamBottom->SetRelativeLocation(FVector(0.f, 0.f, -300));
+
 	// Initiate the stealth attributes
 	PlayerVisibility = 0.f;
 	PlayerLuminance = 0.f;
@@ -61,8 +71,12 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 	// Initiate base attributes
 	GetCharacterMovement()->JumpZVelocity = JumpVelocity;
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
-
+	GetCharacterMovement()->MaxWalkSpeed = 600.f;
+	GetCharacterMovement()->MaxWalkSpeedCrouched = 300.f;
 	CrouchedEyeHeight = 20.f;
+
+	// Initiate Main attributes
+
 }
 
 // Called when the game starts or when spawned
@@ -70,7 +84,7 @@ void AAnachroniaPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	bIsCrouched = false;
+	InitiatedWalkingSpeed = GetCharacterMovement()->MaxWalkSpeed;
 }
 
 // Called every frame
@@ -78,6 +92,8 @@ void AAnachroniaPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//SetGlobalLuminanceOnPlayer(FVector L);
+	PlayerLuminance = CalculateLuminance(GloabalLuminanceOnPlayer);
 }
 
 // Called to bind functionality to input
@@ -91,8 +107,10 @@ void AAnachroniaPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
-	//Bind crouch events
-	PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AAnachroniaPlayer::ToggleCrouch);
+	// Sprint
+	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AAnachroniaPlayer::Sprint);
+	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AAnachroniaPlayer::UnSprint);
+
 
 	// Bind movement events
 	PlayerInputComponent->BindAxis("MoveForward", this, &AAnachroniaPlayer::MoveForward);
@@ -138,6 +156,16 @@ void AAnachroniaPlayer::LookUpAtRate(float Rate)
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
+void AAnachroniaPlayer::Sprint() {
+	GetCharacterMovement()->MaxWalkSpeed = InitiatedWalkingSpeed * 2;
+	UE_LOG(LogTemp, Warning, TEXT("Sprinting!"))
+}
+
+void AAnachroniaPlayer::UnSprint() {
+	GetCharacterMovement()->MaxWalkSpeed = InitiatedWalkingSpeed;
+	UE_LOG(LogTemp, Warning, TEXT("Not Sprinting!"))
+}
+
 void AAnachroniaPlayer::ToggleCrouch() {
 	if (!GetCharacterMovement()->IsCrouching())
 		Crouch();
@@ -175,7 +203,7 @@ void  AAnachroniaPlayer::ToggleCrouchOff() {
 	}
 }
 
-float AAnachroniaPlayer::CalculateLuminance(FVector V) {
+float AAnachroniaPlayer::CalculateLuminance(const FVector& V) {
 
 	/* NOTE: Check if the input value of the RGB vector is normalized (0.0-1.0) or not. if it's not, 
 			 then divide the values with 255 and then do the Sqrt-calculation */
@@ -185,18 +213,3 @@ float AAnachroniaPlayer::CalculateLuminance(FVector V) {
 	return L;
 }
 
-void AAnachroniaPlayer::SetLuminance(float Value) {
-
-}
-
-void AAnachroniaPlayer::SetMotionLevel(float Value) {
-
-}
-
-void AAnachroniaPlayer::SetVisibility(float L, float M) {
-
-}
-
-float AAnachroniaPlayer::GetLuminance() {
-	return PlayerLuminance;
-}
