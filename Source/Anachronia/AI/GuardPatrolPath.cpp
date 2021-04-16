@@ -73,6 +73,26 @@ void AGuardPatrolPath::OnConstruction(const FTransform& Transform)
 	}
 }
 
+int32 AGuardPatrolPath::FindClosestPointToWorldLocation(FVector FromLocation) const
+{
+	check(SplineComponent != nullptr);
+
+	float SmallestDistanceSoFar = BIG_NUMBER;
+	int ClosestPoint = 0;
+	for (int32 Point = 0; Point < SplineComponent->GetNumberOfSplinePoints(); Point++)
+	{
+		const FVector Location = SplineComponent->GetWorldLocationAtSplinePoint(Point);
+		const float Distance = FVector::Dist2D(Location, FromLocation);
+		if (Distance < SmallestDistanceSoFar)
+		{
+			SmallestDistanceSoFar = Distance;
+			ClosestPoint = Point;
+		}
+	}
+
+	return ClosestPoint;
+}
+
 bool AGuardPatrolPath::ShouldTickIfViewportsOnly() const
 {
 	return true;

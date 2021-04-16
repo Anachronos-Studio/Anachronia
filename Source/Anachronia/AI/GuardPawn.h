@@ -23,14 +23,16 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-
 public:
 	UPROPERTY(Category = Guard, EditInstanceOnly)
 	AGuardPatrolPath* PatrolPath;
 	
+	/* If true, will be immediately moved to the closest node on the patrol path
+	 * when the game starts
+	 */
+	UPROPERTY(Category = Guard, EditAnywhere)
+	bool bStartOnPath;
+	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-
-private:
-	virtual void OnConstruction(const FTransform& Transform) override;
 };
