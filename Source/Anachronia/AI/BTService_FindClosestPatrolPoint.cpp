@@ -3,7 +3,7 @@
 
 #include "BTService_FindClosestPatrolPoint.h"
 
-#include "AI/GuardAIController.h"
+#include "GuardAIController.h"
 
 UBTService_FindClosestPatrolPoint::UBTService_FindClosestPatrolPoint()
 {
@@ -15,5 +15,6 @@ void UBTService_FindClosestPatrolPoint::OnBecomeRelevant(UBehaviorTreeComponent&
 {
 	AGuardAIController* Guard = Cast<AGuardAIController>(OwnerComp.GetAIOwner());
 	check(Guard != nullptr);
+	UE_LOG(LogTemp, Display, TEXT("I'm relevant!!"));
 	Guard->FindClosestPatrolPoint();
 }
