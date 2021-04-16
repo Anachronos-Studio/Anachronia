@@ -18,7 +18,10 @@ AGuardPawn::AGuardPawn()
 	GetCapsuleComponent()->SetCollisionProfileName("Pawn");
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
-	GetCharacterMovement()->bUseControllerDesiredRotation = true;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->bUseRVOAvoidance = true;
+	GetCharacterMovement()->AvoidanceConsiderationRadius = 250.0f;
+	GetCharacterMovement()->AvoidanceWeight = 0.5f;
 
 	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight()));
 }
