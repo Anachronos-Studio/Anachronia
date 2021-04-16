@@ -56,6 +56,27 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
 	float JumpVelocity;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+	bool bPlayerIsCrouched;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+	float PlayerCapsuleStandingHalfHeight;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+	float PlayerCapsuleCrouchedHalfHeight;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+	FVector RelativeCamLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+	FVector RelativeCamCrouchedLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+	float PlayerSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+	float PlayerCrouchedSpeed;
+
 	// Stealth properties below
 
 	/** This value will determine the overall visibility of the player to the AI */
@@ -94,8 +115,7 @@ public:
 
 	/** The blunt damage that will get it's value from weapons */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MainAttributes)
-	float BluntDamage;
-
+	float BluntDamage;		
 
 protected:
 
@@ -122,7 +142,7 @@ protected:
 	float InitiatedWalkingSpeed;
 
 	void ToggleCrouch();
-	bool bIsCrouched;
+	
 
 	/** Calculate the luminosity. This function should be called when setting up player visibility check */
 	float CalculateLuminance(const FVector &V);
@@ -187,4 +207,5 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
 	void SetGlobalLuminanceOnPlayer(FVector L){ GloabalLuminanceOnPlayer = L; }
+	
 };
