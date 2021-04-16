@@ -62,7 +62,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
 	float PlayerCapsuleStandingHalfHeight;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
 	float PlayerCapsuleCrouchedHalfHeight;
 
 	// Stealth properties below
