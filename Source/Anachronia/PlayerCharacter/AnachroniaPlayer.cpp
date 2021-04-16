@@ -74,6 +74,10 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 	GetCharacterMovement()->MaxWalkSpeed = 600.f;
 	GetCharacterMovement()->MaxWalkSpeedCrouched = 300.f;
 	CrouchedEyeHeight = 20.f;
+	bPlayerIsCrouched = false;
+	PlayerCapsuleStandingHalfHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
+	PlayerCapsuleCrouchedHalfHeight = 55.f;
+
 
 	// Initiate Main attributes
 	MaxHealth = 100.f;
@@ -115,6 +119,8 @@ void AAnachroniaPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	// Sprint
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AAnachroniaPlayer::Sprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AAnachroniaPlayer::UnSprint);
+
+	//PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AAnachroniaPlayer::ToggleCrouch);
 
 
 	// Bind movement events
@@ -217,4 +223,3 @@ float AAnachroniaPlayer::CalculateLuminance(const FVector& V) {
 	L = FMath::Sqrt(FMath::Pow(0.299 * R, 2) + FMath::Pow(0.587 * G, 2) + FMath::Pow(0.114 * B, 2));
 	return L;
 }
-
