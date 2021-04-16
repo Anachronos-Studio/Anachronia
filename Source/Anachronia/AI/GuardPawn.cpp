@@ -3,6 +3,8 @@
 
 #include "GuardPawn.h"
 #include "GuardAIController.h"
+#include "GuardPatrolPath.h"
+#include "Components/SplineComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
@@ -25,29 +27,20 @@ AGuardPawn::AGuardPawn()
 void AGuardPawn::BeginPlay()
 {
 	Super::BeginPlay();
+
+	if (bStartOnPath && PatrolPath != nullptr)
+	{
+		const int32 Point = PatrolPath->FindClosestPointToWorldLocation(GetActorLocation());
+		USplineComponent* Spline = PatrolPath->GetSpline();
+		const FVector NewLocation = Spline->GetLocationAtSplinePoint(Point, ESplineCoordinateSpace::World);
+		const FQuat NewRotation = Spline->GetQuaternionAtSplinePoint(Point, ESplineCoordinateSpace::World);
+		SetActorLocation(NewLocation);
+		SetActorRotation(NewRotation);
+	}
 }
 
 // Called every frame
 void AGuardPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-}
-
-
-void AGuardPawn::OnConstruction(const FTransform& Transform)
-{
-	Super::OnConstruction(Transform);
-
-	//if (bStartOnPath && MovementComponent != nullptr && MovementComponent->PatrolPath)
-	//{
-	//	FVector NewLocation;
-	//	FRotator NewRotation;
-	//	MovementComponent->FindClosestLocationAndRotationOnPath(GetActorLocation(), NewLocation, NewRotation);
-	//	SetActorLocation(NewLocation);
-	//	SetActorRotation(NewRotation);
-	//}
-	//else
-	//{
-	//	bStartOnPath = false;
-	//}
 }

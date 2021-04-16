@@ -27,6 +27,7 @@ public:
 	AGuardPatrolPath* GetPatrolPath() const;
 	FVector GetCurrentPatrolGoal() const;
 	void PickNextPatrolPoint();
+	void FindClosestPatrolPoint();
 	FPatrolStop* GetCurrentPatrolStopInfo() const;
 
 private:

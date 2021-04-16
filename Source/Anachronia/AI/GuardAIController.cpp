@@ -68,6 +68,15 @@ void AGuardAIController::PickNextPatrolPoint()
 	NextPatrolPoint = (NextPatrolPoint % NumPoints + NumPoints) % NumPoints; // Actual modulo that handles negative numbers correctly
 }
 
+void AGuardAIController::FindClosestPatrolPoint()
+{
+	AGuardPatrolPath* Path = GetPatrolPath();
+	if (Path == nullptr) return;
+
+	NextPatrolPoint = Path->FindClosestPointToWorldLocation(GetPawn()->GetActorLocation());
+	
+}
+
 FPatrolStop* AGuardAIController::GetCurrentPatrolStopInfo() const
 {
 	AGuardPatrolPath* Path = GetPatrolPath();
