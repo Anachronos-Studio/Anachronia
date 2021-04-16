@@ -142,6 +142,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
 	void SetCurrentHealth(float Value) { CurrentHealth = Value; }
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
+	void SetDamageToPlayerCurrentHealth(float DamageValue) { CurrentHealth -= DamageValue; }
+	UFUNCTION(BlueprintCallable, Category = MainAttributes)
 	float GetCurrentHealth() { return CurrentHealth; }
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
 	void SetMaxHealth(float Value) { MaxHealth = Value; }
