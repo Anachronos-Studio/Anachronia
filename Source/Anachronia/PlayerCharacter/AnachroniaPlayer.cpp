@@ -69,14 +69,18 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 	PlayerMotionLevel = 0.f;
 
 	// Initiate base attributes
+	PlayerSpeed = 600.f;
+	PlayerCrouchedSpeed = 300.f;
 	GetCharacterMovement()->JumpZVelocity = JumpVelocity;
 	GetCharacterMovement()->GetNavAgentPropertiesRef().bCanCrouch = true;
-	GetCharacterMovement()->MaxWalkSpeed = 600.f;
-	GetCharacterMovement()->MaxWalkSpeedCrouched = 300.f;
+	GetCharacterMovement()->MaxWalkSpeed = PlayerSpeed;
+	GetCharacterMovement()->MaxWalkSpeedCrouched = PlayerCrouchedSpeed;
 	CrouchedEyeHeight = 20.f;
 	bPlayerIsCrouched = false;
 	PlayerCapsuleStandingHalfHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
 	PlayerCapsuleCrouchedHalfHeight = 55.f;
+	RelativeCamLocation = FirstPersonCameraComponent->GetRelativeLocation();
+	RelativeCamCrouchedLocation = FVector(-39.56f, 1.75f, 34.f);
 
 
 	// Initiate Main attributes
@@ -119,6 +123,7 @@ void AAnachroniaPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 	// Sprint
 	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AAnachroniaPlayer::Sprint);
 	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AAnachroniaPlayer::UnSprint);
+
 
 	//PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AAnachroniaPlayer::ToggleCrouch);
 
@@ -167,8 +172,12 @@ void AAnachroniaPlayer::LookUpAtRate(float Rate)
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
-void AAnachroniaPlayer::Sprint() {
-	GetCharacterMovement()->MaxWalkSpeed = InitiatedWalkingSpeed * 2;
+void AAnachroniaPlayer::Sprint() {	
+	
+	if (bIsCrouched)
+		GetCharacterMovement()->MaxWalkSpeed = PlayerCrouchedSpeed;
+	else
+		GetCharacterMovement()->MaxWalkSpeed = InitiatedWalkingSpeed * 2;
 	UE_LOG(LogTemp, Warning, TEXT("Sprinting!"))
 }
 

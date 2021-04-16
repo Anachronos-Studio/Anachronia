@@ -65,6 +65,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
 	float PlayerCapsuleCrouchedHalfHeight;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+	FVector RelativeCamLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+	FVector RelativeCamCrouchedLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+	float PlayerSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+	float PlayerCrouchedSpeed;
+
 	// Stealth properties below
 
 	/** This value will determine the overall visibility of the player to the AI */
