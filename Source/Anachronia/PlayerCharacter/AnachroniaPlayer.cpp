@@ -9,6 +9,7 @@
 #include "Components/InputComponent.h"
 #include "GameFramework/InputSettings.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/PlayerController.h"
 
 // Sets default values
 AAnachroniaPlayer::AAnachroniaPlayer()
@@ -18,6 +19,9 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
+
+	// Initiate Menu Options
+	bTogglePlayerCrouch = true;
 
 	// Jump velocity that sets the height of the player jump
 	JumpVelocity = 330.f;
@@ -77,6 +81,7 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 	GetCharacterMovement()->MaxWalkSpeedCrouched = PlayerCrouchedSpeed;
 	CrouchedEyeHeight = 20.f;
 	bPlayerIsCrouched = false;
+	bPlayerIsSprinting = false;
 	PlayerCapsuleStandingHalfHeight = GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight();
 	PlayerCapsuleCrouchedHalfHeight = 55.f;
 	RelativeCamLocation = FirstPersonCameraComponent->GetRelativeLocation();
@@ -116,13 +121,15 @@ void AAnachroniaPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	check(PlayerInputComponent);
 
+	
+
 	// Bind jump events
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
 
 	// Sprint
-	PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AAnachroniaPlayer::Sprint);
-	PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AAnachroniaPlayer::UnSprint);
+	//PlayerInputComponent->BindAction("Sprint", IE_Pressed, this, &AAnachroniaPlayer::Sprint);
+	//PlayerInputComponent->BindAction("Sprint", IE_Released, this, &AAnachroniaPlayer::UnSprint);
 
 
 	//PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AAnachroniaPlayer::ToggleCrouch);
@@ -174,9 +181,7 @@ void AAnachroniaPlayer::LookUpAtRate(float Rate)
 
 void AAnachroniaPlayer::Sprint() {	
 	
-	if (bIsCrouched)
-		GetCharacterMovement()->MaxWalkSpeed = PlayerCrouchedSpeed;
-	else
+	if(!bIsCrouched)
 		GetCharacterMovement()->MaxWalkSpeed = InitiatedWalkingSpeed * 2;
 	UE_LOG(LogTemp, Warning, TEXT("Sprinting!"))
 }

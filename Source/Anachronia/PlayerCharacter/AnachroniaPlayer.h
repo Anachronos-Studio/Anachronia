@@ -53,11 +53,17 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	float BaseLookUpRate;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MenuOptions)
+	bool bTogglePlayerCrouch;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
 	float JumpVelocity;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
 	bool bPlayerIsCrouched;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+	bool bPlayerIsSprinting;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
 	float PlayerCapsuleStandingHalfHeight;
