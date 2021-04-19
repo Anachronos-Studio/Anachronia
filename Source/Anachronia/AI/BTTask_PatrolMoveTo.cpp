@@ -4,6 +4,7 @@
 #include "BTTask_PatrolMoveTo.h"
 
 #include "GuardAIController.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 UBTTask_PatrolMoveTo::UBTTask_PatrolMoveTo()
 {
