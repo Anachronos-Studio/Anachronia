@@ -53,6 +53,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	float BaseLookUpRate;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MenuOptions)
+	bool bTogglePlayerCrouch;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
 	float JumpVelocity;
 
@@ -60,10 +63,25 @@ public:
 	bool bPlayerIsCrouched;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+	bool bPlayerIsSprinting;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
 	float PlayerCapsuleStandingHalfHeight;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
 	float PlayerCapsuleCrouchedHalfHeight;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+	FVector RelativeCamLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+	FVector RelativeCamCrouchedLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+	float PlayerSpeed;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+	float PlayerCrouchedSpeed;
 
 	// Stealth properties below
 
