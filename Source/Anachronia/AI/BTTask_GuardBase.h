@@ -6,6 +6,7 @@
 #include "BehaviorTree/BTTaskNode.h"
 #include "BTTask_GuardBase.generated.h"
 
+class UGuardPawnMovementComponent;
 class AGuardPawn;
 class AGuardAIController;
 

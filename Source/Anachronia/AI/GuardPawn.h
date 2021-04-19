@@ -4,21 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "Components/CapsuleComponent.h"
-#include "GameFramework/Pawn.h"
+#include "GameFramework/Character.h"
 #include "GuardPawn.generated.h"
 
+class AGuardAIController;
+class UAISenseConfig_Sight;
+class UAIPerceptionComponent;
 class AGuardPatrolPath;
 class UGuardPawnMovementComponent;
 
-UENUM(BlueprintType)
-enum class EGuardPathFollowState : uint8
-{
-	Stopped,
-	Following
-};
-
 UCLASS()
-class ANACHRONIA_API AGuardPawn : public APawn
+class ANACHRONIA_API AGuardPawn : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -31,44 +27,42 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	// Called every frame
-	virtual void Tick(float DeltaTime) override;
-
-	void StartFollowingPath();
-	void StopFollowingPath();
-
-	FORCEINLINE EGuardPathFollowState GetPathFollowState() const { return PathFollowState; }
-
-protected:
 	UPROPERTY(Category = Guard, EditInstanceOnly)
 	AGuardPatrolPath* PatrolPath;
-
-	// If true, will snap the pawn to the path spline before playing
-	UPROPERTY(Category = Guard, EditInstanceOnly, Meta = (EditCondition = "PatrolPath != nullptr"))
+	
+	/* If true, will be immediately moved to the closest node on the patrol path
+	 * when the game starts
+	 */
+	UPROPERTY(Category = Guard, EditAnywhere)
 	bool bStartOnPath;
 
-	UPROPERTY(Category = Guard, EditAnywhere)
-	float WalkSpeed = 200.0f;
+	UPROPERTY(Category = "Guard|Perception", EditAnywhere, BlueprintReadWrite)
+	float SusLookThreshold = 0.3f;
 
-	UPROPERTY(Category = Guard, EditAnywhere)
-	float TurnSpeed = 800.0f;
+	UPROPERTY(Category = "Guard|Perception", EditAnywhere, BlueprintReadWrite)
+	float SusInspectThreshold = 0.6f;
+
+	UPROPERTY(Category = "Guard|Perception", EditAnywhere, BlueprintReadWrite)
+	float SusBaseIncreaseRate = 0.5f;
+
+	UPROPERTY(Category = "Guard|Perception", EditAnywhere, BlueprintReadWrite)
+	float SusDecreaseRate = 0.25f;
+
+	// Maximum sight distance to notice player. Changes corresponding parameter in PerceptionComponent.
+	UPROPERTY(Category = "Guard|Perception", EditAnywhere, BlueprintReadWrite)
+	float SightRadius = 3000.0f;
+
+	// Maximum sight distance to see player that has been already seen. Changes corresponding parameter in PerceptionComponent.
+	UPROPERTY(Category = "Guard|Perception", EditAnywhere, BlueprintReadWrite)
+	float LoseSightRadius = 3500.0f;
 
 	UPROPERTY(VisibleAnywhere)
-	UGuardPawnMovementComponent* MovementComponent;
-
-	UPROPERTY(VisibleAnywhere)
-	UCapsuleComponent* CapsuleComponent;
-
-	UPROPERTY(VisibleAnywhere)
-	USkeletalMeshComponent* MeshComponent;
+	UAIPerceptionComponent* PerceptionComponent;
 	
-private:
-	FRotator DesiredRotation;
-	float DistanceAlongPath;
-	float PatrolStopTimer;
-	float PatrolDirection = 1.0f;
-	EGuardPathFollowState PathFollowState;
+	// Called every frame
+	virtual void Tick(float DeltaTime) override;
+	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 
-	void StepAlongPatrolPath(float DeltaTime);
-	virtual void OnConstruction(const FTransform& Transform) override;
+	UFUNCTION(BlueprintCallable)
+	AGuardAIController* GetGuardAI() const;
 };

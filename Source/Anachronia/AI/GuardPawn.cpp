@@ -2,10 +2,13 @@
 
 
 #include "GuardPawn.h"
-#include "GuardPawnMovementComponent.h"
 #include "GuardAIController.h"
 #include "GuardPatrolPath.h"
 #include "Components/SplineComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
+#include "Perception/AIPerceptionComponent.h"
+#include "AIController.h"
+#include "Perception/AISenseConfig_Sight.h"
 
 // Sets default values
 AGuardPawn::AGuardPawn()
@@ -15,153 +18,60 @@ AGuardPawn::AGuardPawn()
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	AIControllerClass = AGuardAIController::StaticClass();
+	GetCapsuleComponent()->SetCollisionProfileName("Pawn");
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->bUseRVOAvoidance = true;
+	GetCharacterMovement()->AvoidanceConsiderationRadius = 250.0f;
+	GetCharacterMovement()->AvoidanceWeight = 0.5f;
 
-	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("CapsuleComponent"));
-	RootComponent = CapsuleComponent;
-	CapsuleComponent->SetCapsuleHalfHeight(88.0f);
-	CapsuleComponent->SetCapsuleRadius(22.0f);
+	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight()));
 
-	MeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
-	MeshComponent->SetupAttachment(RootComponent);
-	MeshComponent->SetRelativeLocation(FVector(0.0f, 0.0f, -CapsuleComponent->GetScaledCapsuleHalfHeight()));
-	
-	MovementComponent = CreateDefaultSubobject<UGuardPawnMovementComponent>(TEXT("MovementComponent"));
-	MovementComponent->UpdatedComponent = RootComponent;
+	PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>("PerceptionComponent");
+	UAISenseConfig_Sight* SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>("SightConfig");
+	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
+	PerceptionComponent->ConfigureSense(*SightConfig);
 }
 
 // Called when the game starts or when spawned
 void AGuardPawn::BeginPlay()
 {
 	Super::BeginPlay();
+	
+	if (bStartOnPath && PatrolPath != nullptr)
+	{
+		const int32 Point = PatrolPath->FindClosestPointToWorldLocation(GetActorLocation());
+		USplineComponent* Spline = PatrolPath->GetSpline();
+		const FVector NewLocation = Spline->GetLocationAtSplinePoint(Point, ESplineCoordinateSpace::World);
+		const FQuat NewRotation = Spline->GetQuaternionAtSplinePoint(Point, ESplineCoordinateSpace::World);
+		SetActorLocation(NewLocation);
+		SetActorRotation(NewRotation);
+	}
 }
 
 // Called every frame
 void AGuardPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
-	if (PathFollowState == EGuardPathFollowState::Following)
-	{
-		StepAlongPatrolPath(DeltaTime);
-	}
-
-	SetActorRotation(FMath::RInterpConstantTo(GetActorRotation(), DesiredRotation, DeltaTime, TurnSpeed));
 }
 
-void AGuardPawn::StartFollowingPath()
+void AGuardPawn::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
-	if (PatrolPath == nullptr) return;
-
-	USplineComponent* Spline = PatrolPath->GetSpline();
-	const FVector CurrentLocation = GetActorLocation();
-	const float ClosestInputKey = Spline->FindInputKeyClosestToWorldLocation(CurrentLocation);
-	const FVector ClosestLocationOnPath = Spline->GetLocationAtSplineInputKey(ClosestInputKey, ESplineCoordinateSpace::World);
-	DistanceAlongPath = PatrolPath->GetDistanceAlongSplineAtSplineInputKey(ClosestInputKey);
-
-	PathFollowState = EGuardPathFollowState::Following;
-	PatrolStopTimer = -1.0f;
-}
-
-void AGuardPawn::StopFollowingPath()
-{
-	PathFollowState = EGuardPathFollowState::Stopped;
-	PatrolStopTimer = -1.0f;
-}
-
-void AGuardPawn::StepAlongPatrolPath(float DeltaTime)
-{
-	if (PatrolPath == nullptr)
+	if (PerceptionComponent != nullptr)
 	{
-		StopFollowingPath();
-	}
-
-	if (PatrolStopTimer > 0.0f)
-	{
-		PatrolStopTimer -= DeltaTime;
-	}
-	else
-	{
-		USplineComponent* Spline = PatrolPath->GetSpline();
-		const bool bLoop = Spline->IsClosedLoop();
-
-		const float OldDistance = DistanceAlongPath;
-		float NewDistance = DistanceAlongPath + WalkSpeed * DeltaTime * PatrolDirection;
-		
-		if (PatrolPath->PatrolStops.Num() > 0)
+		UAISenseConfig_Sight* SightConfig = Cast<UAISenseConfig_Sight>(PerceptionComponent->GetSenseConfig(UAISense::GetSenseID<UAISense_Sight>()));
+		if (SightConfig)
 		{
-			int32 NumKeys = Spline->GetNumberOfSplinePoints();
-			if (!bLoop)
-			{
-				NumKeys = NumKeys - 1;
-			}
-			// In the spline editor, it looks like Input Keys go from 0.0 to <Number of points> along the whole spline
-			// But the return value of GetInputKey... is apparently always in the range 0.0-1.0 instead
-			const float OldInputKey = Spline->GetInputKeyAtDistanceAlongSpline(OldDistance) * NumKeys;
-			const float NewInputKey = Spline->GetInputKeyAtDistanceAlongSpline(NewDistance) * NumKeys;
-
-			//GEngine->AddOnScreenDebugMessage(41, 2.0, FColor::Yellow, FString::Printf(TEXT("%f"), NewInputKey));
-			
-			for (FPatrolStop& StopPoint : PatrolPath->PatrolStops)
-			{
-				bool bPassedStop;
-				if (PatrolDirection > 0.0f) bPassedStop = NewInputKey >= StopPoint.InputKey && OldInputKey < StopPoint.InputKey;
-				else bPassedStop = NewInputKey <= StopPoint.InputKey && OldInputKey > StopPoint.InputKey;
-				if (bPassedStop)
-				{
-					NewDistance = PatrolPath->GetDistanceAlongSplineAtSplineInputKey(StopPoint.InputKey);
-					PatrolStopTimer = StopPoint.Duration;
-					break;
-				}
-			}
-		}
-
-		const float PathLength = Spline->GetSplineLength();
-		if (bLoop)
-		{
-			NewDistance = FMath::Fmod(NewDistance, PathLength);
-		}
-		else if (PatrolPath->bPingPong)
-		{
-			if (NewDistance > PathLength && PatrolDirection > 0.0f)
-			{
-				NewDistance = PathLength - (NewDistance - PathLength);
-				PatrolDirection  = -PatrolDirection;
-			}
-			else if (NewDistance < 0.0f && PatrolDirection < 0.0f)
-			{
-				NewDistance = -NewDistance;
-				PatrolDirection = -PatrolDirection;
-			}
-		}
-
-		DistanceAlongPath = NewDistance;
-		
-		FVector NewLocation = Spline->GetLocationAtDistanceAlongSpline(NewDistance, ESplineCoordinateSpace::World);
-		NewLocation.Z = GetActorLocation().Z;
-		const FVector DeltaLoc = NewLocation - GetActorLocation();
-		const FVector NewDirection = Spline->GetDirectionAtDistanceAlongSpline(NewDistance, ESplineCoordinateSpace::World) * PatrolDirection;
-		const FRotator NewRotation = NewDirection.Rotation();
-		DesiredRotation = NewRotation;
-
-		FHitResult Hit;
-		MovementComponent->SafeMoveUpdatedComponent(DeltaLoc, GetActorRotation(), true, Hit);
-		if (Hit.IsValidBlockingHit())
-		{
-			MovementComponent->SlideAlongSurface(DeltaLoc, 1.0f - Hit.Time, Hit.Normal, Hit);
+			UE_LOG(LogTemp, Display, TEXT("Update sense config!"));
+			SightConfig->SightRadius = SightRadius;
+			SightConfig->LoseSightRadius = LoseSightRadius;
+			PerceptionComponent->RequestStimuliListenerUpdate();
 		}
 	}
 }
 
-void AGuardPawn::OnConstruction(const FTransform& Transform)
+AGuardAIController* AGuardPawn::GetGuardAI() const
 {
-	Super::OnConstruction(Transform);
-
-	if (bStartOnPath && PatrolPath != nullptr && PatrolPath->GetSpline() != nullptr)
-	{
-		FVector NewLocation = PatrolPath->GetSpline()->FindLocationClosestToWorldLocation(GetActorLocation(), ESplineCoordinateSpace::World);
-		NewLocation.Z = GetActorLocation().Z;
-		SetActorLocation(NewLocation);
-		const FRotator NewRotation = PatrolPath->GetSpline()->FindRotationClosestToWorldLocation(GetActorLocation(), ESplineCoordinateSpace::World);
-		SetActorRotation(NewRotation);
-	}
+	return Cast<AGuardAIController>(GetController());
 }

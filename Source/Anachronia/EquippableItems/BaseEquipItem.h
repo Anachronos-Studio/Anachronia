@@ -35,4 +35,9 @@ public:
 protected:
 	// Checks if the equippable item is a weapon or not
 	bool bIsWeapon;
+
+
+public:
+
+	bool IsItWeapon() { return bIsWeapon; }
 };
