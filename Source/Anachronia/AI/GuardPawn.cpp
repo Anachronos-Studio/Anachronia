@@ -21,7 +21,8 @@ AGuardPawn::AGuardPawn()
 	GetCapsuleComponent()->SetCollisionProfileName("Pawn");
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
-	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	GetCharacterMovement()->bUseRVOAvoidance = true;
 	GetCharacterMovement()->AvoidanceConsiderationRadius = 250.0f;
 	GetCharacterMovement()->AvoidanceWeight = 0.5f;
@@ -44,8 +45,14 @@ void AGuardPawn::BeginPlay()
 		const int32 Point = PatrolPath->FindClosestPointToWorldLocation(GetActorLocation());
 		USplineComponent* Spline = PatrolPath->GetSpline();
 		const FVector NewLocation = Spline->GetLocationAtSplinePoint(Point, ESplineCoordinateSpace::World);
-		const FQuat NewRotation = Spline->GetQuaternionAtSplinePoint(Point, ESplineCoordinateSpace::World);
+		const FRotator NewRotation = Spline->GetRotationAtSplinePoint(Point, ESplineCoordinateSpace::World);
 		SetActorLocation(NewLocation);
+		if (GetController())
+		{
+			GetController()->SetControlRotation(NewRotation);
+			GetGuardAI()->MakeThisOriginalRotation();
+		}
+		
 		SetActorRotation(NewRotation);
 	}
 }
@@ -58,6 +65,8 @@ void AGuardPawn::Tick(float DeltaTime)
 
 void AGuardPawn::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+	
 	if (PerceptionComponent != nullptr)
 	{
 		UAISenseConfig_Sight* SightConfig = Cast<UAISenseConfig_Sight>(PerceptionComponent->GetSenseConfig(UAISense::GetSenseID<UAISense_Sight>()));
@@ -66,6 +75,7 @@ void AGuardPawn::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 			UE_LOG(LogTemp, Display, TEXT("Update sense config!"));
 			SightConfig->SightRadius = SightRadius;
 			SightConfig->LoseSightRadius = LoseSightRadius;
+			SightConfig->PeripheralVisionAngleDegrees = PeripheralVisionHalfAngle;
 			PerceptionComponent->RequestStimuliListenerUpdate();
 		}
 	}

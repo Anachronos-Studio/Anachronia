@@ -18,9 +18,17 @@ UBTTask_PatrolMoveTo::UBTTask_PatrolMoveTo()
 EBTNodeResult::Type UBTTask_PatrolMoveTo::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	AGuardAIController* Guard = Cast<AGuardAIController>(OwnerComp.GetAIOwner());
-	const FVector GoalLocation = Guard->GetCurrentPatrolGoal();
-	OwnerComp.GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", GoalLocation);
-	return Super::ExecuteTask(OwnerComp, NodeMemory);
+	if (Guard->GetPatrolPath() == nullptr)
+	{
+		Guard->ResetRotation();
+		return EBTNodeResult::Succeeded;
+	}
+	else
+	{
+		const FVector GoalLocation = Guard->GetCurrentPatrolGoal();
+		OwnerComp.GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", GoalLocation);
+		return Super::ExecuteTask(OwnerComp, NodeMemory);
+	}
 }
 
 void UBTTask_PatrolMoveTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
@@ -48,4 +56,11 @@ void UBTTask_PatrolMoveTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* No
 	}
 	
 	Super::TickTask(OwnerComp, NodeMemory, DeltaSeconds);
+}
+
+EBTNodeResult::Type UBTTask_PatrolMoveTo::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+{
+	UE_LOG(LogTemp, Display, TEXT("Abort patrol!"));
+	//GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Red, TEXT("Abort task!!!"));
+	return Super::AbortTask(OwnerComp, NodeMemory);
 }

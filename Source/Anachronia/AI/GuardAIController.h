@@ -19,6 +19,22 @@ enum class ESusLevel : uint8
 	Busted,
 };
 
+UENUM(BlueprintType)
+enum class EMovementSpeed : uint8
+{
+	Walk,
+	Run,
+};
+
+UENUM(BlueprintType)
+enum class EAlertness : uint8
+{
+	Neutral,
+	Distracted,
+	AlarmedKnowing,
+	AlarmedUnknowing,
+};
+
 /**
  * 
  */
@@ -34,10 +50,15 @@ public:
 	AGuardPawn* GetGuardPawn() const;
 	AGuardPatrolPath* GetPatrolPath() const;
 	FVector GetCurrentPatrolGoal() const;
+	float GetAlertnessValue(EAlertness AlertnessLevel) const;
 	void PickNextPatrolPoint();
 	void FindClosestPatrolPoint();
 	FPatrolStop* GetCurrentPatrolStopInfo() const;
 	bool IsSusEnough(ESusLevel Level) const;
+	void MakeThisOriginalRotation();
+	void ResetRotation();
+	void SetMovementSpeed(EMovementSpeed NewSpeed);
+	void SetAlertness(EAlertness InAlertness);
 
 	UFUNCTION(BlueprintCallable)
 	ESusLevel GetSusLevel() const;
@@ -48,6 +69,9 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly, VisibleInstanceOnly)
 	bool bCanSeePlayer;
+
+	UPROPERTY(Transient, BlueprintReadOnly, VisibleInstanceOnly)
+	EAlertness Alertness;
 	
 private:
 	UPROPERTY(VisibleInstanceOnly)
@@ -63,6 +87,8 @@ private:
 	int32 NextPatrolPoint = 0;
 	
 	int32 PatrolDirection = 1;
+
+	FRotator OriginalRotation;
 
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
