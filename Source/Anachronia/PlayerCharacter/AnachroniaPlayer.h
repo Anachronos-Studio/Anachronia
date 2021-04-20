@@ -11,6 +11,7 @@ class ANACHRONIA_API AAnachroniaPlayer : public ACharacter
 {
 	GENERATED_BODY()
 
+
 public:
 	// Sets default values for this character's properties
 	AAnachroniaPlayer();
@@ -29,20 +30,20 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
 	class UStaticMeshComponent* LightReceiver;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
-	UCameraComponent* LightCamTop;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
-	UCameraComponent* LightCamBottom;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
+	//UCameraComponent* LightCamTop;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
+	//UCameraComponent* LightCamBottom;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
-	class USceneCaptureComponent2D* SceneCaptureTop;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
-	USceneCaptureComponent2D* SceneCaptureBottom;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
+	//class USceneCaptureComponent2D* SceneCaptureTop;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
+	//USceneCaptureComponent2D* SceneCaptureBottom;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
-	class UTextureRenderTarget2D* RenderTargetTop;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
-	UTextureRenderTarget2D* RenderTargetBottom;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
+	//UTextureRenderTarget2D* RenderTargetTop;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
+	//UTextureRenderTarget2D* RenderTargetBottom;
 
 	
 protected:
@@ -112,6 +113,7 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = StealthLevelAttributes)
 	float PlayerMotionLevel;
 
+
 	// Player Main Attributes below
 
 	/** The maximum health of the player*/
@@ -161,6 +163,7 @@ protected:
 	void ToggleCrouch();
 	
 	void CheckLights();
+	FColor& FindBrightestPixel(TArray<FColor>& ColorBuffer, int32 start, int32 max);
 
 	/** Calculate the luminosity. This function should be called when setting up player visibility check */
 	float CalculateLuminance(const FVector &V);
@@ -168,6 +171,7 @@ protected:
 	UPROPERTY(BlueprintReadOnly)
 	FVector GloabalLuminanceOnPlayer;
 	
+	float DeltaTimeTimer = 0.f;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = BasicAttributes)
