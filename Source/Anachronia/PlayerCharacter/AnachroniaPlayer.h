@@ -34,6 +34,17 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
 	UCameraComponent* LightCamBottom;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
+	class USceneCaptureComponent2D* SceneCaptureTop;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
+	USceneCaptureComponent2D* SceneCaptureBottom;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
+	class UTextureRenderTarget2D* RenderTargetTop;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
+	UTextureRenderTarget2D* RenderTargetBottom;
+
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -149,6 +160,7 @@ protected:
 
 	void ToggleCrouch();
 	
+	void CheckLights();
 
 	/** Calculate the luminosity. This function should be called when setting up player visibility check */
 	float CalculateLuminance(const FVector &V);
