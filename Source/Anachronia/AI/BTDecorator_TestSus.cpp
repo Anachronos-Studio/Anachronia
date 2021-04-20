@@ -21,7 +21,7 @@ void UBTDecorator_TestSus::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* No
 
 FString UBTDecorator_TestSus::GetStaticDescription() const
 {
-	const FString LevelStr = UEnum::GetValueAsString<ESusLevel>(Level);
+	const FString LevelStr = StaticEnum<ESusLevel>()->GetValueAsString(Level);
 	const FString Desc = FString::Printf(TEXT("Sus >= %s?"), *LevelStr);
 	return FString::Printf(TEXT("%s: %s"), *Super::GetStaticDescription(), *Desc);
 }
