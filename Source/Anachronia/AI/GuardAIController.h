@@ -38,6 +38,8 @@ public:
 	void FindClosestPatrolPoint();
 	FPatrolStop* GetCurrentPatrolStopInfo() const;
 	bool IsSusEnough(ESusLevel Level) const;
+	void MakeThisOriginalRotation();
+	void ResetRotation();
 
 	UFUNCTION(BlueprintCallable)
 	ESusLevel GetSusLevel() const;
@@ -63,6 +65,8 @@ private:
 	int32 NextPatrolPoint = 0;
 	
 	int32 PatrolDirection = 1;
+
+	FRotator OriginalRotation;
 
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;

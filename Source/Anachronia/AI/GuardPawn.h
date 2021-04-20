@@ -56,6 +56,13 @@ public:
 	UPROPERTY(Category = "Guard|Perception", EditAnywhere, BlueprintReadWrite)
 	float LoseSightRadius = 3500.0f;
 
+	/** How far to the side AI can see, in degrees.
+	 *	The value represents the angle measured in relation to the forward vector, not the whole range.
+	 *	Changes corresponding parameter in PerceptionComponent.
+	 */
+	UPROPERTY(Category = "Guard|Perception", EditAnywhere, BlueprintReadWrite)
+	float PeripheralVisionHalfAngle = 90.f;
+
 	UPROPERTY(VisibleAnywhere)
 	UAIPerceptionComponent* PerceptionComponent;
 	

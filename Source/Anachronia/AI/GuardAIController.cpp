@@ -3,7 +3,9 @@
 #include "GuardPatrolPath.h"
 #include "GuardPawn.h"
 #include "BehaviorTree/BehaviorTree.h"
+#include "BehaviorTree/BlackboardComponent.h"
 #include "Components/SplineComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "Perception/AISenseConfig_Sight.h"
@@ -11,6 +13,7 @@
 AGuardAIController::AGuardAIController()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	bSetControlRotationFromPawnOrientation = false;
 	static ConstructorHelpers::FObjectFinder<UBehaviorTree> BehaviorTreeAsset(TEXT("/Game/Anachronia/BehaviorTrees/BT_Guard"));
 	if (BehaviorTreeAsset.Succeeded())
 	{
@@ -25,21 +28,32 @@ AGuardAIController::AGuardAIController()
 void AGuardAIController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	UE_LOG(LogTemp, Display, TEXT("AI play"));
 }
 
 void AGuardAIController::Tick(float DeltaTime)
 {
+	Super::Tick(DeltaTime);
+	
 	if (bCanSeePlayer)
 	{
 		const float Rate = GuardPawn->SusBaseIncreaseRate; // TODO: Take in rate multiplier from player
 		SusValue = FMath::Min(SusValue + Rate * DeltaTime, 1.0f);
+		if (IsSusEnough(ESusLevel::KindaSus))
+		{
+			GetBlackboardComponent()->SetValueAsVector(TEXT("LookLocation"), PlayerRef->GetActorLocation());
+		}
 	}
 	else
 	{
 		SusValue = FMath::Max(SusValue - GuardPawn->SusDecreaseRate * DeltaTime, 0.0f);
 	}
 
-	FString Msg = FString::Printf(TEXT("Sus: %3.0f%% [%s]"), SusValue * 100.0f, *UEnum::GetValueAsString<ESusLevel>(GetSusLevel()));
+	FString Msg = FString::Printf(TEXT("Sus: %3.0f%% [%s]"),
+		SusValue * 100.0f,
+		*UEnum::GetValueAsString<ESusLevel>(GetSusLevel())
+	);
 	GEngine->AddOnScreenDebugMessage(419, 1.0f, FColor::White, Msg);
 }
 
@@ -136,6 +150,16 @@ bool AGuardAIController::IsSusEnough(ESusLevel Level) const
 	}
 }
 
+void AGuardAIController::MakeThisOriginalRotation()
+{
+	OriginalRotation = GetControlRotation();
+}
+
+void AGuardAIController::ResetRotation()
+{
+	SetControlRotation(OriginalRotation);
+}
+
 ESusLevel AGuardAIController::GetSusLevel() const
 {
 	if (SusValue >= 1.0f) return ESusLevel::Busted;
@@ -149,6 +173,8 @@ void AGuardAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
+	UE_LOG(LogTemp, Display, TEXT("AI possess"));
+
 	GuardPawn = GetPawn<AGuardPawn>();
 	if (GuardPawn == nullptr)
 	{
@@ -156,6 +182,8 @@ void AGuardAIController::OnPossess(APawn* InPawn)
 		return;
 	}
 
+	OriginalRotation = GuardPawn->GetActorRotation();
+	
 	RunBehaviorTree(BTAsset);
 	SetPerceptionComponent(*GuardPawn->PerceptionComponent);
 	PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AGuardAIController::OnTargetPerceptionUpdated);
@@ -165,7 +193,6 @@ void AGuardAIController::OnUnPossess()
 {
 	Super::OnUnPossess();
 
-	PerceptionComponent->OnTargetPerceptionUpdated.RemoveDynamic(this, &AGuardAIController::OnTargetPerceptionUpdated);
 	GuardPawn = nullptr;
 	PlayerRef = nullptr;
 }
