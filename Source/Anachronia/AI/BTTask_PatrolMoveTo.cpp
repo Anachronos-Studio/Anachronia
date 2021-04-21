@@ -18,22 +18,17 @@ UBTTask_PatrolMoveTo::UBTTask_PatrolMoveTo()
 EBTNodeResult::Type UBTTask_PatrolMoveTo::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	AGuardAIController* Guard = Cast<AGuardAIController>(OwnerComp.GetAIOwner());
-	if (Guard->GetPatrolPath() == nullptr)
-	{
-		Guard->ResetRotation();
-		return EBTNodeResult::Succeeded;
-	}
-	else
-	{
-		const FVector GoalLocation = Guard->GetCurrentPatrolGoal();
-		OwnerComp.GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", GoalLocation);
-		return Super::ExecuteTask(OwnerComp, NodeMemory);
-	}
+	const FVector GoalLocation = Guard->GetCurrentPatrolGoal();
+	OwnerComp.GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", GoalLocation);
+	return Super::ExecuteTask(OwnerComp, NodeMemory);
 }
 
 void UBTTask_PatrolMoveTo::TickTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
 {
 	AGuardAIController* Guard = Cast<AGuardAIController>(OwnerComp.GetAIOwner());
+
+	if (Guard->GetPatrolPath() == nullptr) return;
+	
 	APawn* Pawn = Guard->GetPawn();
 
 	// If the guard is close to reaching their goal, but does not intend to stop at that point,
@@ -63,4 +58,13 @@ EBTNodeResult::Type UBTTask_PatrolMoveTo::AbortTask(UBehaviorTreeComponent& Owne
 	UE_LOG(LogTemp, Display, TEXT("Abort patrol!"));
 	//GEngine->AddOnScreenDebugMessage(-1, 4.0f, FColor::Red, TEXT("Abort task!!!"));
 	return Super::AbortTask(OwnerComp, NodeMemory);
+}
+
+void UBTTask_PatrolMoveTo::OnTaskFinished(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, EBTNodeResult::Type TaskResult)
+{
+	AGuardAIController* Guard = Cast<AGuardAIController>(OwnerComp.GetAIOwner());
+	if (Guard->GetPatrolPath() == nullptr)
+	{
+		Guard->ResetRotation();
+	}
 }

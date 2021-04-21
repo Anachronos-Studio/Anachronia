@@ -31,6 +31,7 @@ void AGuardAIController::BeginPlay()
 	
 	GetBlackboardComponent()->SetValueAsObject("Player", PlayerRef);
 	GetBlackboardComponent()->SetValueAsFloat("LostTrackLookDuration", GuardPawn->LookAfterLosingPlayerDuration);
+	GetBlackboardComponent()->SetValueAsFloat("LookBeforeInspectingDuration", GuardPawn->LookBeforeInspectingDuration);
 }
 
 void AGuardAIController::Tick(float DeltaTime)
@@ -39,25 +40,46 @@ void AGuardAIController::Tick(float DeltaTime)
 	
 	if (bCanSeePlayer)
 	{
-		const float Rate = GuardPawn->SusBaseIncreaseRate * GetAlertnessValue(Alertness); // TODO: Take in rate multiplier from player
+		float Rate = GuardPawn->SusBaseIncreaseRate * GetAlertnessValue(Alertness); // TODO: Take in rate multiplier from player
+		const float Distance = FVector::Dist(GuardPawn->GetActorLocation(), PlayerRef->GetActorLocation());
+		const float DistanceFactor = 1.0f - FMath::Clamp(Distance / GuardPawn->SightRadius, 0.0f, 1.0f);
+		Rate *= DistanceFactor * GuardPawn->SusDistanceRateMultiplier;
+		
+		FString Msg = FString::Printf(TEXT("Rate: %.3f\nDist: %.3f"),
+			Rate,
+			DistanceFactor
+		);
+		GEngine->AddOnScreenDebugMessage(420, 1.0f, FColor::White, Msg);
+		
 		SusValue = FMath::Min(SusValue + Rate * DeltaTime, 1.0f);
 		if (IsSusEnough(ESusLevel::KindaSus) && PlayerRef)
 		{
-			GetBlackboardComponent()->SetValueAsVector(TEXT("NavigationGoalLocation"), PlayerRef->GetActorLocation());
+			if (State != EGuardState::Inspect) // When inspecting, should not track moving player, so don't update goal location
+			{
+				GetBlackboardComponent()->SetValueAsVector(TEXT("NavigationGoalLocation"), PlayerRef->GetActorLocation());
+			}
 		}
 	}
 	else
 	{
-		if (Alertness != EAlertness::AlarmedKnowing)
+		float MinSus = 0.0f;
+		if (Alertness == EAlertness::AlarmedKnowing)
 		{
-			SusValue = FMath::Max(SusValue - GuardPawn->SusDecreaseRate * DeltaTime, 0.0f);
+			MinSus = 1.0f;
 		}
+		else if (State == EGuardState::Inspect)
+		{
+			MinSus = GuardPawn->SusInspectThreshold;
+		}
+		SusValue = FMath::Max(SusValue - GuardPawn->SusDecreaseRate * DeltaTime, MinSus);
 	}
 
-	FString Msg = FString::Printf(TEXT("Sus: %3.0f%% [%s]\nAlertness: %s"),
+	const FString Msg = FString::Printf(TEXT("Sus: %3.0f%% [%s]\nAlertness: %s\nMain state: %s\n%s"),
 		SusValue * 100.0f,
 		*StaticEnum<ESusLevel>()->GetValueAsString(GetSusLevel()),
-		*StaticEnum<EAlertness>()->GetValueAsString(Alertness)
+		*StaticEnum<EAlertness>()->GetValueAsString(Alertness),
+		*StaticEnum<EGuardState>()->GetValueAsString(State),
+		bCanSeePlayer ? TEXT("Player in sight") : TEXT("Can't see player")
 	);
 	GEngine->AddOnScreenDebugMessage(419, 1.0f, FColor::White, Msg);
 }
@@ -78,7 +100,7 @@ FVector AGuardAIController::GetCurrentPatrolGoal() const
 	AGuardPatrolPath* Path = GetPatrolPath();
 	if (Path == nullptr)
 	{
-		return GuardPawn->GetActorLocation();
+		return OriginalLocation;
 	}
 	
 	USplineComponent* Spline = Path->GetSpline();
@@ -217,6 +239,11 @@ void AGuardAIController::SetAlertness(EAlertness InAlertness)
 	}
 }
 
+void AGuardAIController::SetState(EGuardState InState)
+{
+	State = InState;
+}
+
 ESusLevel AGuardAIController::GetSusLevel() const
 {
 	if (SusValue >= 1.0f) return ESusLevel::Busted;
@@ -241,6 +268,7 @@ void AGuardAIController::OnPossess(APawn* InPawn)
 	}
 
 	OriginalRotation = GuardPawn->GetActorRotation();
+	OriginalLocation = GuardPawn->GetActorLocation();
 	
 	RunBehaviorTree(BTAsset);
 	SetPerceptionComponent(*GuardPawn->PerceptionComponent);
