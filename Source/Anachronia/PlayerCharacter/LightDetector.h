@@ -12,8 +12,6 @@ class ANACHRONIA_API ALightDetector : public AActor
 {
 	GENERATED_BODY()
 	
-	UFUNCTION(BlueprintCallable, Category = "LightDetection")
-	float CalculateBrightness();
 
 	void ProcessRenderTexture(UTextureRenderTarget2D* texture);
 
@@ -42,5 +40,14 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+	float GlobalIlluminationMinValue = 0.329871f;
+
+	UFUNCTION(BlueprintCallable, Category = "LightDetection")
+	float CalculateBrightness();
+
+	UFUNCTION(BlueprintCallable, Category = "LightDetection")
+	float CalculateGlobalCoefficient(float InputValue);
 
 };

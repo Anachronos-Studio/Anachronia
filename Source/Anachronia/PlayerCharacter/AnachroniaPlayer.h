@@ -29,6 +29,13 @@ public:
 	/** To catch the global lighting to determine player visibility */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
 	class UStaticMeshComponent* LightReceiver;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
+	class ALightDetector* PlayerLightDetector;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
+	class UChildActorComponent* Detector;
+
 
 	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
 	//UCameraComponent* LightCamTop;
@@ -113,6 +120,9 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = StealthLevelAttributes)
 	float PlayerMotionLevel;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
+	float LightDetectorLevel;
+
 
 	// Player Main Attributes below
 
@@ -169,7 +179,7 @@ protected:
 	float CalculateLuminance(const FVector &V);
 
 	UPROPERTY(BlueprintReadOnly)
-	FVector GloabalLuminanceOnPlayer;
+	FVector GlobalLuminanceOnPlayer;
 	
 	float DeltaTimeTimer = 0.f;
 
@@ -228,6 +238,6 @@ public:
 	float GetVisibility(){ return PlayerVisibility; }
 
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
-	void SetGlobalLuminanceOnPlayer(FVector L){ GloabalLuminanceOnPlayer = L; }
+	void SetGlobalLuminanceOnPlayer(FVector L){ GlobalLuminanceOnPlayer = L; }
 	
 };

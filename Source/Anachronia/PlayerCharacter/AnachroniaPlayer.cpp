@@ -15,6 +15,7 @@
 #include "Engine/TextureRenderTarget2D.h"
 #include "Kismet/GameplayStatics.h"
 #include "Engine/DirectionalLight.h"
+#include "LightDetector.h"
 
 
 // Sets default values
@@ -57,12 +58,18 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 	// Create a box that will catch the lighing
 	LightReceiver = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LightReceiver"));
 	LightReceiver->SetupAttachment(GetCapsuleComponent());
+	LightReceiver->SetRelativeLocation(FVector(0.f, 1.75f, 0.f));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Octahedron(TEXT("StaticMesh'/Game/Anachronia/Meshes/Oct.Oct'"));
 	if (Octahedron.Succeeded()) 
 		LightReceiver->SetStaticMesh(Octahedron.Object);
 	LightReceiver->SetCastShadow(false);
 	LightReceiver->bCastDynamicShadow = false;
 	LightReceiver->SetRelativeScale3D(FVector(0.2f));
+
+	LightDetectorLevel = 0.f;
+
+	Detector = CreateDefaultSubobject<UChildActorComponent>(TEXT("Detector"));
+	
 
 	// Create LightCameras
 	//LightCamTop = CreateDefaultSubobject<UCameraComponent>(TEXT("LightCamTop"));
@@ -145,7 +152,10 @@ void AAnachroniaPlayer::Tick(float DeltaTime)
 	//UE_LOG(LogTemp, Warning, TEXT("Timer: %f"), DeltaTimeTimer);
 
 	//SetGlobalLuminanceOnPlayer(FVector L);
-	PlayerLuminance = CalculateLuminance(GloabalLuminanceOnPlayer);
+	//PlayerLuminance = CalculateLuminance(GlobalLuminanceOnPlayer);
+
+	SetLuminance(LightDetectorLevel);
+	SetVisibility(PlayerLuminance, PlayerMotionLevel);
 
 	//SceneCaptureTop->CaptureScene();
 	//SceneCaptureBottom->CaptureScene();	

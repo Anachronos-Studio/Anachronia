@@ -4,6 +4,7 @@
 #include "LightDetector.h"
 #include "Engine/TextureRenderTarget2D.h"
 #include "UnrealClient.h"
+#include "Kismet/KismetMathLibrary.h"
 
 // Sets default values
 ALightDetector::ALightDetector()
@@ -71,7 +72,14 @@ float ALightDetector::CalculateBrightness() {
 
 
 	// At the end we return the brightest pixel we found in the RenderTextures
+	brightnessOutput = UKismetMathLibrary::NormalizeToRange(brightnessOutput, 0.f, 255.f);
 	return brightnessOutput;
 }
 
+float ALightDetector::CalculateGlobalCoefficient(float InputValue) {
+	float GlobalCoefficient = UKismetMathLibrary::NormalizeToRange(InputValue, GlobalIlluminationMinValue, 1.0f);
+	//if (GlobalCoefficient < 0.f) GlobalCoefficient = 0.001f;
+	return GlobalCoefficient;
 
+	
+}
