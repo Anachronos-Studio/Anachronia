@@ -11,6 +11,7 @@ class ANACHRONIA_API AAnachroniaPlayer : public ACharacter
 {
 	GENERATED_BODY()
 
+
 public:
 	// Sets default values for this character's properties
 	AAnachroniaPlayer();
@@ -28,12 +29,30 @@ public:
 	/** To catch the global lighting to determine player visibility */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
 	class UStaticMeshComponent* LightReceiver;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
+	class ALightDetector* PlayerLightDetector;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
-	UCameraComponent* LightCamTop;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
-	UCameraComponent* LightCamBottom;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
+	class UChildActorComponent* Detector;
 
+
+	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
+	//UCameraComponent* LightCamTop;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
+	//UCameraComponent* LightCamBottom;
+
+	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
+	//class USceneCaptureComponent2D* SceneCaptureTop;
+	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
+	//USceneCaptureComponent2D* SceneCaptureBottom;
+
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
+	//UTextureRenderTarget2D* RenderTargetTop;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
+	//UTextureRenderTarget2D* RenderTargetBottom;
+
+	
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -53,11 +72,17 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
 	float BaseLookUpRate;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MenuOptions)
+	bool bTogglePlayerCrouch;
+	
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
 	float JumpVelocity;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
 	bool bPlayerIsCrouched;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+	bool bPlayerIsSprinting;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
 	float PlayerCapsuleStandingHalfHeight;
@@ -94,6 +119,10 @@ public:
 	/** The player motion level determines how much motion player makes, to get noticeable */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = StealthLevelAttributes)
 	float PlayerMotionLevel;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
+	float LightDetectorLevel;
+
 
 	// Player Main Attributes below
 
@@ -143,13 +172,16 @@ protected:
 
 	void ToggleCrouch();
 	
+	void CheckLights();
+	FColor& FindBrightestPixel(TArray<FColor>& ColorBuffer, int32 start, int32 max);
 
 	/** Calculate the luminosity. This function should be called when setting up player visibility check */
 	float CalculateLuminance(const FVector &V);
 
 	UPROPERTY(BlueprintReadOnly)
-	FVector GloabalLuminanceOnPlayer;
+	FVector GlobalLuminanceOnPlayer;
 	
+	float DeltaTimeTimer = 0.f;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = BasicAttributes)
@@ -206,6 +238,6 @@ public:
 	float GetVisibility(){ return PlayerVisibility; }
 
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
-	void SetGlobalLuminanceOnPlayer(FVector L){ GloabalLuminanceOnPlayer = L; }
+	void SetGlobalLuminanceOnPlayer(FVector L){ GlobalLuminanceOnPlayer = L; }
 	
 };

@@ -6,6 +6,9 @@
 #include "GuardPatrolPath.h"
 #include "Components/SplineComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Perception/AIPerceptionComponent.h"
+#include "AIController.h"
+#include "Perception/AISenseConfig_Sight.h"
 
 // Sets default values
 AGuardPawn::AGuardPawn()
@@ -18,26 +21,38 @@ AGuardPawn::AGuardPawn()
 	GetCapsuleComponent()->SetCollisionProfileName("Pawn");
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
-	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->bOrientRotationToMovement = false;
+	GetCharacterMovement()->bUseControllerDesiredRotation = true;
 	GetCharacterMovement()->bUseRVOAvoidance = true;
 	GetCharacterMovement()->AvoidanceConsiderationRadius = 250.0f;
 	GetCharacterMovement()->AvoidanceWeight = 0.5f;
 
 	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight()));
+
+	PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>("PerceptionComponent");
+	UAISenseConfig_Sight* SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>("SightConfig");
+	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
+	PerceptionComponent->ConfigureSense(*SightConfig);
 }
 
 // Called when the game starts or when spawned
 void AGuardPawn::BeginPlay()
 {
 	Super::BeginPlay();
-
+	
 	if (bStartOnPath && PatrolPath != nullptr)
 	{
 		const int32 Point = PatrolPath->FindClosestPointToWorldLocation(GetActorLocation());
 		USplineComponent* Spline = PatrolPath->GetSpline();
 		const FVector NewLocation = Spline->GetLocationAtSplinePoint(Point, ESplineCoordinateSpace::World);
-		const FQuat NewRotation = Spline->GetQuaternionAtSplinePoint(Point, ESplineCoordinateSpace::World);
+		const FRotator NewRotation = Spline->GetRotationAtSplinePoint(Point, ESplineCoordinateSpace::World);
 		SetActorLocation(NewLocation);
+		if (GetController())
+		{
+			GetController()->SetControlRotation(NewRotation);
+			GetGuardAI()->MakeThisOriginalRotation();
+		}
+		
 		SetActorRotation(NewRotation);
 	}
 }
@@ -46,4 +61,27 @@ void AGuardPawn::BeginPlay()
 void AGuardPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+}
+
+void AGuardPawn::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
+{
+	Super::PostEditChangeProperty(PropertyChangedEvent);
+	
+	if (PerceptionComponent != nullptr)
+	{
+		UAISenseConfig_Sight* SightConfig = Cast<UAISenseConfig_Sight>(PerceptionComponent->GetSenseConfig(UAISense::GetSenseID<UAISense_Sight>()));
+		if (SightConfig)
+		{
+			UE_LOG(LogTemp, Display, TEXT("Update sense config!"));
+			SightConfig->SightRadius = SightRadius;
+			SightConfig->LoseSightRadius = LoseSightRadius;
+			SightConfig->PeripheralVisionAngleDegrees = PeripheralVisionHalfAngle;
+			PerceptionComponent->RequestStimuliListenerUpdate();
+		}
+	}
+}
+
+AGuardAIController* AGuardPawn::GetGuardAI() const
+{
+	return Cast<AGuardAIController>(GetController());
 }

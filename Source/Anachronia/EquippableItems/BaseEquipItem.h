@@ -32,6 +32,8 @@ public:
 
 	virtual void UseTool();
 
+	//Get Animation()
+
 protected:
 	// Checks if the equippable item is a weapon or not
 	bool bIsWeapon;
