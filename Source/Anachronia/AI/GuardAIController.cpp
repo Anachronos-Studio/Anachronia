@@ -39,7 +39,17 @@ void AGuardAIController::Tick(float DeltaTime)
 	
 	if (bCanSeePlayer)
 	{
-		const float Rate = GuardPawn->SusBaseIncreaseRate * GetAlertnessValue(Alertness); // TODO: Take in rate multiplier from player
+		float Rate = GuardPawn->SusBaseIncreaseRate * GetAlertnessValue(Alertness); // TODO: Take in rate multiplier from player
+		const float Distance = FVector::Dist(GuardPawn->GetActorLocation(), PlayerRef->GetActorLocation());
+		const float DistanceFactor = 1.0f - FMath::Clamp(Distance / GuardPawn->SightRadius, 0.0f, 1.0f);
+		Rate *= DistanceFactor * GuardPawn->SusDistanceRateMultiplier;
+		
+		FString Msg = FString::Printf(TEXT("Rate: %.3f\nDist: %.3f"),
+			Rate,
+			DistanceFactor
+		);
+		GEngine->AddOnScreenDebugMessage(420, 1.0f, FColor::White, Msg);
+		
 		SusValue = FMath::Min(SusValue + Rate * DeltaTime, 1.0f);
 		if (IsSusEnough(ESusLevel::KindaSus) && PlayerRef)
 		{

@@ -48,47 +48,52 @@ public:
 	float LookAfterLosingPlayerDuration = 2.0f;
 
 	// When SusValue exceeds this, guard will stop and look towards the suspicious thing
-	UPROPERTY(Category = "Guard|Suspiciousness", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Guard|General perception", EditAnywhere, BlueprintReadWrite)
 	float SusLookThreshold = 0.3f;
 
 	// When SusValue exceeds this, guard will walk towards the suspicious thing to look closer
-	UPROPERTY(Category = "Guard|Suspiciousness", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Guard|General perception", EditAnywhere, BlueprintReadWrite)
 	float SusInspectThreshold = 0.6f;
 
 	// How much to add to SusValue per second (rate is first multiplied by other parameters)
-	UPROPERTY(Category = "Guard|Suspiciousness", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Guard|General perception", EditAnywhere, BlueprintReadWrite)
 	float SusBaseIncreaseRate = 1.0f;
 
 	// How much to subtract from SusValue per second when nothing is increasing it
-	UPROPERTY(Category = "Guard|Suspiciousness", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Guard|General perception", EditAnywhere, BlueprintReadWrite)
 	float SusDecreaseRate = 0.25f;
 
-	// SusValue increase rate multiplier when in an alarmed alertness state
-	UPROPERTY(Category = "Guard|Suspiciousness", EditAnywhere, BlueprintReadWrite)
-	float SusAlarmedRateMultiplier = 1.0f;
-
-	// SusValue increase rate multiplier when in distracted alertness state
-	UPROPERTY(Category = "Guard|Suspiciousness", EditAnywhere, BlueprintReadWrite)
-	float SusDistractedRateMultiplier = 0.75f;
-
-	// SusValue increase rate multiplier when in neutral alertness state
-	UPROPERTY(Category = "Guard|Suspiciousness", EditAnywhere, BlueprintReadWrite)
-	float SusNeutralRateMultiplier = 0.5f;
-
 	// Maximum sight distance to notice player. Changes corresponding parameter in PerceptionComponent.
-	UPROPERTY(Category = "Guard|Sight", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Guard|Sight perception", EditAnywhere, BlueprintReadWrite)
 	float SightRadius = 3000.0f;
 
 	// Maximum sight distance to see player that has been already seen. Changes corresponding parameter in PerceptionComponent.
-	UPROPERTY(Category = "Guard|Sight", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Guard|Sight perception", EditAnywhere, BlueprintReadWrite)
 	float LoseSightRadius = 3500.0f;
 
 	/** How far to the side AI can see, in degrees.
 	 *	The value represents the angle measured in relation to the forward vector, not the whole range.
 	 *	Changes corresponding parameter in PerceptionComponent.
 	 */
-	UPROPERTY(Category = "Guard|Sight", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(Category = "Guard|Sight perception", EditAnywhere, BlueprintReadWrite)
 	float PeripheralVisionHalfAngle = 90.f;
+
+	// SusValue increase rate multiplier when in an alarmed alertness state
+	UPROPERTY(Category = "Guard|Sight perception", EditAnywhere, BlueprintReadWrite)
+	float SusAlarmedRateMultiplier = 1.0f;
+
+	// SusValue increase rate multiplier when in distracted alertness state
+	UPROPERTY(Category = "Guard|Sight perception", EditAnywhere, BlueprintReadWrite)
+	float SusDistractedRateMultiplier = 0.75f;
+
+	// SusValue increase rate multiplier when in neutral alertness state
+	UPROPERTY(Category = "Guard|Sight perception", EditAnywhere, BlueprintReadWrite)
+	float SusNeutralRateMultiplier = 0.5f;
+
+	// How much distance to player affects SusValue increase rate. Distance is 0-1 where 0 is max distance away (SightRadius).
+	// That distance value is then multiplied by this parameter.
+	UPROPERTY(Category = "Guard|Sight perception", EditAnywhere, BlueprintReadWrite)
+	float SusDistanceRateMultiplier = 1.0f;
 
 	UPROPERTY(VisibleAnywhere)
 	UAIPerceptionComponent* PerceptionComponent;
