@@ -42,6 +42,11 @@ public:
 	UPROPERTY(Category = "Guard|Movement", EditAnywhere, BlueprintReadWrite)
 	float RunSpeed = 400.0f;
 
+	// When the guard has noticed something suspicious and is about to inspect it, they
+	// will first look towards the source for this many seconds
+	UPROPERTY(Category = "Guard|Movement", EditAnywhere, BlueprintReadWrite)
+	float LookBeforeInspectingDuration = 2.0f;
+	
 	// After losing track of player and reaching her last known location
 	// this determines how long the guard stays there and looks before returning to patrol path
 	UPROPERTY(Category = "Guard|Movement", EditAnywhere, BlueprintReadWrite)

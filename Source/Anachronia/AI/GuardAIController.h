@@ -35,6 +35,15 @@ enum class EAlertness : uint8
 	AlarmedUnknowing,
 };
 
+UENUM(BlueprintType)
+enum class EGuardState : uint8
+{
+	Patrol,
+	Distracted,
+	Inspect,
+	Hunt,
+};
+
 /**
  * 
  */
@@ -59,6 +68,7 @@ public:
 	void ResetRotation();
 	void SetMovementSpeed(EMovementSpeed NewSpeed);
 	void SetAlertness(EAlertness InAlertness);
+	void SetState(EGuardState InState);
 
 	UFUNCTION(BlueprintCallable)
 	ESusLevel GetSusLevel() const;
@@ -72,6 +82,9 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly, VisibleInstanceOnly)
 	EAlertness Alertness;
+
+	UPROPERTY(Transient, BlueprintReadOnly, VisibleInstanceOnly)
+	EGuardState State;
 	
 private:
 	UPROPERTY(VisibleInstanceOnly)
@@ -89,6 +102,7 @@ private:
 	int32 PatrolDirection = 1;
 
 	FRotator OriginalRotation;
+	FVector OriginalLocation;
 
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
