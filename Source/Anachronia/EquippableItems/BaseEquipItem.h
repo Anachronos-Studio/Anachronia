@@ -42,4 +42,6 @@ protected:
 public:
 
 	bool IsItWeapon() { return bIsWeapon; }
+
+
 };
