@@ -5,6 +5,7 @@
 #include "Perception/AIPerceptionTypes.h"
 #include "GuardAIController.generated.h"
 
+class AAnachroniaPlayer;
 struct FPatrolStop;
 class AGuardPatrolPath;
 class AGuardPawn;
@@ -94,7 +95,7 @@ private:
 	UBehaviorTree* BTAsset;
 
 	UPROPERTY()
-	AActor* PlayerRef;
+	AAnachroniaPlayer* PlayerRef;
 
 	UPROPERTY(Transient, VisibleInstanceOnly)
 	int32 NextPatrolPoint = 0;
