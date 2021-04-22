@@ -6,10 +6,17 @@
 #include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/BoxComponent.h"
 #include "Components/InputComponent.h"
 #include "GameFramework/InputSettings.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/PlayerController.h"
+#include "Components/SceneCaptureComponent2D.h"
+#include "Engine/TextureRenderTarget2D.h"
+#include "Kismet/GameplayStatics.h"
+#include "Engine/DirectionalLight.h"
+#include "LightDetector.h"
+
 
 // Sets default values
 AAnachroniaPlayer::AAnachroniaPlayer()
@@ -19,6 +26,8 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
+
+	Tags.Add(TEXT("Player"));
 
 	// Initiate Menu Options
 	bTogglePlayerCrouch = true;
@@ -49,6 +58,7 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 	// Create a box that will catch the lighing
 	LightReceiver = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LightReceiver"));
 	LightReceiver->SetupAttachment(GetCapsuleComponent());
+	LightReceiver->SetRelativeLocation(FVector(0.f, 1.75f, 0.f));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Octahedron(TEXT("StaticMesh'/Game/Anachronia/Meshes/Oct.Oct'"));
 	if (Octahedron.Succeeded()) 
 		LightReceiver->SetStaticMesh(Octahedron.Object);
@@ -56,15 +66,43 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 	LightReceiver->bCastDynamicShadow = false;
 	LightReceiver->SetRelativeScale3D(FVector(0.2f));
 
+	LightDetectorLevel = 0.f;
+
+	//Detector = CreateDefaultSubobject<UChildActorComponent>(TEXT("Detector"));
+	
+
 	// Create LightCameras
-	LightCamTop = CreateDefaultSubobject<UCameraComponent>(TEXT("LightCamTop"));
-	LightCamBottom = CreateDefaultSubobject<UCameraComponent>(TEXT("LightCamBottom"));
-	LightCamTop->SetupAttachment(LightReceiver);
-	LightCamBottom->SetupAttachment(LightReceiver);
-	LightCamTop->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
-	LightCamTop->SetRelativeLocation(FVector(0.f, 0.f, 300.f));
-	LightCamBottom->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
-	LightCamBottom->SetRelativeLocation(FVector(0.f, 0.f, -300));
+	//LightCamTop = CreateDefaultSubobject<UCameraComponent>(TEXT("LightCamTop"));
+	//LightCamBottom = CreateDefaultSubobject<UCameraComponent>(TEXT("LightCamBottom"));
+	//LightCamTop->SetupAttachment(LightReceiver);
+	//LightCamBottom->SetupAttachment(LightReceiver);
+	//LightCamTop->SetRelativeRotation(FRotator(0.f, -90.f, 0.f));
+	//LightCamTop->SetRelativeLocation(FVector(0.f, 0.f, 300.f));
+	//LightCamTop->SetFieldOfView(66.f);
+	//LightCamTop->SetAspectRatio(1.f);
+	//LightCamTop->SetProjectionMode(ECameraProjectionMode::Perspective);
+	//LightCamBottom->SetRelativeRotation(FRotator(0.f, 90.f, 0.f));
+	//LightCamBottom->SetRelativeLocation(FVector(0.f, 0.f, -300));
+	//LightCamBottom->SetFieldOfView(66.f);
+	//LightCamBottom->SetAspectRatio(1.f);
+	//LightCamBottom->SetProjectionMode(ECameraProjectionMode::Perspective);
+
+	//SceneCaptureTop = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("SceneCaptureTop"));
+	//SceneCaptureBottom = CreateDefaultSubobject<USceneCaptureComponent2D>(TEXT("SceneCaptureBottom"));
+	//SceneCaptureTop->SetupAttachment(LightCamTop);
+	//SceneCaptureBottom->SetupAttachment(LightCamBottom);
+	//SceneCaptureTop->ProjectionType = ECameraProjectionMode::Perspective;
+	//SceneCaptureBottom->ProjectionType = ECameraProjectionMode::Perspective;
+	//SceneCaptureTop->FOVAngle = 36.f;
+	//SceneCaptureBottom->FOVAngle = 36.f;	
+
+	//static ConstructorHelpers::FObjectFinder<UTextureRenderTarget2D> RendTop(TEXT("TextureRenderTarget2D'/Game/Anachronia/IndividualPlaygrounds/Eddie/TestTextureRenderTarget2D_TOP.TestTextureRenderTarget2D_TOP'"));
+	//static ConstructorHelpers::FObjectFinder<UTextureRenderTarget2D> RendBottom(TEXT("TextureRenderTarget2D'/Game/Anachronia/IndividualPlaygrounds/Eddie/TestTextureRenderTarget2D_BOTTOM.TestTextureRenderTarget2D_BOTTOM'"));
+
+	//RenderTargetTop = RendTop.Object;
+	//RenderTargetBottom = RendBottom.Object;
+	//SceneCaptureTop->TextureTarget = RenderTargetTop;
+	//SceneCaptureBottom->TextureTarget = RenderTargetBottom;
 
 	// Initiate the stealth attributes
 	PlayerVisibility = 0.f;
@@ -100,9 +138,10 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 // Called when the game starts or when spawned
 void AAnachroniaPlayer::BeginPlay()
 {
-	Super::BeginPlay();
-	
+	Super::BeginPlay();	
 	InitiatedWalkingSpeed = GetCharacterMovement()->MaxWalkSpeed;
+
+
 }
 
 // Called every frame
@@ -110,8 +149,22 @@ void AAnachroniaPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	//UE_LOG(LogTemp, Warning, TEXT("Timer: %f"), DeltaTimeTimer);
+
 	//SetGlobalLuminanceOnPlayer(FVector L);
-	PlayerLuminance = CalculateLuminance(GloabalLuminanceOnPlayer);
+	//PlayerLuminance = CalculateLuminance(GlobalLuminanceOnPlayer);
+
+	SetLuminance(LightDetectorLevel);
+	SetVisibility(PlayerLuminance, PlayerMotionLevel);
+
+	//SceneCaptureTop->CaptureScene();
+	//SceneCaptureBottom->CaptureScene();	
+
+	//if (DeltaTimeTimer > 1.f) {
+	//	CheckLights();
+	//	DeltaTimeTimer = 0.f;
+	//}
+	//DeltaTimeTimer += DeltaTime;
 }
 
 // Called to bind functionality to input
@@ -237,3 +290,27 @@ float AAnachroniaPlayer::CalculateLuminance(const FVector& V) {
 	L = FMath::Sqrt(FMath::Pow(0.299 * R, 2) + FMath::Pow(0.587 * G, 2) + FMath::Pow(0.114 * B, 2));
 	return L;
 }
+
+//void AAnachroniaPlayer::CheckLights() {
+//	//TArray <FLinearColor> LinearColorArrayTop;
+//	SceneCaptureTop->CaptureScene();
+//	TArray <FColor> ColorArrayTop;	
+//	FRenderTarget* RenderTop = RenderTargetTop->GameThread_GetRenderTargetResource();
+//	RenderTop->ReadPixels(ColorArrayTop, FReadSurfaceDataFlags(RCM_UNorm,CubeFace_MAX), FIntRect(32, 32, 200, 200));
+//	RenderTargetTop->UpdateResourceImmediate();
+//	// Index Formula: FColor PixelColorTop = ColorArrayTop[x + y * RenderTargetTop->SizeX]
+//	
+//	//FColor PixelColorTop = ColorArrayTop[0];
+//	
+//	//ColorArrayTop.Sort();
+//	FColor PixelColorTop = ColorArrayTop[400]; //FindBrightestPixel(ColorArrayTop, 0, ColorArrayTop.Num());
+//	UE_LOG(LogTemp, Warning, TEXT("Brightest Color: %f, %f, %f"), PixelColorTop.R, PixelColorTop.G, PixelColorTop.B);
+//	
+//}
+//
+//FColor& AAnachroniaPlayer::FindBrightestPixel(TArray<FColor>& ColorBuffer, int32 start, int32 max) {
+//	FColor *BrightestColor = &ColorBuffer[100];
+//	return *BrightestColor;
+//}
+
+
