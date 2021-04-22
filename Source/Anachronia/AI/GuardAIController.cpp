@@ -241,6 +241,10 @@ void AGuardAIController::SetAlertness(EAlertness InAlertness)
 
 void AGuardAIController::SetState(EGuardState InState)
 {
+	if (InState == EGuardState::Patrol && State == EGuardState::Inspect)
+	{
+		SusValue = 0.0f;
+	}
 	State = InState;
 }
 

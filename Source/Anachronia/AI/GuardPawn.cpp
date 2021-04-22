@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "AIController.h"
+#include "DrawDebugHelpers.h"
 #include "Perception/AISenseConfig_Sight.h"
 
 // Sets default values
@@ -61,6 +62,11 @@ void AGuardPawn::BeginPlay()
 void AGuardPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	FVector EyesLoc;
+	FRotator EyesRot;
+	GetActorEyesViewPoint(EyesLoc, EyesRot);
+	DrawDebugDirectionalArrow(GetWorld(), EyesLoc, EyesLoc + EyesRot.Vector() * 100.0f, 10.0f, FColor::White, false, -1, 0, 1.0f);
 }
 
 void AGuardPawn::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)

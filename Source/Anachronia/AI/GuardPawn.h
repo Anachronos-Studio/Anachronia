@@ -46,6 +46,11 @@ public:
 	// will first look towards the source for this many seconds
 	UPROPERTY(Category = "Guard|Movement", EditAnywhere, BlueprintReadWrite)
 	float LookBeforeInspectingDuration = 2.0f;
+
+	// When inspecting a suspicious thing, the guard will look around for this long in each direction
+	// before deciding it must have been the wind
+	UPROPERTY(Category = "Guard|Movement", EditAnywhere, BlueprintReadWrite)
+	float LookAroundWhenInspectingDuration = 1.0f;
 	
 	// After losing track of player and reaching her last known location
 	// this determines how long the guard stays there and looks before returning to patrol path
