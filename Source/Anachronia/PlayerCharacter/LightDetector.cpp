@@ -12,8 +12,8 @@ ALightDetector::ALightDetector()
  	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
-	static ConstructorHelpers::FObjectFinder<UTextureRenderTarget2D> RendTop(TEXT("TextureRenderTarget2D'/Game/Anachronia/IndividualPlaygrounds/Eddie/TestTextureRenderTarget2D_TOP.TestTextureRenderTarget2D_TOP'"));
-	static ConstructorHelpers::FObjectFinder<UTextureRenderTarget2D> RendBottom(TEXT("TextureRenderTarget2D'/Game/Anachronia/IndividualPlaygrounds/Eddie/TestTextureRenderTarget2D_BOTTOM.TestTextureRenderTarget2D_BOTTOM'"));
+	static ConstructorHelpers::FObjectFinder<UTextureRenderTarget2D> RendTop(TEXT("TextureRenderTarget2D'/Game/Anachronia/Blueprints/LightDetectorFolder/TestTextureRenderTarget2D_TOP.TestTextureRenderTarget2D_TOP'"));
+	static ConstructorHelpers::FObjectFinder<UTextureRenderTarget2D> RendBottom(TEXT("TextureRenderTarget2D'/Game/Anachronia/Blueprints/LightDetectorFolder/TestTextureRenderTarget2D_BOTTOM.TestTextureRenderTarget2D_BOTTOM'"));
 
 	detectorTextureTop = RendTop.Object;
 	detectorTextureBottom = RendBottom.Object;

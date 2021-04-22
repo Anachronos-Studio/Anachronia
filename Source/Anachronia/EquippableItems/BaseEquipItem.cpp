@@ -10,6 +10,12 @@ ABaseEquipItem::ABaseEquipItem()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	bIsWeapon = false;
+
+	RootPlaceholder = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
+	RootPlaceholder->SetupAttachment(GetRootComponent());
+
+	//SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("Mesh"));
+	//SkeletalMesh->SetupAttachment(RootPlaceholder);
 }
 
 // Called when the game starts or when spawned
