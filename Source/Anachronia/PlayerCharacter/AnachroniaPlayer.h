@@ -33,8 +33,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
 	class ALightDetector* PlayerLightDetector;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
-	class UChildActorComponent* Detector;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
+	//class UChildActorComponent* Detector;
 
 
 	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)

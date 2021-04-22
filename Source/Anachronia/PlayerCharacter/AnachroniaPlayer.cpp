@@ -68,7 +68,7 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 
 	LightDetectorLevel = 0.f;
 
-	Detector = CreateDefaultSubobject<UChildActorComponent>(TEXT("Detector"));
+	//Detector = CreateDefaultSubobject<UChildActorComponent>(TEXT("Detector"));
 	
 
 	// Create LightCameras
