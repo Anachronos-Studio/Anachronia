@@ -36,11 +36,19 @@ public:
 	UPROPERTY(Category = Guard, EditAnywhere)
 	bool bStartOnPath;
 
+	/* *********************
+	 * Movement
+	 */
+	
 	UPROPERTY(Category = "Guard|Movement", EditAnywhere, BlueprintReadWrite)
 	float WalkSpeed = 200.0f;
 
 	UPROPERTY(Category = "Guard|Movement", EditAnywhere, BlueprintReadWrite)
 	float RunSpeed = 400.0f;
+
+	// Makes guards not hug walls and corners too closely when pathfinding
+	UPROPERTY(Category = "Guard|Movement", EditAnywhere, BlueprintReadWrite)
+	float OffsetFromCornersDistance = 100.0f;
 
 	// When the guard has noticed something suspicious and is about to inspect it, they
 	// will first look towards the source for this many seconds
@@ -57,6 +65,10 @@ public:
 	UPROPERTY(Category = "Guard|Movement", EditAnywhere, BlueprintReadWrite)
 	float LookAfterLosingPlayerDuration = 2.0f;
 
+	/* ************************
+	 * General perception
+	 */
+	
 	// When SusValue exceeds this, guard will stop and look towards the suspicious thing
 	UPROPERTY(Category = "Guard|General perception", EditAnywhere, BlueprintReadWrite)
 	float SusLookThreshold = 0.3f;
@@ -73,6 +85,10 @@ public:
 	UPROPERTY(Category = "Guard|General perception", EditAnywhere, BlueprintReadWrite)
 	float SusDecreaseRate = 0.25f;
 
+	/* *************************
+	 * Sight perception
+	 */
+	
 	// Maximum sight distance to notice player. Changes corresponding parameter in PerceptionComponent.
 	UPROPERTY(Category = "Guard|Sight perception", EditAnywhere, BlueprintReadWrite)
 	float SightRadius = 3000.0f;

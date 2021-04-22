@@ -7,6 +7,7 @@
 #include "Components/SplineComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "NavMesh/NavMeshPath.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "Perception/AISenseConfig_Sight.h"
@@ -246,6 +247,12 @@ void AGuardAIController::SetState(EGuardState InState)
 		SusValue = 0.0f;
 	}
 	State = InState;
+}
+
+void AGuardAIController::FindPathForMoveRequest(const FAIMoveRequest& MoveRequest, FPathFindingQuery& Query, FNavPathSharedPtr& OutPath) const
+{
+	Super::FindPathForMoveRequest(MoveRequest, Query, OutPath);
+	((FNavMeshPath*)OutPath.Get())->OffsetFromCorners(GuardPawn->OffsetFromCornersDistance);
 }
 
 ESusLevel AGuardAIController::GetSusLevel() const

@@ -69,7 +69,7 @@ public:
 	void SetMovementSpeed(EMovementSpeed NewSpeed);
 	void SetAlertness(EAlertness InAlertness);
 	void SetState(EGuardState InState);
-
+	virtual void FindPathForMoveRequest(const FAIMoveRequest& MoveRequest, FPathFindingQuery& Query, FNavPathSharedPtr& OutPath) const override;
 	UFUNCTION(BlueprintCallable)
 	ESusLevel GetSusLevel() const;
 
