@@ -65,7 +65,6 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 	LightReceiver->SetCastShadow(false);
 	LightReceiver->bCastDynamicShadow = false;
 	LightReceiver->SetRelativeScale3D(FVector(0.2f));
-
 	LightDetectorLevel = 0.f;
 
 	//Detector = CreateDefaultSubobject<UChildActorComponent>(TEXT("Detector"));
@@ -156,7 +155,7 @@ void AAnachroniaPlayer::Tick(float DeltaTime)
 
 	SetLuminance(LightDetectorLevel);
 	SetVisibility(PlayerLuminance, PlayerMotionLevel);
-
+	LightReceiver->SetWorldRotation(FRotator(0.f, 0.f, 0.f));
 	//SceneCaptureTop->CaptureScene();
 	//SceneCaptureBottom->CaptureScene();	
 
