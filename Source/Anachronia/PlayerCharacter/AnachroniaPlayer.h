@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "AnachroniaPlayer.generated.h"
 
+class ABaseEquipItem;
 UCLASS()
 class ANACHRONIA_API AAnachroniaPlayer : public ACharacter
 {
@@ -32,6 +33,13 @@ public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
 	class ALightDetector* PlayerLightDetector;
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EquippableItems)
+	TArray<ABaseEquipItem*> EquippableItems;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EquippableItems)
+	class UChildActorComponent* EquippableItem;
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
 	//class UChildActorComponent* Detector;
@@ -240,4 +248,5 @@ public:
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
 	void SetGlobalLuminanceOnPlayer(FVector L){ GlobalLuminanceOnPlayer = L; }
 	
+
 };

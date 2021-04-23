@@ -15,7 +15,6 @@ UBTService_SetPatrolling::UBTService_SetPatrolling()
 
 void UBTService_SetPatrolling::OnBecomeRelevant(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	UE_LOG(LogTemp, Display, TEXT("I'm relevant!!"));
 	AGuardAIController* Guard = Cast<AGuardAIController>(OwnerComp.GetAIOwner());
 	check(Guard != nullptr);
 	const bool bWasPatrollingBefore = Guard->GetBlackboardComponent()->GetValueAsBool("Patrolling");

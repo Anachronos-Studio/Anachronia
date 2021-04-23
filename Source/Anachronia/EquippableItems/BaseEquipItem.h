@@ -6,6 +6,7 @@
 #include "GameFramework/Pawn.h"
 #include "BaseEquipItem.generated.h"
 
+class AAnachroniaPlayer;
 UCLASS()
 class ANACHRONIA_API ABaseEquipItem : public APawn
 {
@@ -15,6 +16,17 @@ public:
 	// Sets default values for this pawn's properties
 	ABaseEquipItem();
 
+	UPROPERTY(VisibleAnywhere)
+	USceneComponent* RootPlaceholder;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh)
+	UStaticMeshComponent* StaticMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh)
+	USkeletalMeshComponent* SkeletalMesh;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player)
+	AAnachroniaPlayer* AttachedPlayer;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -26,13 +38,6 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	virtual void Action();
-
-	virtual void ChargeWeapon();
-
-	virtual void UseTool();
-
-	//Get Animation()
 
 protected:
 	// Checks if the equippable item is a weapon or not
@@ -43,5 +48,11 @@ public:
 
 	bool IsItWeapon() { return bIsWeapon; }
 
+	UFUNCTION(BlueprintImplementableEvent, Category = InputEvents)
+	void CallPrimaryAction();
+	UFUNCTION(BlueprintImplementableEvent, Category = InputEvents)
+	void CallSecondaryAction();	
 
+	UFUNCTION(BlueprintImplementableEvent, Category = Attachments)
+	void AttachToPlayer();
 };

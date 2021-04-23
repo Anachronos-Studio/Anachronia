@@ -5,6 +5,7 @@
 #include "Perception/AIPerceptionTypes.h"
 #include "GuardAIController.generated.h"
 
+class AAnachroniaPlayer;
 struct FPatrolStop;
 class AGuardPatrolPath;
 class AGuardPawn;
@@ -69,7 +70,7 @@ public:
 	void SetMovementSpeed(EMovementSpeed NewSpeed);
 	void SetAlertness(EAlertness InAlertness);
 	void SetState(EGuardState InState);
-
+	virtual void FindPathForMoveRequest(const FAIMoveRequest& MoveRequest, FPathFindingQuery& Query, FNavPathSharedPtr& OutPath) const override;
 	UFUNCTION(BlueprintCallable)
 	ESusLevel GetSusLevel() const;
 
@@ -94,7 +95,7 @@ private:
 	UBehaviorTree* BTAsset;
 
 	UPROPERTY()
-	AActor* PlayerRef;
+	AAnachroniaPlayer* PlayerRef;
 
 	UPROPERTY(Transient, VisibleInstanceOnly)
 	int32 NextPatrolPoint = 0;

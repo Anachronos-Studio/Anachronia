@@ -3,6 +3,8 @@
 
 #include "BaseEquipItem.h"
 
+#include "../PlayerCharacter/AnachroniaPlayer.h"
+
 // Sets default values
 ABaseEquipItem::ABaseEquipItem()
 {
@@ -10,13 +12,20 @@ ABaseEquipItem::ABaseEquipItem()
 	PrimaryActorTick.bCanEverTick = true;
 	
 	bIsWeapon = false;
+
+	RootPlaceholder = CreateDefaultSubobject<USceneComponent>(TEXT("RootPlaceholder"));
+	RootPlaceholder->SetupAttachment(GetRootComponent());
+
+	
+	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
+	SkeletalMesh->SetupAttachment(RootPlaceholder);
+	
 }
 
 // Called when the game starts or when spawned
 void ABaseEquipItem::BeginPlay()
 {
 	Super::BeginPlay();
-	
 }
 
 // Called every frame
@@ -30,24 +39,6 @@ void ABaseEquipItem::Tick(float DeltaTime)
 void ABaseEquipItem::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-}
-
-void ABaseEquipItem::Action() {
-	
-	if (bIsWeapon) {
-		// TODO
-		
-	} else {
-		// TODO
-	}
-}
-
-void ABaseEquipItem::ChargeWeapon() {
-
-}
-
-void ABaseEquipItem::UseTool() {
 
 }
 

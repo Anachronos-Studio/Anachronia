@@ -36,22 +36,39 @@ public:
 	UPROPERTY(Category = Guard, EditAnywhere)
 	bool bStartOnPath;
 
+	/* *********************
+	 * Movement
+	 */
+	
 	UPROPERTY(Category = "Guard|Movement", EditAnywhere, BlueprintReadWrite)
 	float WalkSpeed = 200.0f;
 
 	UPROPERTY(Category = "Guard|Movement", EditAnywhere, BlueprintReadWrite)
 	float RunSpeed = 400.0f;
 
+	// Makes guards not hug walls and corners too closely when pathfinding
+	UPROPERTY(Category = "Guard|Movement", EditAnywhere, BlueprintReadWrite)
+	float OffsetFromCornersDistance = 100.0f;
+
 	// When the guard has noticed something suspicious and is about to inspect it, they
 	// will first look towards the source for this many seconds
 	UPROPERTY(Category = "Guard|Movement", EditAnywhere, BlueprintReadWrite)
 	float LookBeforeInspectingDuration = 2.0f;
+
+	// When inspecting a suspicious thing, the guard will look around for this long in each direction
+	// before deciding it must have been the wind
+	UPROPERTY(Category = "Guard|Movement", EditAnywhere, BlueprintReadWrite)
+	float LookAroundWhenInspectingDuration = 1.0f;
 	
 	// After losing track of player and reaching her last known location
 	// this determines how long the guard stays there and looks before returning to patrol path
 	UPROPERTY(Category = "Guard|Movement", EditAnywhere, BlueprintReadWrite)
 	float LookAfterLosingPlayerDuration = 2.0f;
 
+	/* ************************
+	 * General perception
+	 */
+	
 	// When SusValue exceeds this, guard will stop and look towards the suspicious thing
 	UPROPERTY(Category = "Guard|General perception", EditAnywhere, BlueprintReadWrite)
 	float SusLookThreshold = 0.3f;
@@ -68,6 +85,10 @@ public:
 	UPROPERTY(Category = "Guard|General perception", EditAnywhere, BlueprintReadWrite)
 	float SusDecreaseRate = 0.25f;
 
+	/* *************************
+	 * Sight perception
+	 */
+	
 	// Maximum sight distance to notice player. Changes corresponding parameter in PerceptionComponent.
 	UPROPERTY(Category = "Guard|Sight perception", EditAnywhere, BlueprintReadWrite)
 	float SightRadius = 3000.0f;
