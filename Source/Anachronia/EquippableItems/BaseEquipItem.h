@@ -15,6 +15,12 @@ public:
 	// Sets default values for this pawn's properties
 	ABaseEquipItem();
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh)
+	UStaticMeshComponent* RootPlaceholder;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh)
+	USkeletalMeshComponent* SkeletalMesh;
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -32,6 +38,8 @@ public:
 
 	virtual void UseTool();
 
+	//Get Animation()
+
 protected:
 	// Checks if the equippable item is a weapon or not
 	bool bIsWeapon;
@@ -40,4 +48,6 @@ protected:
 public:
 
 	bool IsItWeapon() { return bIsWeapon; }
+
+
 };

@@ -23,6 +23,7 @@ protected:
 	ESusLevel Level;
 	
 	virtual bool CalculateRawConditionValue(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) const override;
+	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
 public:
 	virtual FString GetStaticDescription() const override;
 };
