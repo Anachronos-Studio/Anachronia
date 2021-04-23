@@ -56,6 +56,8 @@ void AGuardPawn::BeginPlay()
 		
 		SetActorRotation(NewRotation);
 	}
+
+	//TakeDamage(1000.0f, false);
 }
 
 // Called every frame
@@ -90,4 +92,37 @@ void AGuardPawn::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 AGuardAIController* AGuardPawn::GetGuardAI() const
 {
 	return Cast<AGuardAIController>(GetController());
+}
+
+void AGuardPawn::TakeDamage(float Damage, bool bNonLethal)
+{
+	if (GetGuardAI() && GetGuardAI()->IsVulnerableToStealthTakeDown())
+	{
+		CurrentHealth = 0.0f;
+	}
+	else
+	{
+		CurrentHealth -= Damage;
+	}
+	
+	if (CurrentHealth <= 0.0f)
+	{
+		// Die
+		CurrentHealth = 0.0f;
+		OnDeath(bNonLethal);
+	}
+}
+
+void AGuardPawn::OnDeath_Implementation(bool bNonLethalDeath)
+{
+	GetCharacterMovement()->DisableMovement();
+	GetCapsuleComponent()->SetSimulatePhysics(true);
+	const FVector HeadLocation = GetActorLocation() + FVector::UpVector * GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 0.5f;
+	FVector Force = GetActorForwardVector() * 40000.0f;
+	//Force.Z += 30000.0f;
+	GetCapsuleComponent()->AddImpulseAtLocation(Force, HeadLocation);
+	if (GetController() != nullptr)
+	{
+		GetController()->UnPossess();
+	}
 }
