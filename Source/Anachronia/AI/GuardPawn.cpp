@@ -76,10 +76,11 @@ void AGuardPawn::Tick(float DeltaTime)
 	DrawDebugDirectionalArrow(GetWorld(), EyesLoc, EyesLoc + EyesRot.Vector() * 100.0f, 10.0f, FColor::White, false, -1, 0, 1.0f);
 }
 
+#if WITH_EDITOR
 void AGuardPawn::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
 {
 	Super::PostEditChangeProperty(PropertyChangedEvent);
-	
+
 	if (PerceptionComponent != nullptr)
 	{
 		if (SightConfig)
@@ -92,6 +93,8 @@ void AGuardPawn::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 		}
 	}
 }
+#endif // WITH_EDITOR
+
 
 AGuardAIController* AGuardPawn::GetGuardAI() const
 {
