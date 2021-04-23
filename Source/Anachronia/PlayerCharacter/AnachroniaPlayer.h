@@ -248,4 +248,5 @@ public:
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
 	void SetGlobalLuminanceOnPlayer(FVector L){ GlobalLuminanceOnPlayer = L; }
 	
+
 };
