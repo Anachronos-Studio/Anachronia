@@ -30,6 +30,8 @@ protected:
 	void OnDeath(bool bNonLethalDeath);
 
 public:
+	void SetDamageToCurrentHealth(float Damage, bool bNonLethal);
+	
 	UPROPERTY(Category = Guard, EditInstanceOnly)
 	AGuardPatrolPath* PatrolPath;
 	
@@ -155,6 +157,4 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	AGuardAIController* GetGuardAI() const;
-
-	void TakeDamage(float Damage, bool bNonLethal);
 };

@@ -94,7 +94,7 @@ AGuardAIController* AGuardPawn::GetGuardAI() const
 	return Cast<AGuardAIController>(GetController());
 }
 
-void AGuardPawn::TakeDamage(float Damage, bool bNonLethal)
+void AGuardPawn::SetDamageToCurrentHealth(float Damage, bool bNonLethal)
 {
 	if (GetGuardAI() && GetGuardAI()->IsVulnerableToStealthTakeDown())
 	{
