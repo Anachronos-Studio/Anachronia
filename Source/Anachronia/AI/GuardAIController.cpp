@@ -271,6 +271,11 @@ ESusLevel AGuardAIController::GetSusLevel() const
 	return ESusLevel::NotSus;
 }
 
+bool AGuardAIController::IsVulnerableToStealthTakeDown() const
+{
+	return !bCanSeePlayer && Alertness != EAlertness::AlarmedKnowing;
+}
+
 void AGuardAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);

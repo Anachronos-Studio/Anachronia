@@ -26,6 +26,9 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintNativeEvent)
+	void OnDeath(bool bNonLethalDeath);
+
 public:
 	UPROPERTY(Category = Guard, EditInstanceOnly)
 	AGuardPatrolPath* PatrolPath;
@@ -121,6 +124,16 @@ public:
 	UPROPERTY(Category = "Guard|Sight perception", EditAnywhere, BlueprintReadWrite)
 	float SusDistanceRateMultiplier = 1.0f;
 
+	/**********************
+	 * Combat
+	 */
+
+	UPROPERTY(Category = "Guard|Combat", EditAnywhere, BlueprintReadWrite)
+	float MaxHealth = 100.0f;
+
+	UPROPERTY(Category = "Guard|Combat", Transient, VisibleAnywhere, BlueprintReadWrite)
+	float CurrentHealth = 100.0f;
+
 	UPROPERTY(VisibleAnywhere)
 	UAIPerceptionComponent* PerceptionComponent;
 	
@@ -130,4 +143,6 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	AGuardAIController* GetGuardAI() const;
+
+	void TakeDamage(float Damage, bool bNonLethal);
 };

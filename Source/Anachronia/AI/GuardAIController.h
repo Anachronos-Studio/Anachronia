@@ -69,10 +69,14 @@ public:
 	void ResetRotation();
 	void SetMovementSpeed(EMovementSpeed NewSpeed);
 	void SetAlertness(EAlertness InAlertness);
+	FORCEINLINE EAlertness GetAlertness() const { return Alertness; }
 	void SetState(EGuardState InState);
+	FORCEINLINE EGuardState GetState() const { return State; }
 	virtual void FindPathForMoveRequest(const FAIMoveRequest& MoveRequest, FPathFindingQuery& Query, FNavPathSharedPtr& OutPath) const override;
 	UFUNCTION(BlueprintCallable)
 	ESusLevel GetSusLevel() const;
+	FORCEINLINE bool CanSeePlayer() const { return bCanSeePlayer; }
+	bool IsVulnerableToStealthTakeDown() const;
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, VisibleInstanceOnly)
