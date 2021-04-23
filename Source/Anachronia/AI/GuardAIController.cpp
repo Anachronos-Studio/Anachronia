@@ -90,6 +90,11 @@ void AGuardAIController::Tick(float DeltaTime)
 		bCanSeePlayer ? TEXT("Player in sight") : TEXT("Can't see player")
 	);
 	GEngine->AddOnScreenDebugMessage(419, 1.0f, FColor::White, Msg);
+
+	if (AttackCooldownTimer > 0.0f)
+	{
+		AttackCooldownTimer -= DeltaTime;
+	}
 }
 
 AGuardPawn* AGuardAIController::GetGuardPawn() const
@@ -274,6 +279,28 @@ ESusLevel AGuardAIController::GetSusLevel() const
 bool AGuardAIController::IsVulnerableToStealthTakeDown() const
 {
 	return !bCanSeePlayer && Alertness != EAlertness::AlarmedKnowing;
+}
+
+bool AGuardAIController::CanAttackPlayer()
+{
+	if (PlayerRef == nullptr)
+	{
+		return false;
+	}
+	const float Distance = FVector::Dist2D(GetPawn()->GetActorLocation(), PlayerRef->GetActorLocation());
+	const float ZDistance = FMath::Abs(GetPawn()->GetActorLocation().Z - PlayerRef->GetActorLocation().Z);
+	const float MaxZDistance = GuardPawn->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	UE_LOG(LogTemp, Display, TEXT("Dist: %f, z: %f, cool: %f"), Distance, ZDistance, AttackCooldownTimer);
+	if (Distance < GuardPawn->DistanceBeforeAttacking && ZDistance < MaxZDistance && AttackCooldownTimer <= 0.0f)
+	{
+		AttackCooldownTimer = GuardPawn->AttackCooldown;
+
+		return true;
+	}
+	else
+	{
+		return false;
+	}
 }
 
 void AGuardAIController::OnPossess(APawn* InPawn)

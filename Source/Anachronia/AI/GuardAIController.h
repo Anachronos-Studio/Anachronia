@@ -77,6 +77,7 @@ public:
 	ESusLevel GetSusLevel() const;
 	FORCEINLINE bool CanSeePlayer() const { return bCanSeePlayer; }
 	bool IsVulnerableToStealthTakeDown() const;
+	bool CanAttackPlayer();
 
 protected:
 	UPROPERTY(Transient, BlueprintReadOnly, VisibleInstanceOnly)
@@ -108,6 +109,7 @@ private:
 
 	FRotator OriginalRotation;
 	FVector OriginalLocation;
+	float AttackCooldownTimer;
 
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;

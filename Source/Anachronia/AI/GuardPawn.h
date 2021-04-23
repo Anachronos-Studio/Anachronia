@@ -134,6 +134,18 @@ public:
 	UPROPERTY(Category = "Guard|Combat", Transient, VisibleAnywhere, BlueprintReadWrite)
 	float CurrentHealth = 100.0f;
 
+	// How much damage to deal to player per blow
+	UPROPERTY(Category = "Guard|Combat", EditAnywhere, BlueprintReadWrite)
+	float AttackDamage = 25.0f;
+
+	// How close to the player does the guard need to be to try attacking?
+	UPROPERTY(Category = "Guard|Combat", EditAnywhere, BlueprintReadWrite)
+	float DistanceBeforeAttacking = 100.0f;
+
+	// How many seconds between attacks (minimum)?
+	UPROPERTY(Category = "Guard|Combat", EditAnywhere, BlueprintReadWrite)
+	float AttackCooldown = 0.75f;
+
 	UPROPERTY(VisibleAnywhere)
 	UAIPerceptionComponent* PerceptionComponent;
 	
