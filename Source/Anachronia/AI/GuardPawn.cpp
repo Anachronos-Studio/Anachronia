@@ -9,6 +9,7 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "AIController.h"
 #include "DrawDebugHelpers.h"
+#include "Perception/AISenseConfig_Hearing.h"
 #include "Perception/AISenseConfig_Sight.h"
 
 // Sets default values
@@ -31,9 +32,10 @@ AGuardPawn::AGuardPawn()
 	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight()));
 
 	PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>("PerceptionComponent");
-	UAISenseConfig_Sight* SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>("SightConfig");
+	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>("SightConfig");
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
-	PerceptionComponent->ConfigureSense(*SightConfig);
+	HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>("HearingConfig");
+	HearingConfig->DetectionByAffiliation.bDetectNeutrals = true;
 }
 
 // Called when the game starts or when spawned
@@ -57,7 +59,10 @@ void AGuardPawn::BeginPlay()
 		SetActorRotation(NewRotation);
 	}
 
-	//TakeDamage(1000.0f, false);
+	PerceptionComponent->ConfigureSense(*SightConfig);
+	PerceptionComponent->ConfigureSense(*HearingConfig);
+
+	//SetDamageToCurrentHealth(1000.0f, false);
 }
 
 // Called every frame
@@ -77,7 +82,6 @@ void AGuardPawn::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEv
 	
 	if (PerceptionComponent != nullptr)
 	{
-		UAISenseConfig_Sight* SightConfig = Cast<UAISenseConfig_Sight>(PerceptionComponent->GetSenseConfig(UAISense::GetSenseID<UAISense_Sight>()));
 		if (SightConfig)
 		{
 			UE_LOG(LogTemp, Display, TEXT("Update sense config!"));

@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "GuardPawn.generated.h"
 
+class UAISenseConfig_Hearing;
 class AGuardAIController;
 class UAISenseConfig_Sight;
 class UAIPerceptionComponent;
@@ -125,6 +126,12 @@ public:
 	// That distance value is then multiplied by this parameter.
 	UPROPERTY(Category = "Guard|Sight perception", EditAnywhere, BlueprintReadWrite)
 	float SusDistanceRateMultiplier = 1.0f;
+
+	UPROPERTY()
+	UAISenseConfig_Sight* SightConfig;
+
+	UPROPERTY()
+	UAISenseConfig_Hearing* HearingConfig;
 
 	/**********************
 	 * Combat
