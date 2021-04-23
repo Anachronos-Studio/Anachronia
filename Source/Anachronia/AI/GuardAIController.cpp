@@ -2,11 +2,13 @@
 
 #include "GuardPatrolPath.h"
 #include "GuardPawn.h"
+#include "Anachronia/PlayerCharacter/AnachroniaPlayer.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Components/SplineComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
+#include "NavMesh/NavMeshPath.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "Perception/AISenseConfig_Sight.h"
@@ -27,7 +29,11 @@ void AGuardAIController::BeginPlay()
 
 	UE_LOG(LogTemp, Display, TEXT("AI play"));
 	
-	PlayerRef = UGameplayStatics::GetPlayerCharacter(GetWorld(), 0);
+	PlayerRef = Cast<AAnachroniaPlayer>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if (PlayerRef)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Could not find a AnachroniaPlayer actor in the world!"));
+	}
 	
 	GetBlackboardComponent()->SetValueAsObject("Player", PlayerRef);
 	GetBlackboardComponent()->SetValueAsFloat("LostTrackLookDuration", GuardPawn->LookAfterLosingPlayerDuration);
@@ -40,12 +46,14 @@ void AGuardAIController::Tick(float DeltaTime)
 	
 	if (bCanSeePlayer)
 	{
-		float Rate = GuardPawn->SusBaseIncreaseRate * GetAlertnessValue(Alertness); // TODO: Take in rate multiplier from player
+		float Rate = GuardPawn->SusBaseIncreaseRate;
+		Rate *= GetAlertnessValue(Alertness);
+		Rate *= PlayerRef->GetVisibility();
 		const float Distance = FVector::Dist(GuardPawn->GetActorLocation(), PlayerRef->GetActorLocation());
 		const float DistanceFactor = 1.0f - FMath::Clamp(Distance / GuardPawn->SightRadius, 0.0f, 1.0f);
 		Rate *= DistanceFactor * GuardPawn->SusDistanceRateMultiplier;
 		
-		FString Msg = FString::Printf(TEXT("Rate: %.3f\nDist: %.3f"),
+		const FString Msg = FString::Printf(TEXT("Rate: %.3f\nDist: %.3f"),
 			Rate,
 			DistanceFactor
 		);
@@ -241,7 +249,17 @@ void AGuardAIController::SetAlertness(EAlertness InAlertness)
 
 void AGuardAIController::SetState(EGuardState InState)
 {
+	if (InState == EGuardState::Patrol && State == EGuardState::Inspect)
+	{
+		SusValue = 0.0f;
+	}
 	State = InState;
+}
+
+void AGuardAIController::FindPathForMoveRequest(const FAIMoveRequest& MoveRequest, FPathFindingQuery& Query, FNavPathSharedPtr& OutPath) const
+{
+	Super::FindPathForMoveRequest(MoveRequest, Query, OutPath);
+	((FNavMeshPath*)OutPath.Get())->OffsetFromCorners(GuardPawn->OffsetFromCornersDistance);
 }
 
 ESusLevel AGuardAIController::GetSusLevel() const
