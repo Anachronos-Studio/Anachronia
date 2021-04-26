@@ -17,9 +17,8 @@ ABaseEquipItem::ABaseEquipItem()
 	bIsWeapon = false;
 
 	RootPlaceholder = CreateDefaultSubobject<USceneComponent>(TEXT("RootPlaceholder"));
-	RootPlaceholder->SetupAttachment(GetRootComponent());
+	RootComponent = RootPlaceholder;
 
-	
 	SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
 	SkeletalMesh->SetupAttachment(RootPlaceholder);
 	

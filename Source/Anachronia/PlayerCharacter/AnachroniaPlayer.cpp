@@ -61,7 +61,6 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 
 	EquippableItem = CreateDefaultSubobject<UChildActorComponent>(TEXT("EquippableItem"));
 	EquippableItem->SetupAttachment(FirstPersonCameraComponent);
-	EquippableItem->SetChildActorClass(ABaseEquipItem::StaticClass());
 
 	// Create a box that will catch the lighing
 	LightReceiver = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LightReceiver"));
@@ -147,8 +146,6 @@ void AAnachroniaPlayer::BeginPlay()
 {
 	Super::BeginPlay();	
 	InitiatedWalkingSpeed = GetCharacterMovement()->MaxWalkSpeed;
-
-
 }
 
 // Called every frame
