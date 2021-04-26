@@ -58,8 +58,15 @@ void AGuardAIController::Tick(float DeltaTime)
 			DistanceFactor
 		);
 		GEngine->AddOnScreenDebugMessage(420, 1.0f, FColor::White, Msg);
-		
+
+		const ESusLevel OldSusLevel = GetSusLevel();
 		SusValue = FMath::Min(SusValue + Rate * DeltaTime, 1.0f);
+		const ESusLevel NewSusLevel = GetSusLevel();
+		if (OldSusLevel != NewSusLevel)
+		{
+			GuardPawn->OnSusLevelIncreased(NewSusLevel, OldSusLevel);
+		}
+		
 		if (IsSusEnough(ESusLevel::KindaSus) && PlayerRef)
 		{
 			if (State != EGuardState::Inspect) // When inspecting, should not track moving player, so don't update goal location
@@ -79,7 +86,14 @@ void AGuardAIController::Tick(float DeltaTime)
 		{
 			MinSus = GuardPawn->SusInspectThreshold;
 		}
+
+		const ESusLevel OldSusLevel = GetSusLevel();
 		SusValue = FMath::Max(SusValue - GuardPawn->SusDecreaseRate * DeltaTime, MinSus);
+		const ESusLevel NewSusLevel = GetSusLevel();
+		if (OldSusLevel != NewSusLevel)
+		{
+			GuardPawn->OnSusLevelIncreased(NewSusLevel, OldSusLevel);
+		}
 	}
 
 	const FString Msg = FString::Printf(TEXT("Sus: %3.0f%% [%s]\nAlertness: %s\nMain state: %s\n%s"),
@@ -248,6 +262,7 @@ void AGuardAIController::SetAlertness(EAlertness InAlertness)
 	{
 		// Bit of a hack, want to reset SusValue to 0% when completely losing track of chased player
 		// in order to go directly back to patrol state (and not go through inspect or kinda sus states)
+		GuardPawn->OnSusLevelDecreased(ESusLevel::NotSus, GetSusLevel());
 		SusValue = 0.0f;
 	}
 }
@@ -256,6 +271,7 @@ void AGuardAIController::SetState(EGuardState InState)
 {
 	if (InState == EGuardState::Patrol && State == EGuardState::Inspect)
 	{
+		GuardPawn->OnSusLevelDecreased(ESusLevel::NotSus, GetSusLevel());
 		SusValue = 0.0f;
 	}
 	State = InState;

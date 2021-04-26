@@ -110,11 +110,10 @@ private:
 	FRotator OriginalRotation;
 	FVector OriginalLocation;
 	float AttackCooldownTimer;
-
+	
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
 
-private:
 	UFUNCTION()
 	void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 	

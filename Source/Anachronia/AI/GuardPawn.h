@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "GuardPawn.generated.h"
 
+enum class ESusLevel : uint8;
 class UAISenseConfig_Hearing;
 class AGuardAIController;
 class UAISenseConfig_Sight;
@@ -157,6 +158,12 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	UAIPerceptionComponent* PerceptionComponent;
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnSusLevelIncreased(ESusLevel NewSusLevel, ESusLevel OldSusLevel);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnSusLevelDecreased(ESusLevel NewSusLevel, ESusLevel OldSusLevel);
 	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
