@@ -59,9 +59,6 @@ void AGuardPawn::BeginPlay()
 		SetActorRotation(NewRotation);
 	}
 
-	PerceptionComponent->ConfigureSense(*SightConfig);
-	PerceptionComponent->ConfigureSense(*HearingConfig);
-
 	//SetDamageToCurrentHealth(1000.0f, false);
 }
 

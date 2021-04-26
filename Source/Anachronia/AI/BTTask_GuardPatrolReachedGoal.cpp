@@ -5,6 +5,7 @@
 
 #include "GuardAIController.h"
 #include "GuardPatrolPath.h"
+#include "GuardPawn.h"
 #include "BehaviorTree/BlackboardComponent.h"
 
 UBTTask_GuardPatrolReachedGoal::UBTTask_GuardPatrolReachedGoal()
@@ -18,6 +19,7 @@ EBTNodeResult::Type UBTTask_GuardPatrolReachedGoal::ExecuteTask(UBehaviorTreeCom
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 	
 	AGuardAIController* Guard = GetGuardController(OwnerComp);
+	
 	const FVector CurrentGoal = OwnerComp.GetBlackboardComponent()->GetValueAsVector("NavigationGoalLocation");
 	FVector Delta = Guard->GetPawn()->GetActorLocation() - CurrentGoal;
 	Delta.Z = 0;
@@ -30,6 +32,12 @@ EBTNodeResult::Type UBTTask_GuardPatrolReachedGoal::ExecuteTask(UBehaviorTreeCom
 		{
 			Guard->PickNextPatrolPoint();
 			MyMemory->RemainingStopTime = Stop->Duration;
+			return EBTNodeResult::InProgress;
+		}
+		else
+		{
+			// No need to constantly switch between moveto and wait tasks when no patrol path exists, just wait a fixed small amount instead of 0 seconds
+			MyMemory->RemainingStopTime = 5.0f;
 			return EBTNodeResult::InProgress;
 		}
 	}

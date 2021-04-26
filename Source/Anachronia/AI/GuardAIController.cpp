@@ -12,6 +12,7 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "Perception/AISenseConfig_Sight.h"
+#include "Perception/AISenseConfig_Hearing.h"
 
 AGuardAIController::AGuardAIController()
 {
@@ -30,7 +31,7 @@ void AGuardAIController::BeginPlay()
 	UE_LOG(LogTemp, Display, TEXT("AI play"));
 	
 	PlayerRef = Cast<AAnachroniaPlayer>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
-	if (PlayerRef)
+	if (PlayerRef == nullptr)
 	{
 		UE_LOG(LogTemp, Error, TEXT("Could not find a AnachroniaPlayer actor in the world!"));
 	}
@@ -337,7 +338,12 @@ void AGuardAIController::OnPossess(APawn* InPawn)
 	OriginalLocation = GuardPawn->GetActorLocation();
 	
 	RunBehaviorTree(BTAsset);
+	check(GuardPawn->SightConfig != nullptr && GuardPawn->HearingConfig != nullptr);
 	SetPerceptionComponent(*GuardPawn->PerceptionComponent);
+	PerceptionComponent->RequestStimuliListenerUpdate();
+	PerceptionComponent->ConfigureSense(*GuardPawn->SightConfig);
+	PerceptionComponent->ConfigureSense(*GuardPawn->HearingConfig);
+	PerceptionComponent->RequestStimuliListenerUpdate(); // This RequestUpdate is the one that seems to actually be needed for perception to work, but the one before ConfigureSense is needed to not get warnings...
 	PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AGuardAIController::OnTargetPerceptionUpdated);
 	SetActorTickEnabled(true);
 	Alertness = EAlertness::Neutral;
@@ -354,10 +360,13 @@ void AGuardAIController::OnUnPossess()
 
 void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
+	UE_LOG(LogTemp, Display, TEXT("Perception update!"));
 	if (Stimulus.Type == UAISense::GetSenseID<UAISense_Sight>())
 	{
+		UE_LOG(LogTemp, Display, TEXT("It's sight"));
 		if (Actor->ActorHasTag(FName(TEXT("Player"))))
 		{
+			UE_LOG(LogTemp, Display, TEXT("'twas the player!"));
 			bCanSeePlayer = Stimulus.WasSuccessfullySensed();
 			GetBlackboardComponent()->SetValueAsBool(TEXT("HasLineOfSight"), bCanSeePlayer);
 		}
