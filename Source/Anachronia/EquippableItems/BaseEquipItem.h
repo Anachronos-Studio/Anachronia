@@ -6,7 +6,7 @@
 #include "GameFramework/Pawn.h"
 #include "BaseEquipItem.generated.h"
 
-class AAnachroniaPlayer;
+//class AAnachroniaPlayer;
 UCLASS()
 class ANACHRONIA_API ABaseEquipItem : public APawn
 {
@@ -25,8 +25,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh)
 	USkeletalMeshComponent* SkeletalMesh;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player)
-	AAnachroniaPlayer* AttachedPlayer;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player)
+	//AAnachroniaPlayer* AttachedPlayer;
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -45,7 +45,7 @@ protected:
 
 
 public:
-
+	
 	bool IsItWeapon() { return bIsWeapon; }
 
 	UFUNCTION(BlueprintImplementableEvent, Category = InputEvents)

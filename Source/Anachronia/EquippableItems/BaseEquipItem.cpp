@@ -3,7 +3,7 @@
 
 #include "BaseEquipItem.h"
 
-#include "../PlayerCharacter/AnachroniaPlayer.h"
+//#include "../PlayerCharacter/AnachroniaPlayer.h"
 
 // Sets default values
 ABaseEquipItem::ABaseEquipItem()
