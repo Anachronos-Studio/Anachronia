@@ -25,7 +25,7 @@
 // Sets default values
 AAnachroniaPlayer::AAnachroniaPlayer()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	// Set size for collision capsule
@@ -67,7 +67,7 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 	LightReceiver->SetupAttachment(GetCapsuleComponent());
 	LightReceiver->SetRelativeLocation(FVector(0.f, 1.75f, 0.f));
 	static ConstructorHelpers::FObjectFinder<UStaticMesh> Octahedron(TEXT("StaticMesh'/Game/Anachronia/Meshes/Oct.Oct'"));
-	if (Octahedron.Succeeded()) 
+	if (Octahedron.Succeeded())
 		LightReceiver->SetStaticMesh(Octahedron.Object);
 	LightReceiver->SetCastShadow(false);
 	LightReceiver->bCastDynamicShadow = false;
@@ -75,7 +75,7 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 	LightDetectorLevel = 0.f;
 
 	//Detector = CreateDefaultSubobject<UChildActorComponent>(TEXT("Detector"));
-	
+
 
 	// Create LightCameras
 	//LightCamTop = CreateDefaultSubobject<UCameraComponent>(TEXT("LightCamTop"));
@@ -144,7 +144,7 @@ AAnachroniaPlayer::AAnachroniaPlayer()
 // Called when the game starts or when spawned
 void AAnachroniaPlayer::BeginPlay()
 {
-	Super::BeginPlay();	
+	Super::BeginPlay();
 	InitiatedWalkingSpeed = GetCharacterMovement()->MaxWalkSpeed;
 }
 
@@ -178,7 +178,7 @@ void AAnachroniaPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	check(PlayerInputComponent);
 
-	
+
 
 	// Bind jump events
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
@@ -191,7 +191,7 @@ void AAnachroniaPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 	//PlayerInputComponent->BindAction("Crouch", IE_Pressed, this, &AAnachroniaPlayer::ToggleCrouch);
 
-	
+
 
 	// Bind movement events
 	PlayerInputComponent->BindAxis("MoveForward", this, &AAnachroniaPlayer::MoveForward);
@@ -237,9 +237,9 @@ void AAnachroniaPlayer::LookUpAtRate(float Rate)
 	AddControllerPitchInput(Rate * BaseLookUpRate * GetWorld()->GetDeltaSeconds());
 }
 
-void AAnachroniaPlayer::Sprint() {	
-	
-	if(!bIsCrouched)
+void AAnachroniaPlayer::Sprint() {
+
+	if (!bIsCrouched)
 		GetCharacterMovement()->MaxWalkSpeed = InitiatedWalkingSpeed * 2;
 	UE_LOG(LogTemp, Warning, TEXT("Sprinting!"))
 }
@@ -288,7 +288,7 @@ void  AAnachroniaPlayer::ToggleCrouchOff() {
 
 float AAnachroniaPlayer::CalculateLuminance(const FVector& V) {
 
-	/* NOTE: Check if the input value of the RGB vector is normalized (0.0-1.0) or not. if it's not, 
+	/* NOTE: Check if the input value of the RGB vector is normalized (0.0-1.0) or not. if it's not,
 			 then divide the values with 255 and then do the Sqrt-calculation */
 	float R = V.X, G = V.Y, B = V.Z;
 	float L = 0.f;
@@ -317,5 +317,3 @@ float AAnachroniaPlayer::CalculateLuminance(const FVector& V) {
 //	FColor *BrightestColor = &ColorBuffer[100];
 //	return *BrightestColor;
 //}
-
-

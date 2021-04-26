@@ -19,27 +19,27 @@ public:
 
 	/** Pawn mesh: 1st person view (arms; seen only by self) */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Mesh)
-	class USkeletalMeshComponent* Mesh1P;
+		class USkeletalMeshComponent* Mesh1P;
 
 	//Insert component for tool/weapon
 
 	/** First person camera */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, meta = (AllowPrivateAccess = "true"))
-	class UCameraComponent* FirstPersonCameraComponent;
+		class UCameraComponent* FirstPersonCameraComponent;
 
 	/** To catch the global lighting to determine player visibility */
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = LightDetector)
-	class UStaticMeshComponent* LightReceiver;
-	
+		class UStaticMeshComponent* LightReceiver;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
-	class ALightDetector* PlayerLightDetector;
+		class ALightDetector* PlayerLightDetector;
 
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EquippableItems)
-	TArray<ABaseEquipItem*> EquippableItems;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EquippableItems)
-	class UChildActorComponent* EquippableItem;
+		TArray<ABaseEquipItem*> EquippableItems;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EquippableItems)
+		class UChildActorComponent* EquippableItem;
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
 	//class UChildActorComponent* Detector;
@@ -60,12 +60,12 @@ public:
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
 	//UTextureRenderTarget2D* RenderTargetBottom;
 
-	
+
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-public:	
+public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
@@ -74,85 +74,85 @@ public:
 
 	/** Base turn rate, in deg/sec. Other scaling may affect final turn rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-	float BaseTurnRate;
+		float BaseTurnRate;
 
 	/** Base look up/down rate, in deg/sec. Other scaling may affect final rate. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera)
-	float BaseLookUpRate;
+		float BaseLookUpRate;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MenuOptions)
-	bool bTogglePlayerCrouch;
-	
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
-	float JumpVelocity;
+		bool bTogglePlayerCrouch;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
-	bool bPlayerIsCrouched;
+		float JumpVelocity;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
-	bool bPlayerIsSprinting;
+		bool bPlayerIsCrouched;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
-	float PlayerCapsuleStandingHalfHeight;
+		bool bPlayerIsSprinting;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+		float PlayerCapsuleStandingHalfHeight;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
-	float PlayerCapsuleCrouchedHalfHeight;
+		float PlayerCapsuleCrouchedHalfHeight;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = BasicAttributes)
-	FVector RelativeCamLocation;
+		FVector RelativeCamLocation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
-	FVector RelativeCamCrouchedLocation;
+		FVector RelativeCamCrouchedLocation;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
-	float PlayerSpeed;
+		float PlayerSpeed;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
-	float PlayerCrouchedSpeed;
+		float PlayerCrouchedSpeed;
 
 	// Stealth properties below
 
 	/** This value will determine the overall visibility of the player to the AI */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = StealthLevelAttributes)
-	float PlayerVisibility;
+		float PlayerVisibility;
 
 	/** The Luminance value will handle the visual luminosity of the player */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = StealthLevelAttributes)
-	float PlayerLuminance;
+		float PlayerLuminance;
 
 	/** The Noise level is dependent on player movement types as well as floor material*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = StealthLevelAttributes)
-	float PlayerNoiseLevel;																				//Separera från visibility
+		float PlayerNoiseLevel;																				//Separera från visibility
 
-	/** The player motion level determines how much motion player makes, to get noticeable */
+		/** The player motion level determines how much motion player makes, to get noticeable */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = StealthLevelAttributes)
-	float PlayerMotionLevel;
+		float PlayerMotionLevel;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
-	float LightDetectorLevel;
+		float LightDetectorLevel;
 
 
 	// Player Main Attributes below
 
 	/** The maximum health of the player*/
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MainAttributes)
-	float MaxHealth;
+		float MaxHealth;
 
 	/** The current health of the player*/
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MainAttributes)
-	float CurrentHealth;
+		float CurrentHealth;
 
 	/** The Basic damage player can do, affects both lethal damage and blunt damage by addition */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MainAttributes)
-	float BaseDamage;
+		float BaseDamage;
 
 	/** The lethal damage that will get it's value from weapons */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MainAttributes)
-	float LethalDamage;
+		float LethalDamage;
 
 	/** The blunt damage that will get it's value from weapons */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MainAttributes)
-	float BluntDamage;		
+		float BluntDamage;
 
 protected:
 
@@ -179,74 +179,74 @@ protected:
 	float InitiatedWalkingSpeed;
 
 	void ToggleCrouch();
-	
+
 	void CheckLights();
 	FColor& FindBrightestPixel(TArray<FColor>& ColorBuffer, int32 start, int32 max);
 
 	/** Calculate the luminosity. This function should be called when setting up player visibility check */
-	float CalculateLuminance(const FVector &V);
+	float CalculateLuminance(const FVector& V);
 
 	UPROPERTY(BlueprintReadOnly)
-	FVector GlobalLuminanceOnPlayer;
-	
+		FVector GlobalLuminanceOnPlayer;
+
 	float DeltaTimeTimer = 0.f;
 
 public:
 	UFUNCTION(BlueprintCallable, Category = BasicAttributes)
-	void ToggleCrouchOn();
+		void ToggleCrouchOn();
 
 	UFUNCTION(BlueprintCallable, Category = BasicAttributes)
-	void ToggleCrouchOff();
+		void ToggleCrouchOff();
 
 	// Main attributes functions
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
-	void SetCurrentHealth(float Value) { CurrentHealth = Value; }
+		void SetCurrentHealth(float Value) { CurrentHealth = Value; }
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
-	void SetDamageToPlayerCurrentHealth(float DamageValue) { CurrentHealth -= DamageValue; }
+		void SetDamageToPlayerCurrentHealth(float DamageValue) { CurrentHealth -= DamageValue; }
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
-	float GetCurrentHealth() { return CurrentHealth; }
+		float GetCurrentHealth() { return CurrentHealth; }
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
-	void SetMaxHealth(float Value) { MaxHealth = Value; }
+		void SetMaxHealth(float Value) { MaxHealth = Value; }
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
-	float GetMaxHealth() { return MaxHealth; }
+		float GetMaxHealth() { return MaxHealth; }
 
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
-	void SetBaseDamage(float Value) { BaseDamage = Value; }
+		void SetBaseDamage(float Value) { BaseDamage = Value; }
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
-	float GetBaseDamage() { return BaseDamage; }
+		float GetBaseDamage() { return BaseDamage; }
 
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
-	void SetLethalDamage(float PlayerBaseDamage, float WeaponLeathalDamage) { 
+		void SetLethalDamage(float PlayerBaseDamage, float WeaponLeathalDamage) {
 		LethalDamage = PlayerBaseDamage + WeaponLeathalDamage;
 	}
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
-	float GetLethalDamage() { return LethalDamage; }
+		float GetLethalDamage() { return LethalDamage; }
 
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
-	void SetBluntDamage(float PlayerBaseDamage, float WeaponBluntDamage) {
+		void SetBluntDamage(float PlayerBaseDamage, float WeaponBluntDamage) {
 		BluntDamage = PlayerBaseDamage + WeaponBluntDamage;
 	}
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
-	float GetBluntDamage() { return BluntDamage; }
+		float GetBluntDamage() { return BluntDamage; }
 
 
 	// Stealth attributes functions
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
-	void SetLuminance(float Value) { PlayerLuminance = Value; }
+		void SetLuminance(float Value) { PlayerLuminance = Value; }
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
-	void SetMotionLevel(float Value) { PlayerMotionLevel = Value; }
+		void SetMotionLevel(float Value) { PlayerMotionLevel = Value; }
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
-	void SetVisibility(float L, float M) { PlayerVisibility = (L + M) / 2.f; }
+		void SetVisibility(float L, float M) { PlayerVisibility = (L + M) / 2.f; }
 
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
-	float GetLuminance(){ return PlayerLuminance; }
+		float GetLuminance() { return PlayerLuminance; }
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
-	float GetMotionLevel(){ return PlayerMotionLevel; }
+		float GetMotionLevel() { return PlayerMotionLevel; }
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
-	float GetVisibility(){ return PlayerVisibility; }
+		float GetVisibility() { return PlayerVisibility; }
 
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
-	void SetGlobalLuminanceOnPlayer(FVector L){ GlobalLuminanceOnPlayer = L; }
-	
+		void SetGlobalLuminanceOnPlayer(FVector L) { GlobalLuminanceOnPlayer = L; }
+
 
 };
