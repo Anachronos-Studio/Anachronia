@@ -339,6 +339,7 @@ void AGuardAIController::OnPossess(APawn* InPawn)
 	
 	RunBehaviorTree(BTAsset);
 	check(GuardPawn->SightConfig != nullptr && GuardPawn->HearingConfig != nullptr);
+	
 	SetPerceptionComponent(*GuardPawn->PerceptionComponent);
 	PerceptionComponent->RequestStimuliListenerUpdate();
 	PerceptionComponent->ConfigureSense(*GuardPawn->SightConfig);
@@ -370,5 +371,10 @@ void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 			bCanSeePlayer = Stimulus.WasSuccessfullySensed();
 			GetBlackboardComponent()->SetValueAsBool(TEXT("HasLineOfSight"), bCanSeePlayer);
 		}
+	}
+	else if (Stimulus.Type == UAISense::GetSenseID<UAISense_Hearing>())
+	{
+		UE_LOG(LogTemp, Display, TEXT("It's noise"));
+		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Blue, TEXT("Guard heard something!!!!"));
 	}
 }

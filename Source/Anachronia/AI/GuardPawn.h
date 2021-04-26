@@ -128,7 +128,23 @@ public:
 	UPROPERTY(Category = "Guard|Sight perception", EditAnywhere, BlueprintReadWrite)
 	float SusDistanceRateMultiplier = 1.0f;
 
-	UPROPERTY()
+	/* *****************************
+	 * Hearing perception
+	 */
+
+	// Guard can never hear a sound from further away than this. Actual range of sounds may be smaller (configured when the noise is reported)
+	UPROPERTY(Category = "Guard|Hearing perception", EditAnywhere, BlueprintReadWrite)
+	float HearingMaxRadius = 3000.0f;
+
+	// When distance to sound is smaller than this value multiplied by the sound range, the sound is considered to have been very close
+	UPROPERTY(Category = "Guard|Hearing perception", EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
+	float HearingCloseThreshold = 0.1f;
+
+	// When distance to sound is larger or equal to this value multiplied by the sound range, the sound is considered to have been very far away
+	UPROPERTY(Category = "Guard|Hearing perception", EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
+	float HearingFarThreshold = 0.7f;
+	
+	UPROPERTY(EditInstanceOnly, Transient)
 	UAISenseConfig_Sight* SightConfig;
 
 	UPROPERTY()

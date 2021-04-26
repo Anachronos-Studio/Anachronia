@@ -36,6 +36,7 @@ AGuardPawn::AGuardPawn()
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
 	HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>("HearingConfig");
 	HearingConfig->DetectionByAffiliation.bDetectNeutrals = true;
+	HearingConfig->DetectionByAffiliation.bDetectFriendlies = true;
 }
 
 // Called when the game starts or when spawned
