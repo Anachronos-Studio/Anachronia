@@ -17,13 +17,13 @@ public:
 	ABaseEquipItem();
 
 	UPROPERTY(VisibleAnywhere)
-	USceneComponent* RootPlaceholder;
+	class USceneComponent* RootPlaceholder;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh)
-	UStaticMeshComponent* StaticMesh;
+	class UStaticMeshComponent* StaticMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh)
-	USkeletalMeshComponent* SkeletalMesh;
+	class USkeletalMeshComponent* SkeletalMesh;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player)
 	AAnachroniaPlayer* AttachedPlayer;

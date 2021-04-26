@@ -4,6 +4,9 @@
 #include "BaseEquipItem.h"
 
 #include "../PlayerCharacter/AnachroniaPlayer.h"
+#include "Components/SceneComponent.h"
+#include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 
 // Sets default values
 ABaseEquipItem::ABaseEquipItem()
