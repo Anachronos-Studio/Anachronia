@@ -28,8 +28,15 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	UFUNCTION(BlueprintNativeEvent)
+public:
+	UFUNCTION(BlueprintNativeEvent, Category = "Guard")
 	void OnDeath(bool bNonLethalDeath);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Guard")
+	void OnSusLevelIncreased(ESusLevel NewSusLevel, ESusLevel OldSusLevel);
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Guard")
+	void OnSusLevelDecreased(ESusLevel NewSusLevel, ESusLevel OldSusLevel);
 
 public:
 	void SetDamageToCurrentHealth(float Damage, bool bNonLethal);
@@ -146,6 +153,14 @@ public:
 	// When distance to sound is larger or equal to this value multiplied by the sound range, the sound is considered to have been very far away
 	UPROPERTY(Category = "Guard|Hearing perception", EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float HearingFarThreshold = 0.7f;
+
+	// Maximum SusValue a sound can result in
+	UPROPERTY(Category = "Guard|Hearing perception", EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
+	float HearingMaxSus = 0.8f;
+
+	// When adding to the SusValue because of a sound, the increase (based on distance) is multiplied with this factor
+	UPROPERTY(Category = "Guard|Hearing perception", EditAnywhere, BlueprintReadWrite)
+	float HearingSusIncreaseMultiplier = 0.5f;
 	
 	UPROPERTY(VisibleAnywhere, Transient)
 	UAISenseConfig_Sight* SightConfig;
@@ -177,12 +192,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere)
 	UAIPerceptionComponent* PerceptionComponent;
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnSusLevelIncreased(ESusLevel NewSusLevel, ESusLevel OldSusLevel);
-
-	UFUNCTION(BlueprintImplementableEvent)
-	void OnSusLevelDecreased(ESusLevel NewSusLevel, ESusLevel OldSusLevel);
 	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -190,5 +199,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	AGuardAIController* GetGuardAI() const;
 
+	virtual void GetActorEyesViewPoint(FVector& Location, FRotator& Rotation) const override;
 	void ConfigureSenses();
 };

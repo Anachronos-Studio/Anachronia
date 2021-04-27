@@ -79,6 +79,13 @@ AGuardAIController* AGuardPawn::GetGuardAI() const
 	return Cast<AGuardAIController>(GetController());
 }
 
+void AGuardPawn::GetActorEyesViewPoint(FVector& Location, FRotator& Rotation) const
+{
+	// Default pawn implementation will use controller rotation instead of the visual rotation of the pawn
+	Location = GetPawnViewLocation();
+	Rotation = GetActorRotation();
+}
+
 void AGuardPawn::ConfigureSenses()
 {
 	if (SightConfig == nullptr || HearingConfig == nullptr)
