@@ -34,14 +34,17 @@ protected:
 public:
 	void SetDamageToCurrentHealth(float Damage, bool bNonLethal);
 	
-	UPROPERTY(Category = Guard, EditInstanceOnly)
+	UPROPERTY(Category = "Guard", EditInstanceOnly)
 	AGuardPatrolPath* PatrolPath;
 	
 	/* If true, will be immediately moved to the closest node on the patrol path
 	 * when the game starts (and rotated to face in proper direction)
 	 */
-	UPROPERTY(Category = Guard, EditAnywhere)
+	UPROPERTY(Category = "Guard", EditAnywhere)
 	bool bStartOnPath;
+
+	UPROPERTY(Category = "Guard", EditAnywhere)
+	bool bDebugInfo = false;
 
 	/* *********************
 	 * Movement
@@ -144,10 +147,10 @@ public:
 	UPROPERTY(Category = "Guard|Hearing perception", EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float HearingFarThreshold = 0.7f;
 	
-	UPROPERTY(EditInstanceOnly, Transient)
+	UPROPERTY(VisibleAnywhere, Transient)
 	UAISenseConfig_Sight* SightConfig;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, Transient)
 	UAISenseConfig_Hearing* HearingConfig;
 
 	/**********************
@@ -183,10 +186,9 @@ public:
 	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
-#if WITH_EDITOR
-	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)/* override*/;
-#endif
 
 	UFUNCTION(BlueprintCallable)
 	AGuardAIController* GetGuardAI() const;
+
+	void ConfigureSenses();
 };
