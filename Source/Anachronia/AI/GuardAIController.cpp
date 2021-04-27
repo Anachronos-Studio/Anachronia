@@ -403,13 +403,22 @@ void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 		UE_LOG(LogTemp, Display, TEXT("It's noise"));
 		const float Distance = FVector::Distance(Stimulus.StimulusLocation, GetPawn()->GetActorLocation());
 		const float DistanceFactor = FMath::Clamp(Distance / GuardPawn->HearingMaxRadius, 0.0f, 1.0f);
-		if (DistanceFactor >= GuardPawn->HearingFarThreshold && Alertness == EAlertness::Neutral)
+		const bool InstantDistract = Stimulus.Tag == FName(TEXT("Noisemaker"));
+		if (DistanceFactor >= GuardPawn->HearingFarThreshold && Alertness == EAlertness::Neutral && !InstantDistract)
 		{
 			// Ignore, noise wasn't suspicious enough
 			return;
 		}
+
+		if (InstantDistract)
+		{
+			SusValue = GuardPawn->HearingMaxSus;
+		}
+		else
+		{
+			SusValue = FMath::Min(SusValue + (1.0f - DistanceFactor) * GuardPawn->HearingSusIncreaseMultiplier, GuardPawn->HearingMaxSus);
+		}
 		
-		SusValue = FMath::Min(SusValue + DistanceFactor * GuardPawn->HearingSusIncreaseMultiplier, GuardPawn->HearingMaxSus);
 		if (State != EGuardState::Inspect && !IsSusEnough(ESusLevel::Busted))
 		{
 			GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", Stimulus.StimulusLocation);
