@@ -38,6 +38,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Guard")
 	void OnSusLevelDecreased(ESusLevel NewSusLevel, ESusLevel OldSusLevel);
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Guard")
+	void OnCallForBackup();
+
 public:
 	void SetDamageToCurrentHealth(float Damage, bool bNonLethal);
 	
@@ -161,6 +164,18 @@ public:
 	// When adding to the SusValue because of a sound, the increase (based on distance) is multiplied with this factor
 	UPROPERTY(Category = "Guard|Hearing perception", EditAnywhere, BlueprintReadWrite)
 	float HearingSusIncreaseMultiplier = 0.5f;
+
+	/* *****************************
+	 * Call for backup
+	 */
+
+	// How long (in seconds) between each time the guard calls for backup when hunting player
+	UPROPERTY(Category = "Guard|Call for backup", EditAnywhere, BlueprintReadWrite)
+	float BackupCallInterval = 10.0f;
+
+	// Range of sound made when calling for backup
+	UPROPERTY(Category = "Guard|Call for backup", EditAnywhere, BlueprintReadWrite)
+	float BackupCallRange = 1000.0f;
 	
 	UPROPERTY(VisibleAnywhere, Transient)
 	UAISenseConfig_Sight* SightConfig;

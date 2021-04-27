@@ -122,6 +122,21 @@ void AGuardAIController::Tick(float DeltaTime)
 	{
 		AttackCooldownTimer -= DeltaTime;
 	}
+
+	if (BackupTimer > 0.0f)
+	{
+		BackupTimer -= DeltaTime;
+	}
+	
+	if (State == EGuardState::Hunt && bCanSeePlayer)
+	{
+		if (BackupTimer <= 0.0f)
+		{
+			BackupTimer += GuardPawn->BackupCallInterval;
+			UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetPawn()->GetActorLocation(), 1.0f, this, GuardPawn->BackupCallRange, FName("Backup"));
+			GuardPawn->OnCallForBackup();
+		}
+	}
 }
 
 void AGuardAIController::OnPossess(APawn* InPawn)
@@ -140,6 +155,8 @@ void AGuardAIController::OnPossess(APawn* InPawn)
 
 	OriginalRotation = GuardPawn->GetActorRotation();
 	OriginalLocation = GuardPawn->GetActorLocation();
+	BackupTimer = 0.0f;
+	AttackCooldownTimer = 0.0f;
 
 	RunBehaviorTree(BTAsset);
 	if (GuardPawn->SightConfig == nullptr || GuardPawn->HearingConfig == nullptr)
@@ -403,25 +420,41 @@ void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 		UE_LOG(LogTemp, Display, TEXT("It's noise"));
 		const float Distance = FVector::Distance(Stimulus.StimulusLocation, GetPawn()->GetActorLocation());
 		const float DistanceFactor = FMath::Clamp(Distance / GuardPawn->HearingMaxRadius, 0.0f, 1.0f);
-		const bool InstantDistract = Stimulus.Tag == FName(TEXT("Noisemaker"));
-		if (DistanceFactor >= GuardPawn->HearingFarThreshold && Alertness == EAlertness::Neutral && !InstantDistract)
-		{
-			// Ignore, noise wasn't suspicious enough
-			return;
-		}
 
-		if (InstantDistract)
+		if (Stimulus.Tag == FName(TEXT("Backup")))
 		{
-			SusValue = GuardPawn->HearingMaxSus;
+			if (Actor != this)
+			{
+				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("I heard your request for backup, comrade!"));
+				AGuardAIController* GuardInDistress = Cast<AGuardAIController>(Actor);
+				SusValue = 1.0f;
+				GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", PlayerRef->GetActorLocation());
+				const FVector PredictedLocation = PlayerRef->GetActorLocation() + PlayerRef->GetVelocity() * 100.0f;
+				GetBlackboardComponent()->SetValueAsVector("PredictedPlayerLocation", PredictedLocation);
+			}
 		}
 		else
 		{
-			SusValue = FMath::Min(SusValue + (1.0f - DistanceFactor) * GuardPawn->HearingSusIncreaseMultiplier, GuardPawn->HearingMaxSus);
-		}
-		
-		if (State != EGuardState::Inspect && !IsSusEnough(ESusLevel::Busted))
-		{
-			GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", Stimulus.StimulusLocation);
+			const bool InstantDistract = Stimulus.Tag == FName(TEXT("Noisemaker"));
+			if (DistanceFactor >= GuardPawn->HearingFarThreshold && Alertness == EAlertness::Neutral && !InstantDistract)
+			{
+				// Ignore, noise wasn't suspicious enough
+				return;
+			}
+
+			if (InstantDistract)
+			{
+				SusValue = GuardPawn->HearingMaxSus;
+			}
+			else
+			{
+				SusValue = FMath::Min(SusValue + (1.0f - DistanceFactor) * GuardPawn->HearingSusIncreaseMultiplier, GuardPawn->HearingMaxSus);
+			}
+
+			if (State != EGuardState::Inspect && !IsSusEnough(ESusLevel::Busted))
+			{
+				GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", Stimulus.StimulusLocation);
+			}
 		}
 	}
 }
