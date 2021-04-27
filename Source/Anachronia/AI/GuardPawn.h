@@ -144,10 +144,10 @@ public:
 	UPROPERTY(Category = "Guard|Hearing perception", EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float HearingFarThreshold = 0.7f;
 	
-	UPROPERTY(EditInstanceOnly, Transient)
+	UPROPERTY(VisibleAnywhere, Transient)
 	UAISenseConfig_Sight* SightConfig;
 
-	UPROPERTY()
+	UPROPERTY(VisibleAnywhere, Transient)
 	UAISenseConfig_Hearing* HearingConfig;
 
 	/**********************

@@ -35,6 +35,11 @@ void AGuardAIController::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("Could not find a AnachroniaPlayer actor in the world!"));
 	}
+
+	if (GuardPawn == nullptr)
+	{
+		return;
+	}
 	
 	GetBlackboardComponent()->SetValueAsObject("Player", PlayerRef);
 	GetBlackboardComponent()->SetValueAsFloat("LostTrackLookDuration", GuardPawn->LookAfterLosingPlayerDuration);
@@ -338,7 +343,12 @@ void AGuardAIController::OnPossess(APawn* InPawn)
 	OriginalLocation = GuardPawn->GetActorLocation();
 	
 	RunBehaviorTree(BTAsset);
-	check(GuardPawn->SightConfig != nullptr && GuardPawn->HearingConfig != nullptr);
+	if (GuardPawn->SightConfig == nullptr || GuardPawn->HearingConfig == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Guard perception configs are null! sight: %p, hearing: %p"), GuardPawn->SightConfig, GuardPawn->HearingConfig);
+		UnPossess();
+		return;
+	}
 	
 	SetPerceptionComponent(*GuardPawn->PerceptionComponent);
 	PerceptionComponent->RequestStimuliListenerUpdate();
