@@ -4,10 +4,20 @@ using UnrealBuildTool;
 
 public class Anachronia : ModuleRules
 {
-	public Anachronia(ReadOnlyTargetRules Target) : base(Target)
-	{
-		PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
+    public Anachronia(ReadOnlyTargetRules Target) : base(Target)
+    {
+        PCHUsage = PCHUsageMode.UseExplicitOrSharedPCHs;
 
-		PublicDependencyModuleNames.AddRange(new string[] { "Core", "CoreUObject", "Engine", "InputCore", "HeadMountedDisplay", "AIModule", "GameplayTasks", "NavigationSystem", "FMODStudio" });
-	}
+        PublicDependencyModuleNames.AddRange(new string[] {
+            "Core",
+            "CoreUObject",
+            "Engine", 
+            "InputCore", 
+            "HeadMountedDisplay", 
+            "AIModule",
+            "GameplayTasks", 
+            "NavigationSystem", 
+            "FMODStudio",
+            "CableComponent"});
+    }
 }
