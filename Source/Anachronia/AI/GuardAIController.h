@@ -117,5 +117,5 @@ private:
 	UFUNCTION()
 	void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 	
-	
+	FORCEINLINE bool ShouldShowDebug() const;
 };

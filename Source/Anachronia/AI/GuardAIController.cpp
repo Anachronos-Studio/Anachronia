@@ -59,11 +59,14 @@ void AGuardAIController::Tick(float DeltaTime)
 		const float DistanceFactor = 1.0f - FMath::Clamp(Distance / GuardPawn->SightRadius, 0.0f, 1.0f);
 		Rate *= DistanceFactor * GuardPawn->SusDistanceRateMultiplier;
 		
-		const FString Msg = FString::Printf(TEXT("Rate: %.3f\nDist: %.3f"),
-			Rate,
-			DistanceFactor
-		);
-		GEngine->AddOnScreenDebugMessage(420, 1.0f, FColor::White, Msg);
+		if (ShouldShowDebug())
+		{
+			const FString Msg = FString::Printf(TEXT("Rate: %.3f\nDist: %.3f"),
+				Rate,
+				DistanceFactor
+			);
+			GEngine->AddOnScreenDebugMessage(420, 1.0f, FColor::White, Msg);
+		}
 
 		const ESusLevel OldSusLevel = GetSusLevel();
 		SusValue = FMath::Min(SusValue + Rate * DeltaTime, 1.0f);
@@ -102,14 +105,17 @@ void AGuardAIController::Tick(float DeltaTime)
 		}
 	}
 
-	const FString Msg = FString::Printf(TEXT("Sus: %3.0f%% [%s]\nAlertness: %s\nMain state: %s\n%s"),
-		SusValue * 100.0f,
-		*StaticEnum<ESusLevel>()->GetValueAsString(GetSusLevel()),
-		*StaticEnum<EAlertness>()->GetValueAsString(Alertness),
-		*StaticEnum<EGuardState>()->GetValueAsString(State),
-		bCanSeePlayer ? TEXT("Player in sight") : TEXT("Can't see player")
-	);
-	GEngine->AddOnScreenDebugMessage(419, 1.0f, FColor::White, Msg);
+	if (ShouldShowDebug())
+	{
+		const FString Msg = FString::Printf(TEXT("Sus: %3.0f%% [%s]\nAlertness: %s\nMain state: %s\n%s"),
+			SusValue * 100.0f,
+			*StaticEnum<ESusLevel>()->GetValueAsString(GetSusLevel()),
+			*StaticEnum<EAlertness>()->GetValueAsString(Alertness),
+			*StaticEnum<EGuardState>()->GetValueAsString(State),
+			bCanSeePlayer ? TEXT("Player in sight") : TEXT("Can't see player")
+		);
+		GEngine->AddOnScreenDebugMessage(419, 1.0f, FColor::White, Msg);
+	}
 
 	if (AttackCooldownTimer > 0.0f)
 	{
@@ -351,7 +357,7 @@ void AGuardAIController::OnPossess(APawn* InPawn)
 	}
 	
 	SetPerceptionComponent(*GuardPawn->PerceptionComponent);
-	PerceptionComponent->RequestStimuliListenerUpdate();
+	GuardPawn->ConfigureSenses();
 	PerceptionComponent->ConfigureSense(*GuardPawn->SightConfig);
 	PerceptionComponent->ConfigureSense(*GuardPawn->HearingConfig);
 	PerceptionComponent->RequestStimuliListenerUpdate(); // This RequestUpdate is the one that seems to actually be needed for perception to work, but the one before ConfigureSense is needed to not get warnings...
@@ -387,4 +393,13 @@ void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 		UE_LOG(LogTemp, Display, TEXT("It's noise"));
 		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Blue, TEXT("Guard heard something!!!!"));
 	}
+}
+
+FORCEINLINE bool AGuardAIController::ShouldShowDebug() const
+{
+#if UE_BUILD_SHIPPING
+	return false;
+#else
+	return GuardPawn != nullptr && GuardPawn->bDebugInfo;
+#endif
 }

@@ -74,29 +74,23 @@ void AGuardPawn::Tick(float DeltaTime)
 	DrawDebugDirectionalArrow(GetWorld(), EyesLoc, EyesLoc + EyesRot.Vector() * 100.0f, 10.0f, FColor::White, false, -1, 0, 1.0f);
 }
 
-#if WITH_EDITOR
-void AGuardPawn::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
-{
-	Super::PostEditChangeProperty(PropertyChangedEvent);
-
-	if (PerceptionComponent != nullptr)
-	{
-		if (SightConfig)
-		{
-			UE_LOG(LogTemp, Display, TEXT("Update sense config!"));
-			SightConfig->SightRadius = SightRadius;
-			SightConfig->LoseSightRadius = LoseSightRadius;
-			SightConfig->PeripheralVisionAngleDegrees = PeripheralVisionHalfAngle;
-			PerceptionComponent->RequestStimuliListenerUpdate();
-		}
-	}
-}
-#endif // WITH_EDITOR
-
-
 AGuardAIController* AGuardPawn::GetGuardAI() const
 {
 	return Cast<AGuardAIController>(GetController());
+}
+
+void AGuardPawn::ConfigureSenses()
+{
+	if (SightConfig == nullptr || HearingConfig == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Told to configure senses, but senses are null. See: %p, Hear: %p"), SightConfig, HearingConfig);
+		return;
+	}
+	SightConfig->SightRadius = SightRadius;
+	SightConfig->LoseSightRadius = LoseSightRadius;
+	SightConfig->PeripheralVisionAngleDegrees = PeripheralVisionHalfAngle;
+	HearingConfig->HearingRange = HearingMaxRadius;
+	PerceptionComponent->RequestStimuliListenerUpdate();
 }
 
 void AGuardPawn::SetDamageToCurrentHealth(float Damage, bool bNonLethal)
