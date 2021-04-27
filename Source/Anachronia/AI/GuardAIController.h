@@ -42,6 +42,7 @@ enum class EGuardState : uint8
 	Patrol,
 	Distracted,
 	Inspect,
+	InspectLookAround,
 	Hunt,
 };
 

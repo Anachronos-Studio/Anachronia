@@ -1,5 +1,6 @@
 #include "GuardAIController.h"
 
+#include "DrawDebugHelpers.h"
 #include "GuardPatrolPath.h"
 #include "GuardPawn.h"
 #include "Anachronia/PlayerCharacter/AnachroniaPlayer.h"
@@ -35,15 +36,8 @@ void AGuardAIController::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("Could not find a AnachroniaPlayer actor in the world!"));
 	}
-
-	if (GuardPawn == nullptr)
-	{
-		return;
-	}
 	
 	GetBlackboardComponent()->SetValueAsObject("Player", PlayerRef);
-	GetBlackboardComponent()->SetValueAsFloat("LostTrackLookDuration", GuardPawn->LookAfterLosingPlayerDuration);
-	GetBlackboardComponent()->SetValueAsFloat("LookBeforeInspectingDuration", GuardPawn->LookBeforeInspectingDuration);
 }
 
 void AGuardAIController::Tick(float DeltaTime)
@@ -91,7 +85,7 @@ void AGuardAIController::Tick(float DeltaTime)
 		{
 			MinSus = 1.0f;
 		}
-		else if (State == EGuardState::Inspect)
+		else if (State == EGuardState::Inspect || State == EGuardState::InspectLookAround)
 		{
 			MinSus = GuardPawn->SusInspectThreshold;
 		}
@@ -115,12 +109,67 @@ void AGuardAIController::Tick(float DeltaTime)
 			bCanSeePlayer ? TEXT("Player in sight") : TEXT("Can't see player")
 		);
 		GEngine->AddOnScreenDebugMessage(419, 1.0f, FColor::White, Msg);
+
+		const FVector NavigationGoalLocation = GetBlackboardComponent()->GetValueAsVector("NavigationGoalLocation");
+		const FVector PredictedPlayerLocation = GetBlackboardComponent()->GetValueAsVector("PredictedPlayerLocation");
+		const FVector NoiseLocation = GetBlackboardComponent()->GetValueAsVector("NoiseLocation");
+		DrawDebugCrosshairs(GetWorld(), NavigationGoalLocation, FRotator(0.0f, 0.0f, 0.0f), 50.0f, FColor::Green);
+		DrawDebugCrosshairs(GetWorld(), PredictedPlayerLocation, FRotator(0.0f, 20.0f, 0.0f), 50.0f, FColor::Cyan);
+		DrawDebugCrosshairs(GetWorld(), NoiseLocation, FRotator(0.0f, 45.0f, 0.0f), 50.0f, FColor::Yellow);
 	}
 
 	if (AttackCooldownTimer > 0.0f)
 	{
 		AttackCooldownTimer -= DeltaTime;
 	}
+}
+
+void AGuardAIController::OnPossess(APawn* InPawn)
+{
+	Super::OnPossess(InPawn);
+
+	UE_LOG(LogTemp, Display, TEXT("AI possess"));
+
+	GuardPawn = GetPawn<AGuardPawn>();
+	if (GuardPawn == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Guard AI Controller not possessing a Guard Pawn!"));
+		UnPossess();
+		return;
+	}
+
+	OriginalRotation = GuardPawn->GetActorRotation();
+	OriginalLocation = GuardPawn->GetActorLocation();
+
+	RunBehaviorTree(BTAsset);
+	if (GuardPawn->SightConfig == nullptr || GuardPawn->HearingConfig == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Guard perception configs are null! sight: %p, hearing: %p"), GuardPawn->SightConfig, GuardPawn->HearingConfig);
+		UnPossess();
+		return;
+	}
+
+	SetPerceptionComponent(*GuardPawn->PerceptionComponent);
+	GuardPawn->ConfigureSenses();
+	PerceptionComponent->ConfigureSense(*GuardPawn->SightConfig);
+	PerceptionComponent->ConfigureSense(*GuardPawn->HearingConfig);
+	PerceptionComponent->RequestStimuliListenerUpdate(); // This RequestUpdate is the one that seems to actually be needed for perception to work, but the one before ConfigureSense is needed to not get warnings...
+	PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AGuardAIController::OnTargetPerceptionUpdated);
+	SetActorTickEnabled(true);
+	Alertness = EAlertness::Neutral;
+
+	// PlayerRef blackboard key is initialized in BeginPlay() because it's not available here
+	GetBlackboardComponent()->SetValueAsFloat("LostTrackLookDuration", GuardPawn->LookAfterLosingPlayerDuration);
+	GetBlackboardComponent()->SetValueAsFloat("LookBeforeInspectingDuration", GuardPawn->LookBeforeInspectingDuration);
+}
+
+void AGuardAIController::OnUnPossess()
+{
+	Super::OnUnPossess();
+
+	GuardPawn = nullptr;
+	PlayerRef = nullptr;
+	SetActorTickEnabled(false);
 }
 
 AGuardPawn* AGuardAIController::GetGuardPawn() const
@@ -281,11 +330,16 @@ void AGuardAIController::SetAlertness(EAlertness InAlertness)
 
 void AGuardAIController::SetState(EGuardState InState)
 {
-	if (InState == EGuardState::Patrol && State == EGuardState::Inspect)
+	if (InState == EGuardState::Patrol && (State == EGuardState::Inspect || State == EGuardState::InspectLookAround))
 	{
 		GuardPawn->OnSusLevelDecreased(ESusLevel::NotSus, GetSusLevel());
 		SusValue = 0.0f;
 	}
+	else if (InState == EGuardState::Inspect)
+	{
+		GetBlackboardComponent()->SetValueAsVector("InvestigationLocation", GetBlackboardComponent()->GetValueAsVector("NavigationGoalLocation"));
+	}
+	
 	State = InState;
 }
 
@@ -331,50 +385,6 @@ bool AGuardAIController::CanAttackPlayer()
 	}
 }
 
-void AGuardAIController::OnPossess(APawn* InPawn)
-{
-	Super::OnPossess(InPawn);
-
-	UE_LOG(LogTemp, Display, TEXT("AI possess"));
-
-	GuardPawn = GetPawn<AGuardPawn>();
-	if (GuardPawn == nullptr)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Guard AI Controller not possessing a Guard Pawn!"));
-		UnPossess();
-		return;
-	}
-
-	OriginalRotation = GuardPawn->GetActorRotation();
-	OriginalLocation = GuardPawn->GetActorLocation();
-	
-	RunBehaviorTree(BTAsset);
-	if (GuardPawn->SightConfig == nullptr || GuardPawn->HearingConfig == nullptr)
-	{
-		UE_LOG(LogTemp, Error, TEXT("Guard perception configs are null! sight: %p, hearing: %p"), GuardPawn->SightConfig, GuardPawn->HearingConfig);
-		UnPossess();
-		return;
-	}
-	
-	SetPerceptionComponent(*GuardPawn->PerceptionComponent);
-	GuardPawn->ConfigureSenses();
-	PerceptionComponent->ConfigureSense(*GuardPawn->SightConfig);
-	PerceptionComponent->ConfigureSense(*GuardPawn->HearingConfig);
-	PerceptionComponent->RequestStimuliListenerUpdate(); // This RequestUpdate is the one that seems to actually be needed for perception to work, but the one before ConfigureSense is needed to not get warnings...
-	PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AGuardAIController::OnTargetPerceptionUpdated);
-	SetActorTickEnabled(true);
-	Alertness = EAlertness::Neutral;
-}
-
-void AGuardAIController::OnUnPossess()
-{
-	Super::OnUnPossess();
-
-	GuardPawn = nullptr;
-	PlayerRef = nullptr;
-	SetActorTickEnabled(false);
-}
-
 void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
 	UE_LOG(LogTemp, Display, TEXT("Perception update!"));
@@ -391,7 +401,19 @@ void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 	else if (Stimulus.Type == UAISense::GetSenseID<UAISense_Hearing>())
 	{
 		UE_LOG(LogTemp, Display, TEXT("It's noise"));
-		GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Blue, TEXT("Guard heard something!!!!"));
+		const float Distance = FVector::Distance(Stimulus.StimulusLocation, GetPawn()->GetActorLocation());
+		const float DistanceFactor = FMath::Clamp(Distance / GuardPawn->HearingMaxRadius, 0.0f, 1.0f);
+		if (DistanceFactor >= GuardPawn->HearingFarThreshold && Alertness == EAlertness::Neutral)
+		{
+			// Ignore, noise wasn't suspicious enough
+			return;
+		}
+		
+		SusValue = FMath::Min(SusValue + DistanceFactor * GuardPawn->HearingSusIncreaseMultiplier, GuardPawn->HearingMaxSus);
+		if (State != EGuardState::Inspect && !IsSusEnough(ESusLevel::Busted))
+		{
+			GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", Stimulus.StimulusLocation);
+		}
 	}
 }
 
