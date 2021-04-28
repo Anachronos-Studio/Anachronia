@@ -107,11 +107,11 @@ void AGuardPawn::ConfigureSenses()
 
 void AGuardPawn::SetDamageToCurrentHealth(float Damage, bool bNonLethal)
 {
-	if (GetGuardAI() && GetGuardAI()->IsVulnerableToStealthTakeDown())
+	/*if (GetGuardAI() && GetGuardAI()->IsVulnerableToStealthTakeDown())
 	{
 		CurrentHealth = 0.0f;
 	}
-	else
+	else*/
 	{
 		CurrentHealth -= Damage;
 	}
