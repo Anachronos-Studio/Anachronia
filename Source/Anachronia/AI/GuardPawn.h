@@ -38,7 +38,11 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Guard")
 	void OnSusLevelDecreased(ESusLevel NewSusLevel, ESusLevel OldSusLevel);
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Guard")
+	void OnCallForBackup();
+
 public:
+	UFUNCTION(BlueprintCallable, Category = "Guard")
 	void SetDamageToCurrentHealth(float Damage, bool bNonLethal);
 	
 	UPROPERTY(Category = "Guard", EditInstanceOnly)
@@ -121,6 +125,20 @@ public:
 	UPROPERTY(Category = "Guard|Sight perception", EditAnywhere, BlueprintReadWrite)
 	float PeripheralVisionHalfAngle = 90.f;
 
+	/*
+	 * If player's visibility is below this threshold, guard can never see player at all (unless she's very close)
+	 */
+	UPROPERTY(Category = "Guard|Sight perception", EditAnywhere, BlueprintReadWrite)
+	float PlayerMinVisibility = 0.1f;
+
+	// If player is at least this close to guard, guard can always see player (regardless of their visibility)
+	UPROPERTY(Category = "Guard|Sight perception", EditAnywhere, BlueprintReadWrite)
+	float AlwaysSeeDistance = 100.0f;
+
+	// How much faster to fill sus meter when player is within AlwaysSeeDistance
+	UPROPERTY(Category = "Guard|Sight perception", EditAnywhere, BlueprintReadWrite)
+	float VeryCloseSusIncreaseMultiplier = 10.0f;
+	
 	// SusValue increase rate multiplier when in an alarmed alertness state
 	UPROPERTY(Category = "Guard|Sight perception", EditAnywhere, BlueprintReadWrite)
 	float SusAlarmedRateMultiplier = 1.0f;
@@ -161,6 +179,18 @@ public:
 	// When adding to the SusValue because of a sound, the increase (based on distance) is multiplied with this factor
 	UPROPERTY(Category = "Guard|Hearing perception", EditAnywhere, BlueprintReadWrite)
 	float HearingSusIncreaseMultiplier = 0.5f;
+
+	/* *****************************
+	 * Call for backup
+	 */
+
+	// How long (in seconds) between each time the guard calls for backup when hunting player
+	UPROPERTY(Category = "Guard|Call for backup", EditAnywhere, BlueprintReadWrite)
+	float BackupCallInterval = 10.0f;
+
+	// Range of sound made when calling for backup
+	UPROPERTY(Category = "Guard|Call for backup", EditAnywhere, BlueprintReadWrite)
+	float BackupCallRange = 1000.0f;
 	
 	UPROPERTY(VisibleAnywhere, Transient)
 	UAISenseConfig_Sight* SightConfig;
