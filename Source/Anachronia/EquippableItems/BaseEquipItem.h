@@ -34,7 +34,7 @@ public:
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attributes)
     float StealthDamageMultiplier;
 
-    UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Attributes)
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Attributes)
     float OutputDamage;
 
     // Checks if the equippable item is a weapon or not
