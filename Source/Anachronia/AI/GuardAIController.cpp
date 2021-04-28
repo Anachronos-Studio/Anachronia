@@ -43,15 +43,32 @@ void AGuardAIController::BeginPlay()
 void AGuardAIController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
+
+	float Rate = GuardPawn->SusBaseIncreaseRate;
 	if (bCanSeePlayer)
 	{
-		float Rate = GuardPawn->SusBaseIncreaseRate;
 		Rate *= GetAlertnessValue(Alertness);
-		Rate *= PlayerRef->GetVisibility();
+		
+		const float PlayerVisibility = PlayerRef->GetVisibility();
 		const float Distance = FVector::Dist(GuardPawn->GetActorLocation(), PlayerRef->GetActorLocation());
 		const float DistanceFactor = 1.0f - FMath::Clamp(Distance / GuardPawn->SightRadius, 0.0f, 1.0f);
+		const bool bVeryClose = Distance <= GuardPawn->AlwaysSeeDistance;
+		
+		if (PlayerVisibility < GuardPawn->PlayerMinVisibility && !bVeryClose)
+		{
+			Rate = 0;
+		}
+		else
+		{
+			Rate *= PlayerVisibility;
+		}
+		
 		Rate *= DistanceFactor * GuardPawn->SusDistanceRateMultiplier;
+
+		if (bVeryClose)
+		{
+			Rate *= GuardPawn->VeryCloseSusIncreaseMultiplier;
+		}
 		
 		if (ShouldShowDebug())
 		{
@@ -78,7 +95,8 @@ void AGuardAIController::Tick(float DeltaTime)
 			}
 		}
 	}
-	else
+
+	if (!bCanSeePlayer || Rate <= 0.0f)
 	{
 		float MinSus = 0.0f;
 		if (Alertness == EAlertness::AlarmedKnowing)
