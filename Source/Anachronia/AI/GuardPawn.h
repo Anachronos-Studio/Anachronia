@@ -42,6 +42,7 @@ public:
 	void OnCallForBackup();
 
 public:
+	UFUNCTION(BlueprintCallable, Category = "Guard")
 	void SetDamageToCurrentHealth(float Damage, bool bNonLethal);
 	
 	UPROPERTY(Category = "Guard", EditInstanceOnly)
