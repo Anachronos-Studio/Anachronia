@@ -11,9 +11,11 @@
 
 // Sets default values
 ABaseEquipItem::ABaseEquipItem()
-{
+{    
     // Set this pawn to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
     PrimaryActorTick.bCanEverTick = true;
+
+    Tags.Add(TEXT("Item"));
 
     bIsWeapon = false;
 
@@ -22,6 +24,12 @@ ABaseEquipItem::ABaseEquipItem()
 
     SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
     SkeletalMesh->SetupAttachment(RootPlaceholder);
+    
+    // PM to Designers: Override these values in editor!!!
+    BaseWeaponDamage = 1.f;
+    StealthDamageMultiplier = 1.f;
+    // This value below will get it's value by some mathematics
+    OutputDamage = 0.f;
 
 }
 

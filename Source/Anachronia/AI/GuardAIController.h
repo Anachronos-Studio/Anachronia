@@ -77,7 +77,10 @@ public:
 	UFUNCTION(BlueprintCallable)
 	ESusLevel GetSusLevel() const;
 	FORCEINLINE bool CanSeePlayer() const { return bCanSeePlayer; }
+
+	UFUNCTION(BlueprintCallable)
 	bool IsVulnerableToStealthTakeDown() const;
+	
 	bool CanAttackPlayer();
 
 protected:

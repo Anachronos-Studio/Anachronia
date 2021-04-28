@@ -381,7 +381,15 @@ void AGuardAIController::SetState(EGuardState InState)
 void AGuardAIController::FindPathForMoveRequest(const FAIMoveRequest& MoveRequest, FPathFindingQuery& Query, FNavPathSharedPtr& OutPath) const
 {
 	Super::FindPathForMoveRequest(MoveRequest, Query, OutPath);
-	((FNavMeshPath*)OutPath.Get())->OffsetFromCorners(GuardPawn->OffsetFromCornersDistance);
+	FNavMeshPath* PathPtr = (FNavMeshPath*)OutPath.Get();
+	if (PathPtr != nullptr)
+	{
+		PathPtr->OffsetFromCorners(GuardPawn->OffsetFromCornersDistance);
+	}
+	else
+	{
+		UE_LOG(LogTemp, Error, TEXT("PathPtr is null!"));
+	}
 }
 
 ESusLevel AGuardAIController::GetSusLevel() const

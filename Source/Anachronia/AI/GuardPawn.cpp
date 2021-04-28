@@ -68,10 +68,15 @@ void AGuardPawn::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	FVector EyesLoc;
-	FRotator EyesRot;
-	GetActorEyesViewPoint(EyesLoc, EyesRot);
-	DrawDebugDirectionalArrow(GetWorld(), EyesLoc, EyesLoc + EyesRot.Vector() * 100.0f, 10.0f, FColor::White, false, -1, 0, 1.0f);
+#if !UE_BUILD_SHIPPING
+	if (bDebugInfo)
+	{
+		FVector EyesLoc;
+		FRotator EyesRot;
+		GetActorEyesViewPoint(EyesLoc, EyesRot);
+		DrawDebugDirectionalArrow(GetWorld(), EyesLoc, EyesLoc + EyesRot.Vector() * 100.0f, 10.0f, FColor::White, false, -1, 0, 1.0f);
+	}
+#endif
 }
 
 AGuardAIController* AGuardPawn::GetGuardAI() const
@@ -102,11 +107,11 @@ void AGuardPawn::ConfigureSenses()
 
 void AGuardPawn::SetDamageToCurrentHealth(float Damage, bool bNonLethal)
 {
-	if (GetGuardAI() && GetGuardAI()->IsVulnerableToStealthTakeDown())
+	/*if (GetGuardAI() && GetGuardAI()->IsVulnerableToStealthTakeDown())
 	{
 		CurrentHealth = 0.0f;
 	}
-	else
+	else*/
 	{
 		CurrentHealth -= Damage;
 	}
