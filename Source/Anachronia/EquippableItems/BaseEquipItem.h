@@ -17,16 +17,30 @@ public:
     ABaseEquipItem();
 
     UPROPERTY(VisibleAnywhere)
-        class USceneComponent* RootPlaceholder;
+    class USceneComponent* RootPlaceholder;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh)
-        class UStaticMeshComponent* StaticMesh;
+    class UStaticMeshComponent* StaticMesh;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Mesh)
-        class USkeletalMeshComponent* SkeletalMesh;
+    class USkeletalMeshComponent* SkeletalMesh;
 
     UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Player)
-        AAnachroniaPlayer* AttachedPlayer;
+    AAnachroniaPlayer* AttachedPlayer;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attributes)
+    float BaseWeaponDamage;
+
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attributes)
+    float StealthDamageMultiplier;
+
+    UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Attributes)
+    float OutputDamage;
+
+    // Checks if the equippable item is a weapon or not
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attributes)
+    bool bIsWeapon;
+
 protected:
     // Called when the game starts or when spawned
     virtual void BeginPlay() override;
@@ -40,8 +54,7 @@ public:
 
 
 protected:
-    // Checks if the equippable item is a weapon or not
-    bool bIsWeapon;
+
 
 
 public:
@@ -55,4 +68,17 @@ public:
 
     UFUNCTION(BlueprintImplementableEvent, Category = Attachments)
         void AttachToPlayer();
+
+    /** For weapons that deal LEATHAL damage, implement the event/function on the BP subclass of BaseEquipItem */
+    UFUNCTION(BlueprintImplementableEvent, Category = Attributes)
+    void DealLethalDamage();
+
+    /** For weapons that deal BLUNT damage, implement the event/function on the BP subclass of BaseEquipItem */
+    UFUNCTION(BlueprintImplementableEvent, Category = Attributes)
+    void DealBluntDamage();
+
+    UFUNCTION(BlueprintCallable, Category = Attributes)
+    void SetItemTag(FName& InputString) {
+        Tags.Add(InputString);
+    }
 };
