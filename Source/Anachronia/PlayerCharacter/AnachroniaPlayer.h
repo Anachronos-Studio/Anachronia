@@ -191,6 +191,8 @@ protected:
 
 	float DeltaTimeTimer = 0.f;
 
+	
+
 public:
 	UFUNCTION(BlueprintCallable, Category = BasicAttributes)
 		void ToggleCrouchOn();
