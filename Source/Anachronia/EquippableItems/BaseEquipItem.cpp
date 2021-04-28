@@ -7,6 +7,7 @@
 #include "Components/SceneComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "CableComponent.h"
 
 // Sets default values
 ABaseEquipItem::ABaseEquipItem()
