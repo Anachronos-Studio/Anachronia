@@ -4,11 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "Perception/AISightTargetInterface.h"
 #include "AnachroniaPlayer.generated.h"
 
 class ABaseEquipItem;
 UCLASS()
-class ANACHRONIA_API AAnachroniaPlayer : public ACharacter
+class ANACHRONIA_API AAnachroniaPlayer : public ACharacter, public IAISightTargetInterface
 {
 	GENERATED_BODY()
 
@@ -249,6 +250,10 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
 		void SetGlobalLuminanceOnPlayer(FVector L) { GlobalLuminanceOnPlayer = L; }
+
+
+	virtual bool CanBeSeenFrom(const FVector& ObserverLocation, FVector& OutSeenLocation,
+		int32& NumberOfLoSChecksPerformed, float& OutSightStrength, const AActor* IgnoreActor) const override;
 
 
 };
