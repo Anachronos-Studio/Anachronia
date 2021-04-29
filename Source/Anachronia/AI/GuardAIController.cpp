@@ -205,6 +205,7 @@ void AGuardAIController::OnUnPossess()
 	GuardPawn = nullptr;
 	PlayerRef = nullptr;
 	SetActorTickEnabled(false);
+	PerceptionComponent->OnTargetPerceptionUpdated.RemoveDynamic(this, &AGuardAIController::OnTargetPerceptionUpdated);
 }
 
 AGuardPawn* AGuardAIController::GetGuardPawn() const
@@ -430,6 +431,12 @@ bool AGuardAIController::CanAttackPlayer()
 
 void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
 {
+	if (GetPawn() == nullptr || GuardPawn == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("AI perception updated but not possesing anything, whatever will I do"));
+		return;
+	}
+	
 	UE_LOG(LogTemp, Display, TEXT("Perception update!"));
 	if (Stimulus.Type == UAISense::GetSenseID<UAISense_Sight>())
 	{
