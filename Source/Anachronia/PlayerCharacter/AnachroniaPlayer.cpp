@@ -287,6 +287,36 @@ void  AAnachroniaPlayer::ToggleCrouchOff() {
 	}
 }
 
+bool AAnachroniaPlayer::CanBeSeenFrom(const FVector& ObserverLocation, FVector& OutSeenLocation,
+	int32& NumberOfLoSChecksPerformed, float& OutSightStrength, const AActor* IgnoreActor) const
+{
+	const float HalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	const float ZOffsetList[]{HalfHeight, 0.0f, -HalfHeight};
+
+	for (float ZOffset : ZOffsetList)
+	{
+		const FVector TargetLocation = GetActorLocation() + FVector(0.0f, 0.0f, ZOffset);
+		
+		FHitResult HitResult;
+		const bool bHit = GetWorld()->LineTraceSingleByObjectType(HitResult, ObserverLocation, TargetLocation,
+			FCollisionObjectQueryParams(ECC_TO_BITFIELD(ECC_WorldStatic) | ECC_TO_BITFIELD(ECC_WorldDynamic)),
+			FCollisionQueryParams(SCENE_QUERY_STAT(AILineOfSight), true, IgnoreActor));
+
+		NumberOfLoSChecksPerformed++;
+
+		if (!bHit || (HitResult.Actor.IsValid() && HitResult.Actor->IsOwnedBy(this)))
+		{
+			// If this trace was blacked by nothing, or blocked by player itself (somehow), we can be seen
+			OutSeenLocation = TargetLocation;
+			OutSightStrength = 1.0f; // Maybe it would make sense to set this to visibility? But I'm not sure what it actually does...
+			return true;
+		}
+	}
+
+	OutSightStrength = 0.0f;
+	return false;
+}
+
 float AAnachroniaPlayer::CalculateLuminance(const FVector& V) {
 
 	/* NOTE: Check if the input value of the RGB vector is normalized (0.0-1.0) or not. if it's not,
