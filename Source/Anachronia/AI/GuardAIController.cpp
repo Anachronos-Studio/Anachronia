@@ -3,6 +3,7 @@
 #include "DrawDebugHelpers.h"
 #include "GuardPatrolPath.h"
 #include "GuardPawn.h"
+#include "NavigationSystem.h"
 #include "Anachronia/PlayerCharacter/AnachroniaPlayer.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
@@ -132,7 +133,9 @@ void AGuardAIController::Tick(float DeltaTime)
 		const FVector PredictedPlayerLocation = GetBlackboardComponent()->GetValueAsVector("PredictedPlayerLocation");
 		const FVector NoiseLocation = GetBlackboardComponent()->GetValueAsVector("NoiseLocation");
 		DrawDebugCrosshairs(GetWorld(), NavigationGoalLocation, FRotator(0.0f, 0.0f, 0.0f), 50.0f, FColor::Green);
+		DrawDebugDirectionalArrow(GetWorld(), GuardPawn->GetActorLocation(), NavigationGoalLocation, 50.0f, FColor::Green);
 		DrawDebugCrosshairs(GetWorld(), PredictedPlayerLocation, FRotator(0.0f, 20.0f, 0.0f), 50.0f, FColor::Cyan);
+		DrawDebugDirectionalArrow(GetWorld(), NavigationGoalLocation, PredictedPlayerLocation, 50.0f, FColor::Cyan);
 		DrawDebugCrosshairs(GetWorld(), NoiseLocation, FRotator(0.0f, 45.0f, 0.0f), 50.0f, FColor::Yellow);
 	}
 
@@ -452,8 +455,32 @@ void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 	{
 		UE_LOG(LogTemp, Display, TEXT("It's noise"));
 		const float Distance = FVector::Distance(Stimulus.StimulusLocation, GetPawn()->GetActorLocation());
-		const float DistanceFactor = FMath::Clamp(Distance / GuardPawn->HearingMaxRadius, 0.0f, 1.0f);
+		float DistanceFactor = FMath::Clamp(Distance / GuardPawn->HearingMaxRadius, 0.0f, 1.0f);
 
+		FCollisionObjectQueryParams ObjectQueryParams(ECC_TO_BITFIELD(ECC_WorldStatic) | ECC_TO_BITFIELD(ECC_WorldDynamic));
+		FCollisionQueryParams CollisionQueryParams(SCENE_QUERY_STAT(AILineOfSight), true, this);
+		FHitResult HitResult;
+		const bool bHit = GetWorld()->LineTraceSingleByObjectType(HitResult, Stimulus.StimulusLocation, Stimulus.ReceiverLocation, ObjectQueryParams, CollisionQueryParams);
+	
+		//if (bHit)
+		//{
+		//	UE_LOG(LogTemp, Display, TEXT("Occluded!"));
+		//	DistanceFactor *= GuardPawn->HearingOcclusionDamp;
+		//	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
+		//	float PathLength;
+		//	ENavigationQueryResult::Type Result = NavSys->GetPathLength(GetWorld(), Stimulus.StimulusLocation, Stimulus.ReceiverLocation, PathLength);
+		//	if (Result == ENavigationQueryResult::Success)
+		//	{
+		//		UE_LOG(LogTemp, Display, TEXT("There is a path with length: %f"), PathLength);
+		//		float PathFindDistanceFactor = FMath::Clamp(PathLength / GuardPawn->HearingMaxRadius, 0.0f, 1.0f);
+		//		if (PathFindDistanceFactor < DistanceFactor)
+		//		{
+		//			UE_LOG(LogTemp, Display, TEXT("Pathfind was closer than going through wall"));
+		//			DistanceFactor = PathFindDistanceFactor;
+		//		}
+		//	}
+		//}
+		
 		if (Stimulus.Tag == FName(TEXT("Backup")))
 		{
 			if (Actor != this)
