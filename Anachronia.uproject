@@ -40,7 +40,7 @@
 		},
 		{
 			"Name": "UnrealInk",
-			"Enabled": true
+			"Enabled": false
 		},
 		{
 			"Name": "Substance",
