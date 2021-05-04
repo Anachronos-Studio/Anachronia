@@ -34,6 +34,7 @@ enum class EAlertness : uint8
 	Distracted,
 	AlarmedKnowing,
 	AlarmedUnknowing,
+	Dead,
 };
 
 UENUM(BlueprintType)
@@ -44,6 +45,7 @@ enum class EGuardState : uint8
 	Inspect,
 	InspectLookAround,
 	Hunt,
+	Dead,
 };
 
 /**
@@ -83,6 +85,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool IsVulnerableToStealthTakeDown() const;
+
+	UFUNCTION(BlueprintCallable)
+	void Die();
 	
 	bool CanAttackPlayer();
 

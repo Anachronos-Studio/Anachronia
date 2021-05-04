@@ -121,6 +121,7 @@ void AGuardPawn::SetDamageToCurrentHealth(float Damage, bool bNonLethal)
 		// Die
 		CurrentHealth = 0.0f;
 		OnDeath(bNonLethal);
+		GetGuardAI()->Die();
 	}
 }
 
@@ -132,8 +133,4 @@ void AGuardPawn::OnDeath_Implementation(bool bNonLethalDeath)
 	FVector Force = GetActorForwardVector() * 40000.0f;
 	//Force.Z += 30000.0f;
 	GetCapsuleComponent()->AddImpulseAtLocation(Force, HeadLocation);
-	if (GetController() != nullptr)
-	{
-		GetController()->UnPossess();
-	}
 }

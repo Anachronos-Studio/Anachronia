@@ -211,6 +211,15 @@ void AGuardAIController::OnUnPossess()
 	PerceptionComponent->OnTargetPerceptionUpdated.RemoveDynamic(this, &AGuardAIController::OnTargetPerceptionUpdated);
 }
 
+void AGuardAIController::Die()
+{
+	SetState(EGuardState::Dead);
+	SetAlertness(EAlertness::Dead);
+	SusValue = 0.0f;
+	SetActorTickEnabled(false);
+	PerceptionComponent->OnTargetPerceptionUpdated.RemoveDynamic(this, &AGuardAIController::OnTargetPerceptionUpdated);
+}
+
 AGuardPawn* AGuardAIController::GetGuardPawn() const
 {
 	return GuardPawn;
