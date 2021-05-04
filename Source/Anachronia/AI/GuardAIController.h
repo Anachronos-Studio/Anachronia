@@ -79,6 +79,9 @@ public:
 	FORCEINLINE bool CanSeePlayer() const { return bCanSeePlayer; }
 
 	UFUNCTION(BlueprintCallable)
+	FORCEINLINE AAnachroniaPlayer* GetPlayer() const { return PlayerRef; }
+
+	UFUNCTION(BlueprintCallable)
 	bool IsVulnerableToStealthTakeDown() const;
 	
 	bool CanAttackPlayer();
