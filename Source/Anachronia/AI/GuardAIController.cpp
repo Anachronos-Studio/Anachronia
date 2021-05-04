@@ -16,6 +16,8 @@
 #include "Perception/AISenseConfig_Sight.h"
 #include "Perception/AISenseConfig_Hearing.h"
 
+EGuardState AGuardAIController::CurrentHighestState = EGuardState::Patrol;
+
 AGuardAIController::AGuardAIController()
 {
 	PrimaryActorTick.bCanEverTick = true;
@@ -37,6 +39,9 @@ void AGuardAIController::BeginPlay()
 	{
 		UE_LOG(LogTemp, Error, TEXT("Could not find a AnachroniaPlayer actor in the world!"));
 	}
+
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGuardAIController::StaticClass(), AllGuards);
+	CurrentHighestState = EGuardState::Patrol;
 	
 	GetBlackboardComponent()->SetValueAsObject("Player", PlayerRef);
 }
@@ -120,12 +125,13 @@ void AGuardAIController::Tick(float DeltaTime)
 
 	if (ShouldShowDebug())
 	{
-		const FString Msg = FString::Printf(TEXT("Sus: %3.0f%% [%s]\nAlertness: %s\nMain state: %s\n%s"),
+		const FString Msg = FString::Printf(TEXT("Sus: %3.0f%% [%s]\nAlertness: %s\nMain state: %s\n%s\nHighest state: %s"),
 			SusValue * 100.0f,
 			*StaticEnum<ESusLevel>()->GetValueAsString(GetSusLevel()),
 			*StaticEnum<EAlertness>()->GetValueAsString(Alertness),
 			*StaticEnum<EGuardState>()->GetValueAsString(State),
-			bCanSeePlayer ? TEXT("Player in sight") : TEXT("Can't see player")
+			bCanSeePlayer ? TEXT("Player in sight") : TEXT("Can't see player"),
+			*StaticEnum<EGuardState>()->GetValueAsString(CurrentHighestState)
 		);
 		GEngine->AddOnScreenDebugMessage(419, 1.0f, FColor::White, Msg);
 
@@ -387,8 +393,31 @@ void AGuardAIController::SetState(EGuardState InState)
 	{
 		GetBlackboardComponent()->SetValueAsVector("InvestigationLocation", GetBlackboardComponent()->GetValueAsVector("NavigationGoalLocation"));
 	}
-	
+
 	State = InState;
+	
+	if (InState > CurrentHighestState)
+	{
+		CurrentHighestState = InState;
+	}
+	else if (InState < CurrentHighestState)
+	{
+		EGuardState HighestState = (EGuardState)0;
+		for (int32 i = 0; i < AllGuards.Num(); i++)
+		{
+			AGuardAIController* Guard = Cast<AGuardAIController>(AllGuards[i]);
+			if (Guard != nullptr)
+			{
+				if (Guard->GetState() > HighestState)
+				{
+					HighestState = Guard->GetState();
+				}
+			}
+		}
+
+		CurrentHighestState = HighestState;
+	}
+
 }
 
 void AGuardAIController::FindPathForMoveRequest(const FAIMoveRequest& MoveRequest, FPathFindingQuery& Query, FNavPathSharedPtr& OutPath) const
@@ -439,6 +468,11 @@ bool AGuardAIController::CanAttackPlayer()
 	{
 		return false;
 	}
+}
+
+EGuardState AGuardAIController::GetGlobalGuardAlertnessState()
+{
+	return CurrentHighestState;
 }
 
 void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
