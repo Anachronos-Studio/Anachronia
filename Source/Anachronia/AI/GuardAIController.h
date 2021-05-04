@@ -40,12 +40,12 @@ enum class EAlertness : uint8
 UENUM(BlueprintType)
 enum class EGuardState : uint8
 {
+	Dead,
 	Patrol,
 	Distracted,
 	Inspect,
 	InspectLookAround,
 	Hunt,
-	Dead,
 };
 
 /**
@@ -127,6 +127,14 @@ private:
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
 
+	UPROPERTY()
+	TArray<AActor*> AllGuards;
+	
+	static EGuardState CurrentHighestState;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	static EGuardState GetGlobalGuardAlertnessState();
+	
 	UFUNCTION()
 	void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 	
