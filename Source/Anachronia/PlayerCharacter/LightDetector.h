@@ -41,13 +41,26 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	/** The value of the DARKEST area of the map */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
-	float GlobalIlluminationMinValue = 0.329871f;
+		float GlobalIlluminationMinValue; // = 0.219871f;
+
+	/** The desired BRIGHTEST value, default is 1.0 */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+		float GlobalIlluminationMaxValue; // = 0.85f;
 
 	UFUNCTION(BlueprintCallable, Category = "LightDetection")
 	float CalculateBrightness();
 
 	UFUNCTION(BlueprintCallable, Category = "LightDetection")
 	float CalculateGlobalCoefficient(float InputValue);
+
+	/** Set the min/max values for the global illumination tresholds */
+	UFUNCTION(BlueprintCallable, Category = BasicAttributes)
+	void SetGlobalIlluminationValues(float MinValue, float MaxValue) {
+		GlobalIlluminationMinValue = MinValue;
+		GlobalIlluminationMaxValue = MaxValue;
+	}
+
 
 };
