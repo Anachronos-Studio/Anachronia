@@ -15,7 +15,6 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "Perception/AISenseConfig_Sight.h"
-#include "Perception/AISenseConfig_Hearing.h"
 
 EGuardState AGuardAIController::CurrentHighestState = EGuardState::Patrol;
 
@@ -161,7 +160,13 @@ void AGuardAIController::Tick(float DeltaTime)
 		if (BackupTimer <= 0.0f)
 		{
 			BackupTimer += GuardPawn->BackupCallInterval;
-			UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetPawn()->GetActorLocation(), 1.0f, this, GuardPawn->BackupCallRange, FName("Backup"));
+			FAnachroniaNoiseInfo NoiseInfo;
+			NoiseInfo.MaxRange = GuardPawn->BackupCallRange;
+			NoiseInfo.SusMultiplier = 1.0f;
+			NoiseInfo.Instigator = this;
+			NoiseInfo.Location = GetPawn()->GetActorLocation();
+			NoiseInfo.Tag = FName("Backup");
+			UAnachroniaEventSystem::ReportAnachroniaNoise(NoiseInfo);
 			GuardPawn->OnCallForBackup();
 		}
 	}
@@ -187,9 +192,9 @@ void AGuardAIController::OnPossess(APawn* InPawn)
 	AttackCooldownTimer = 0.0f;
 
 	RunBehaviorTree(BTAsset);
-	if (GuardPawn->SightConfig == nullptr || GuardPawn->HearingConfig == nullptr)
+	if (GuardPawn->SightConfig == nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Guard perception configs are null! sight: %p, hearing: %p"), GuardPawn->SightConfig, GuardPawn->HearingConfig);
+		UE_LOG(LogTemp, Error, TEXT("Guard perception configs are null! sight: %p"), GuardPawn->SightConfig);
 		UnPossess();
 		return;
 	}
@@ -197,7 +202,6 @@ void AGuardAIController::OnPossess(APawn* InPawn)
 	SetPerceptionComponent(*GuardPawn->PerceptionComponent);
 	GuardPawn->ConfigureSenses();
 	PerceptionComponent->ConfigureSense(*GuardPawn->SightConfig);
-	PerceptionComponent->ConfigureSense(*GuardPawn->HearingConfig);
 	PerceptionComponent->RequestStimuliListenerUpdate(); // This RequestUpdate is the one that seems to actually be needed for perception to work, but the one before ConfigureSense is needed to not get warnings...
 	PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AGuardAIController::OnTargetPerceptionUpdated);
 	UAnachroniaEventSystem::GetInstance()->AnachroniaNoiseEvent.AddUObject(this, &AGuardAIController::OnAnachroniaNoise);
@@ -496,78 +500,6 @@ void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 			bCanSeePlayer = Stimulus.WasSuccessfullySensed();
 			GetBlackboardComponent()->SetValueAsBool(TEXT("HasLineOfSight"), bCanSeePlayer);
 		}
-	}
-	else if (Stimulus.Type == UAISense::GetSenseID<UAISense_Hearing>())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Guard heard something to UE perception, but it's supposed to be unused now"));
-		return;
-		
-		//UE_LOG(LogTemp, Display, TEXT("It's noise"));
-		//const float Distance = FVector::Distance(Stimulus.StimulusLocation, GetPawn()->GetActorLocation());
-		//float DistanceFactor = FMath::Clamp(Distance / GuardPawn->HearingMaxRadius, 0.0f, 1.0f);
-
-		//FCollisionObjectQueryParams ObjectQueryParams(ECC_TO_BITFIELD(ECC_WorldStatic) | ECC_TO_BITFIELD(ECC_WorldDynamic));
-		//FCollisionQueryParams CollisionQueryParams(SCENE_QUERY_STAT(AILineOfSight), true, this);
-		//FHitResult HitResult;
-		//const bool bHit = GetWorld()->LineTraceSingleByObjectType(HitResult, Stimulus.StimulusLocation, Stimulus.ReceiverLocation, ObjectQueryParams, CollisionQueryParams);
-	
-		////if (bHit)
-		////{
-		////	UE_LOG(LogTemp, Display, TEXT("Occluded!"));
-		////	DistanceFactor *= GuardPawn->HearingOcclusionDamp;
-		////	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
-		////	float PathLength;
-		////	ENavigationQueryResult::Type Result = NavSys->GetPathLength(GetWorld(), Stimulus.StimulusLocation, Stimulus.ReceiverLocation, PathLength);
-		////	if (Result == ENavigationQueryResult::Success)
-		////	{
-		////		UE_LOG(LogTemp, Display, TEXT("There is a path with length: %f"), PathLength);
-		////		float PathFindDistanceFactor = FMath::Clamp(PathLength / GuardPawn->HearingMaxRadius, 0.0f, 1.0f);
-		////		if (PathFindDistanceFactor < DistanceFactor)
-		////		{
-		////			UE_LOG(LogTemp, Display, TEXT("Pathfind was closer than going through wall"));
-		////			DistanceFactor = PathFindDistanceFactor;
-		////		}
-		////	}
-		////}
-		//
-		//if (Stimulus.Tag == FName(TEXT("Backup")))
-		//{
-		//	if (Actor != this)
-		//	{
-		//		GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("I heard your request for backup, comrade!"));
-		//		AGuardAIController* GuardInDistress = Cast<AGuardAIController>(Actor);
-		//		SusValue = 1.0f;
-		//		GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", PlayerRef->GetActorLocation());
-		//		const FVector PredictedLocation = PlayerRef->GetActorLocation() + PlayerRef->GetVelocity() * 100.0f;
-		//		GetBlackboardComponent()->SetValueAsVector("PredictedPlayerLocation", PredictedLocation);
-		//	}
-		//}
-		//else if (Alertness != EAlertness::AlarmedKnowing)
-		//{
-		//	const bool InstantDistract = Stimulus.Tag == FName(TEXT("Noisemaker"));
-		//	if (DistanceFactor >= GuardPawn->HearingFarThreshold && Alertness == EAlertness::Neutral && !InstantDistract)
-		//	{
-		//		// Ignore, noise wasn't suspicious enough
-		//		return;
-		//	}
-
-		//	if (SusValue < GuardPawn->HearingMaxSus)
-		//	{
-		//		if (InstantDistract)
-		//		{
-		//			SusValue = GuardPawn->HearingMaxSus;
-		//		}
-		//		else
-		//		{
-		//			SusValue = FMath::Min(SusValue + (1.0f - DistanceFactor) * GuardPawn->HearingSusIncreaseMultiplier, GuardPawn->HearingMaxSus);
-		//		}
-		//	}
-
-		//	if (State != EGuardState::Inspect && !IsSusEnough(ESusLevel::Busted))
-		//	{
-		//		GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", Stimulus.StimulusLocation);
-		//	}
-		//}
 	}
 }
 
