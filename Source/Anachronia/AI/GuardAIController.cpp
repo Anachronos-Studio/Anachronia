@@ -536,7 +536,7 @@ void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 				GetBlackboardComponent()->SetValueAsVector("PredictedPlayerLocation", PredictedLocation);
 			}
 		}
-		else
+		else if (Alertness != EAlertness::AlarmedKnowing)
 		{
 			const bool InstantDistract = Stimulus.Tag == FName(TEXT("Noisemaker"));
 			if (DistanceFactor >= GuardPawn->HearingFarThreshold && Alertness == EAlertness::Neutral && !InstantDistract)
@@ -545,13 +545,16 @@ void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 				return;
 			}
 
-			if (InstantDistract)
+			if (SusValue < GuardPawn->HearingMaxSus)
 			{
-				SusValue = GuardPawn->HearingMaxSus;
-			}
-			else
-			{
-				SusValue = FMath::Min(SusValue + (1.0f - DistanceFactor) * GuardPawn->HearingSusIncreaseMultiplier, GuardPawn->HearingMaxSus);
+				if (InstantDistract)
+				{
+					SusValue = GuardPawn->HearingMaxSus;
+				}
+				else
+				{
+					SusValue = FMath::Min(SusValue + (1.0f - DistanceFactor) * GuardPawn->HearingSusIncreaseMultiplier, GuardPawn->HearingMaxSus);
+				}
 			}
 
 			if (State != EGuardState::Inspect && !IsSusEnough(ESusLevel::Busted))
