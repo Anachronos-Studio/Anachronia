@@ -43,11 +43,11 @@ public:
 
 	/** The value of the DARKEST area of the map */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
-	float GlobalIlluminationMinValue = 0.219871f;
+		float GlobalIlluminationMinValue; // = 0.219871f;
 
 	/** The desired BRIGHTEST value, default is 1.0 */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
-	float GlobalIlluminationMaxValue = 0.85f;
+		float GlobalIlluminationMaxValue; // = 0.85f;
 
 	UFUNCTION(BlueprintCallable, Category = "LightDetection")
 	float CalculateBrightness();
