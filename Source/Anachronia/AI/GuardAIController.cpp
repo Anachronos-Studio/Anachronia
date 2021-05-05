@@ -639,7 +639,7 @@ void AGuardAIController::OnAnachroniaNoise(FAnachroniaNoiseInfo NoiseInfo)
 			}
 			else
 			{
-				SusValue = FMath::Min(SusValue + (1.0f - DistanceFactor) * GuardPawn->HearingSusIncreaseMultiplier, GuardPawn->HearingMaxSus);
+				SusValue = FMath::Min(SusValue + (1.0f - DistanceFactor) * GuardPawn->HearingSusIncreaseMultiplier * NoiseInfo.SusMultiplier, GuardPawn->HearingMaxSus);
 			}
 		}
 
