@@ -77,7 +77,7 @@ float ALightDetector::CalculateBrightness() {
 }
 
 float ALightDetector::CalculateGlobalCoefficient(float InputValue) {
-	float GlobalCoefficient = UKismetMathLibrary::NormalizeToRange(InputValue, GlobalIlluminationMinValue, 1.0f);
+	float GlobalCoefficient = UKismetMathLibrary::NormalizeToRange(InputValue, GlobalIlluminationMinValue, GlobalIlluminationMaxValue);
 	GlobalCoefficient = FMath::Clamp(GlobalCoefficient, 0.f, 1.f);
 	return GlobalCoefficient;
 
