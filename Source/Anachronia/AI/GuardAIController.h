@@ -5,6 +5,7 @@
 #include "Perception/AIPerceptionTypes.h"
 #include "GuardAIController.generated.h"
 
+struct FAnachroniaNoiseInfo;
 class AAnachroniaPlayer;
 struct FPatrolStop;
 class AGuardPatrolPath;
@@ -137,6 +138,8 @@ private:
 	
 	UFUNCTION()
 	void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
+
+	void OnAnachroniaNoise(FAnachroniaNoiseInfo NoiseInfo);
 	
 	FORCEINLINE bool ShouldShowDebug() const;
 };
