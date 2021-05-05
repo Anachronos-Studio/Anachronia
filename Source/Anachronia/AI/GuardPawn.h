@@ -160,10 +160,6 @@ public:
 	 * Hearing perception
 	 */
 
-	// Guard can never hear a sound from further away than this. Actual range of sounds may be smaller (configured when the noise is reported)
-	UPROPERTY(Category = "Guard|Hearing perception", EditAnywhere, BlueprintReadWrite)
-	float HearingMaxRadius = 3000.0f;
-
 	// When distance to sound is smaller than this value multiplied by the sound range, the sound is considered to have been very close
 	UPROPERTY(Category = "Guard|Hearing perception", EditAnywhere, BlueprintReadWrite, Meta = (ClampMin = 0, ClampMax = 1))
 	float HearingCloseThreshold = 0.1f;
@@ -181,7 +177,7 @@ public:
 	float HearingSusIncreaseMultiplier = 0.5f;
 
 	// How much to multiply sound loudness with when occluded
-	UPROPERTY(Category = "Guard|Hearing perception", EditAnywhere, BlueprintReadWrite)
+	UPROPERTY(/*Category = "Guard|Hearing perception", EditAnywhere, BlueprintReadWrite*/)
 	float HearingOcclusionDamp = 0.5f;
 
 	/* *****************************
@@ -198,9 +194,6 @@ public:
 	
 	UPROPERTY(VisibleAnywhere, Transient)
 	UAISenseConfig_Sight* SightConfig;
-
-	UPROPERTY(VisibleAnywhere, Transient)
-	UAISenseConfig_Hearing* HearingConfig;
 
 	/**********************
 	 * Combat

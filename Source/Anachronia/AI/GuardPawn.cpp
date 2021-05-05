@@ -9,7 +9,6 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "AIController.h"
 #include "DrawDebugHelpers.h"
-#include "Perception/AISenseConfig_Hearing.h"
 #include "Perception/AISenseConfig_Sight.h"
 
 // Sets default values
@@ -34,9 +33,6 @@ AGuardPawn::AGuardPawn()
 	PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>("PerceptionComponent");
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>("SightConfig");
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
-	HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>("HearingConfig");
-	HearingConfig->DetectionByAffiliation.bDetectNeutrals = true;
-	HearingConfig->DetectionByAffiliation.bDetectFriendlies = true;
 }
 
 // Called when the game starts or when spawned
@@ -93,15 +89,14 @@ void AGuardPawn::GetActorEyesViewPoint(FVector& Location, FRotator& Rotation) co
 
 void AGuardPawn::ConfigureSenses()
 {
-	if (SightConfig == nullptr || HearingConfig == nullptr)
+	if (SightConfig == nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Told to configure senses, but senses are null. See: %p, Hear: %p"), SightConfig, HearingConfig);
+		UE_LOG(LogTemp, Error, TEXT("Told to configure senses, but senses are null. See: %p"), SightConfig);
 		return;
 	}
 	SightConfig->SightRadius = SightRadius;
 	SightConfig->LoseSightRadius = LoseSightRadius;
 	SightConfig->PeripheralVisionAngleDegrees = PeripheralVisionHalfAngle;
-	HearingConfig->HearingRange = HearingMaxRadius;
 	PerceptionComponent->RequestStimuliListenerUpdate();
 }
 
