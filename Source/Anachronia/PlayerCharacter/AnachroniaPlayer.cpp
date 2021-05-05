@@ -19,6 +19,7 @@
 #include "LightDetector.h"
 #include "Components/ChildActorComponent.h"
 #include "../EquippableItems/BaseEquipItem.h"
+#include "../Utility/AnachroniaSaveGame.h"
 
 
 
@@ -348,3 +349,25 @@ float AAnachroniaPlayer::CalculateLuminance(const FVector& V) {
 //	FColor *BrightestColor = &ColorBuffer[100];
 //	return *BrightestColor;
 //}
+
+
+void AAnachroniaPlayer::SaveGame() {
+	UAnachroniaSaveGame* SaveGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::CreateSaveGameObject(UAnachroniaSaveGame::StaticClass()));
+
+	SaveGameInstance->CharacterStats.Health = CurrentHealth;
+	SaveGameInstance->CharacterStats.MaxHealth = MaxHealth;
+	SaveGameInstance->CharacterStats.ImperialMarks = ImperialMarks;
+	SaveGameInstance->CharacterStats.Score = PlayerScore;
+
+	UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex);
+}
+void AAnachroniaPlayer::LoadGame() {
+	UAnachroniaSaveGame* LoadGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::CreateSaveGameObject(UAnachroniaSaveGame::StaticClass()));
+
+	LoadGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::LoadGameFromSlot(LoadGameInstance->SaveSlotName, LoadGameInstance->UserIndex));
+
+	CurrentHealth = LoadGameInstance->CharacterStats.Health;
+	MaxHealth = LoadGameInstance->CharacterStats.MaxHealth;
+	ImperialMarks = LoadGameInstance->CharacterStats.ImperialMarks;
+	PlayerScore = LoadGameInstance->CharacterStats.Score;
+}
