@@ -155,6 +155,11 @@ public:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MainAttributes)
 	float BluntDamage;
 
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Scoring)
+	int32 PlayerScore;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Scoring)
+	int32 ImperialMarks;
+
 protected:
 
 	/** Handles moving forward/backward */
@@ -260,5 +265,8 @@ public:
 	virtual bool CanBeSeenFrom(const FVector& ObserverLocation, FVector& OutSeenLocation,
 	int32& NumberOfLoSChecksPerformed, float& OutSightStrength, const AActor* IgnoreActor) const override;
 
-
+	UFUNCTION(BlueprintCallable)
+	void SaveGame();
+	UFUNCTION(BlueprintCallable)
+	void LoadGame();
 };
