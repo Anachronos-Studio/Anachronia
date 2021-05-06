@@ -41,6 +41,8 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Guard")
 	void OnCallForBackup();
 
+	void Respawn();
+	
 public:
 	UFUNCTION(BlueprintCallable, Category = "Guard")
 	void SetDamageToCurrentHealth(float Damage, bool bNonLethal);

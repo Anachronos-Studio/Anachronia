@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "GuardPatrolPath.generated.h"
 
+class ARoomVolume;
 class USplineComponent;
 
 USTRUCT()
@@ -32,6 +33,9 @@ public:
 	AGuardPatrolPath();
 
 	FORCEINLINE USplineComponent* GetSpline() const { return SplineComponent; }
+	void AssignToRoom(ARoomVolume* InRoom);
+	void Claim();
+	void Abandon();
 
 protected:
 	// Called when the game starts or when spawned
@@ -39,6 +43,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	USplineComponent* SplineComponent;
+
+	UPROPERTY(VisibleInstanceOnly, BlueprintReadOnly)
+	ARoomVolume* Room;
 
 	
 public:

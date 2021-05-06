@@ -85,6 +85,9 @@ public:
 	FORCEINLINE AAnachroniaPlayer* GetPlayer() const { return PlayerRef; }
 
 	UFUNCTION(BlueprintCallable)
+	void Respawn();
+
+	UFUNCTION(BlueprintCallable)
 	bool IsVulnerableToStealthTakeDown() const;
 
 	UFUNCTION(BlueprintCallable)
@@ -122,6 +125,10 @@ private:
 
 	FRotator OriginalRotation;
 	FVector OriginalLocation;
+
+	UPROPERTY()
+	AGuardPatrolPath* OriginalPatrolPath;
+	
 	float AttackCooldownTimer;
 	float BackupTimer;
 	
