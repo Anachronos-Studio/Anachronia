@@ -188,8 +188,15 @@ void AGuardAIController::OnPossess(APawn* InPawn)
 
 	OriginalRotation = GuardPawn->GetActorRotation();
 	OriginalLocation = GuardPawn->GetActorLocation();
+	OriginalPatrolPath = GuardPawn->PatrolPath;
 	BackupTimer = 0.0f;
 	AttackCooldownTimer = 0.0f;
+	SusValue = 0.0f;
+	Alertness = EAlertness::Neutral;
+	NextPatrolPoint = 0;
+	PatrolDirection = 1;
+	SetState(EGuardState::Patrol);
+	SetActorTickEnabled(true);
 
 	RunBehaviorTree(BTAsset);
 	if (GuardPawn->SightConfig == nullptr)
@@ -218,7 +225,6 @@ void AGuardAIController::OnUnPossess()
 	Super::OnUnPossess();
 
 	GuardPawn = nullptr;
-	PlayerRef = nullptr;
 	SetActorTickEnabled(false);
 	PerceptionComponent->OnTargetPerceptionUpdated.RemoveDynamic(this, &AGuardAIController::OnTargetPerceptionUpdated);
 	UAnachroniaEventSystem::GetInstance()->AnachroniaNoiseEvent.RemoveAll(this);
@@ -448,6 +454,30 @@ ESusLevel AGuardAIController::GetSusLevel() const
 	if (SusValue >= GuardPawn->SusLookThreshold) return ESusLevel::KindaSus;
 	if (SusValue > 0.0f) return ESusLevel::NonZero;
 	return ESusLevel::NotSus;
+}
+
+void AGuardAIController::Respawn()
+{
+	AGuardPawn* PawnToPossess = GuardPawn;
+	UnPossess();
+	GuardPawn = PawnToPossess;
+	PawnToPossess->SetActorLocation(OriginalLocation);
+	PawnToPossess->SetActorRotation(OriginalRotation);
+	PawnToPossess->PatrolPath = OriginalPatrolPath;
+	PawnToPossess->CurrentHealth = GuardPawn->MaxHealth;
+	
+	Possess(PawnToPossess);
+
+	PlayerRef = Cast<AAnachroniaPlayer>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if (PlayerRef == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Could not find a AnachroniaPlayer actor in the world!"));
+	}
+
+	GuardPawn->Respawn();
+
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGuardAIController::StaticClass(), AllGuards);
+	GetBlackboardComponent()->SetValueAsObject("Player", PlayerRef);
 }
 
 bool AGuardAIController::IsVulnerableToStealthTakeDown() const

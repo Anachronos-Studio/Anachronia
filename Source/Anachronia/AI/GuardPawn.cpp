@@ -40,21 +40,7 @@ void AGuardPawn::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (bStartOnPath && PatrolPath != nullptr)
-	{
-		const int32 Point = PatrolPath->FindClosestPointToWorldLocation(GetActorLocation());
-		USplineComponent* Spline = PatrolPath->GetSpline();
-		const FVector NewLocation = Spline->GetLocationAtSplinePoint(Point, ESplineCoordinateSpace::World);
-		const FRotator NewRotation = Spline->GetRotationAtSplinePoint(Point, ESplineCoordinateSpace::World);
-		SetActorLocation(NewLocation);
-		if (GetController())
-		{
-			GetController()->SetControlRotation(NewRotation);
-			GetGuardAI()->MakeThisOriginalRotation();
-		}
-		
-		SetActorRotation(NewRotation);
-	}
+	Respawn();
 
 	//SetDamageToCurrentHealth(1000.0f, false);
 }
@@ -98,6 +84,30 @@ void AGuardPawn::ConfigureSenses()
 	SightConfig->LoseSightRadius = LoseSightRadius;
 	SightConfig->PeripheralVisionAngleDegrees = PeripheralVisionHalfAngle;
 	PerceptionComponent->RequestStimuliListenerUpdate();
+}
+
+void AGuardPawn::Respawn()
+{
+	if (bStartOnPath && PatrolPath != nullptr)
+	{
+		const int32 Point = PatrolPath->FindClosestPointToWorldLocation(GetActorLocation());
+		USplineComponent* Spline = PatrolPath->GetSpline();
+		const FVector NewLocation = Spline->GetLocationAtSplinePoint(Point, ESplineCoordinateSpace::World);
+		const FRotator NewRotation = Spline->GetRotationAtSplinePoint(Point, ESplineCoordinateSpace::World);
+		SetActorLocation(NewLocation);
+		if (GetController())
+		{
+			GetController()->SetControlRotation(NewRotation);
+			GetGuardAI()->MakeThisOriginalRotation();
+		}
+
+		SetActorRotation(NewRotation);
+	}
+
+	CurrentHealth = MaxHealth;
+
+	GetCharacterMovement()->SetMovementMode(GetCharacterMovement()->DefaultLandMovementMode);
+	GetCapsuleComponent()->SetSimulatePhysics(false);
 }
 
 void AGuardPawn::SetDamageToCurrentHealth(float Damage, bool bNonLethal)
