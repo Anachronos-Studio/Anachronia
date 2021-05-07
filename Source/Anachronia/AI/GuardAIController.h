@@ -62,12 +62,14 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	AGuardPawn* GetGuardPawn() const;
+	void SetPatrolPath(AGuardPatrolPath* Path);
 	AGuardPatrolPath* GetPatrolPath() const;
 	FVector GetCurrentPatrolGoal() const;
 	float GetAlertnessValue(EAlertness AlertnessLevel) const;
 	void PickNextPatrolPoint();
 	void FindClosestPatrolPoint();
 	FPatrolStop* GetCurrentPatrolStopInfo() const;
+	void ChooseNewPatrolPath();
 	bool IsSusEnough(ESusLevel Level) const;
 	void MakeThisOriginalRotation();
 	void ResetRotation();

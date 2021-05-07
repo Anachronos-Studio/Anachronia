@@ -24,22 +24,23 @@ AGuardPatrolPath::AGuardPatrolPath()
 
 void AGuardPatrolPath::AssignToRoom(ARoomVolume* InRoom)
 {
-	if (Room != nullptr)
-	{
-		const FString Msg = FString::Printf(TEXT("Trying to assign patrol path %s to multiple rooms (previously: %s, now: %s)"), *GetName(), *Room->GetName(), *InRoom->GetName());
-		UE_LOG(LogTemp, Warning, TEXT("%s"), *Msg);
-		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, Msg);
-	}
-	
 	Room = InRoom;
 }
 
 void AGuardPatrolPath::Claim()
 {
+	if (Room != nullptr)
+	{
+		Room->ClaimPath(this);
+	}
 }
 
 void AGuardPatrolPath::Abandon()
 {
+	if (Room != nullptr)
+	{
+		Room->AbandonPath(this);
+	}
 }
 
 // Called when the game starts or when spawned

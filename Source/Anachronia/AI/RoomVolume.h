@@ -16,6 +16,8 @@ class ANACHRONIA_API ARoomVolume : public AVolume
 	GENERATED_BODY()
 
 public:
+	ARoomVolume();
+	
 	void ClaimPath(AGuardPatrolPath* Path);
 	void AbandonPath(AGuardPatrolPath* Path);
 	AGuardPatrolPath* FindFreePath();
@@ -29,4 +31,9 @@ protected:
 	UPROPERTY()
 	TArray<AGuardPatrolPath*> FreePaths;
 	
+public:
+#if WITH_EDITOR
+	virtual void OnConstruction(const FTransform& Transform) override;
+#endif // WITH_EDITOR
+
 };

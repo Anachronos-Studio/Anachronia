@@ -4,6 +4,7 @@
 #include "GuardPatrolPath.h"
 #include "GuardPawn.h"
 #include "NavigationSystem.h"
+#include "RoomVolume.h"
 #include "Anachronia/PlayerCharacter/AnachroniaPlayer.h"
 #include "Anachronia/Utility/AnachroniaEventSystem.h"
 #include "BehaviorTree/BehaviorTree.h"
@@ -49,7 +50,7 @@ void AGuardAIController::BeginPlay()
 void AGuardAIController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 	float Rate = GuardPawn->SusBaseIncreaseRate;
 	if (bCanSeePlayer)
 	{
@@ -198,6 +199,11 @@ void AGuardAIController::OnPossess(APawn* InPawn)
 	SetState(EGuardState::Patrol);
 	SetActorTickEnabled(true);
 
+	if (GetPatrolPath() != nullptr)
+	{
+		GetPatrolPath()->Claim();
+	}
+
 	RunBehaviorTree(BTAsset);
 	if (GuardPawn->SightConfig == nullptr)
 	{
@@ -237,11 +243,28 @@ void AGuardAIController::Die()
 	SusValue = 0.0f;
 	SetActorTickEnabled(false);
 	PerceptionComponent->OnTargetPerceptionUpdated.RemoveDynamic(this, &AGuardAIController::OnTargetPerceptionUpdated);
+	UAnachroniaEventSystem::GetInstance()->AnachroniaNoiseEvent.RemoveAll(this);
 }
 
 AGuardPawn* AGuardAIController::GetGuardPawn() const
 {
 	return GuardPawn;
+}
+
+// ReSharper disable once CppMemberFunctionMayBeConst
+void AGuardAIController::SetPatrolPath(AGuardPatrolPath* Path)
+{
+	if (GuardPawn->PatrolPath != nullptr)
+	{
+		GuardPawn->PatrolPath->Abandon();
+	}
+	
+	GuardPawn->PatrolPath = Path;
+	
+	if (Path != nullptr)
+	{
+		Path->Claim();
+	}
 }
 
 AGuardPatrolPath* AGuardAIController::GetPatrolPath() const
@@ -322,6 +345,39 @@ FPatrolStop* AGuardAIController::GetCurrentPatrolStopInfo() const
 	}
 
 	return nullptr;
+}
+
+void AGuardAIController::ChooseNewPatrolPath()
+{
+	TArray<AActor*> OverlappingRooms;
+	GuardPawn->GetOverlappingActors(OverlappingRooms, ARoomVolume::StaticClass());
+	bool bFoundNewPath = false;
+	if (OverlappingRooms.Num() > 0)
+	{
+		ARoomVolume* Room = Cast<ARoomVolume>(OverlappingRooms[0]);
+		if (Room != nullptr)
+		{
+			AGuardPatrolPath* NewPath = Room->FindFreePath();
+			if (NewPath != nullptr)
+			{
+				SetPatrolPath(NewPath);
+				UE_LOG(LogTemp, Display, TEXT("Lost player, now %s will patrol %s instead because this room is sus"), *GetName(), *NewPath->GetName());
+				bFoundNewPath = true;
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Display, TEXT("Lost player and not in a room."));
+	}
+
+	if (!bFoundNewPath)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Lost player, but no free patrol paths in this room so %s will go back to original path %s"), *GetName(), OriginalPatrolPath ? *OriginalPatrolPath->GetName() : TEXT("null"))
+		SetPatrolPath(OriginalPatrolPath);
+	}
+
+	FindClosestPatrolPoint();
 }
 
 bool AGuardAIController::IsSusEnough(ESusLevel Level) const
@@ -463,7 +519,7 @@ void AGuardAIController::Respawn()
 	GuardPawn = PawnToPossess;
 	PawnToPossess->SetActorLocation(OriginalLocation);
 	PawnToPossess->SetActorRotation(OriginalRotation);
-	PawnToPossess->PatrolPath = OriginalPatrolPath;
+	SetPatrolPath(OriginalPatrolPath);
 	PawnToPossess->CurrentHealth = GuardPawn->MaxHealth;
 	
 	Possess(PawnToPossess);

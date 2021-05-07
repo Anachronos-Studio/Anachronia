@@ -3,6 +3,14 @@
 
 #include "RoomVolume.h"
 
+#include "GuardPatrolPath.h"
+#include "Components/BrushComponent.h"
+
+ARoomVolume::ARoomVolume()
+{
+	GetBrushComponent()->SetCollisionProfileName(TEXT("OverlapGuardOnly"));
+}
+
 void ARoomVolume::ClaimPath(AGuardPatrolPath* Path)
 {
 	FreePaths.Remove(Path);
@@ -21,7 +29,7 @@ AGuardPatrolPath* ARoomVolume::FindFreePath()
 	}
 	else
 	{
-		return FreePaths[0];
+		return FreePaths.Last();
 	}
 }
 
@@ -30,5 +38,23 @@ void ARoomVolume::BeginPlay()
 	for (AGuardPatrolPath* Path : PatrolPaths)
 	{
 		FreePaths.Add(Path);
+		Path->AssignToRoom(this);
 	}
 }
+
+#if WITH_EDITOR
+void ARoomVolume::OnConstruction(const FTransform& Transform)
+{
+	for (AGuardPatrolPath* Path : PatrolPaths)
+	{
+		if (Path != nullptr)
+		{
+			if (Path->GetRoom() != nullptr && Path->GetRoom() != this)
+			{
+				Path->GetRoom()->PatrolPaths.Remove(Path);
+			}
+			Path->AssignToRoom(this);
+		}
+	}
+}
+#endif // WITH_EDITOR

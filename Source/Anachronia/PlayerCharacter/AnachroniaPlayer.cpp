@@ -299,8 +299,8 @@ bool AAnachroniaPlayer::CanBeSeenFrom(const FVector& ObserverLocation, FVector& 
 		const FVector TargetLocation = GetActorLocation() + FVector(0.0f, 0.0f, ZOffset);
 		
 		FHitResult HitResult;
-		const bool bHit = GetWorld()->LineTraceSingleByObjectType(HitResult, ObserverLocation, TargetLocation,
-			FCollisionObjectQueryParams(ECC_TO_BITFIELD(ECC_WorldStatic) | ECC_TO_BITFIELD(ECC_WorldDynamic)),
+		const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, ObserverLocation, TargetLocation,
+			ECC_Visibility,
 			FCollisionQueryParams(SCENE_QUERY_STAT(AILineOfSight), true, IgnoreActor));
 
 		NumberOfLoSChecksPerformed++;
