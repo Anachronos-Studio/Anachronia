@@ -23,7 +23,6 @@ AGuardPawn::AGuardPawn()
 	AIControllerClass = AGuardAIController::StaticClass();
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Pawn"));
 	GetCapsuleComponent()->SetCollisionObjectType(ECC_Guard);
-	GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_WorldStatic, ECR_Overlap);
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
