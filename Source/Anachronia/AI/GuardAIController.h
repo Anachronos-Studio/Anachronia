@@ -149,6 +149,8 @@ private:
 	void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
 
 	void OnAnachroniaNoise(FAnachroniaNoiseInfo NoiseInfo);
+
+	int32 LineTraceSound(FVector Start, FVector End) const;
 	
 	FORCEINLINE bool ShouldShowDebug() const;
 };
