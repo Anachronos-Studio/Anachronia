@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Perception/AISightTargetInterface.h"
+#include "Templates/UnrealTemplate.h"
 #include "AnachroniaPlayer.generated.h"
 
 class ABaseEquipItem;
@@ -114,19 +115,19 @@ public:
 	// Stealth properties below
 
 	/** This value will determine the overall visibility of the player to the AI */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = StealthLevelAttributes)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = StealthLevelAttributes)
 	float PlayerVisibility;
 
 	/** The Luminance value will handle the visual luminosity of the player */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = StealthLevelAttributes)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = StealthLevelAttributes)
 	float PlayerLuminance;
 
 	/** The Noise level is dependent on player movement types as well as floor material*/
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = StealthLevelAttributes)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = StealthLevelAttributes)
 	float PlayerNoiseLevel;																				//Separera från visibility
 
 	/** The player motion level determines how much motion player makes, to get noticeable */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = StealthLevelAttributes)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = StealthLevelAttributes)
 	float PlayerMotionLevel;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
@@ -140,7 +141,7 @@ public:
 	float MaxHealth;
 
 	/** The current health of the player*/
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MainAttributes)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MainAttributes)
 	float CurrentHealth;
 
 	/** The Basic damage player can do, affects both lethal damage and blunt damage by addition */
@@ -148,16 +149,16 @@ public:
 	float BaseDamage;
 
 	/** The lethal damage that will get it's value from weapons */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MainAttributes)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MainAttributes)
 	float LethalDamage;
 
 	/** The blunt damage that will get it's value from weapons */
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = MainAttributes)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MainAttributes)
 	float BluntDamage;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Scoring)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Scoring)
 	int32 PlayerScore;
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Scoring)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Scoring)
 	int32 ImperialMarks;
 
 protected:
@@ -244,7 +245,15 @@ public:
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
 	void SetMotionLevel(float Value) { PlayerMotionLevel = Value; }
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
-	void SetVisibility(float L, float M) { PlayerVisibility = (L + M) / 2.f; }
+	void SetVisibility(float L, float M) { 	
+		float Temp;
+		if(XOR(L <= 0.1f,M <= 0.1f))
+			Temp = 0.1f;
+		else 
+			Temp = L * M;
+		PlayerVisibility = L * M; 
+	}
+	//void SetVisibility(float L, float M) { PlayerVisibility = (L + M) / 2.f; }
 
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
 	float GetLuminance() { return PlayerLuminance; }
