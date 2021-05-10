@@ -3,6 +3,7 @@
 
 #include "GuardPatrolPath.h"
 
+#include "RoomVolume.h"
 #include "DrawDebugHelpers.h"
 #include "Components/SplineComponent.h"
 
@@ -19,6 +20,27 @@ AGuardPatrolPath::AGuardPatrolPath()
 	RootComponent = SplineComponent;
 	SplineComponent->SetClosedLoop(true);
 
+}
+
+void AGuardPatrolPath::AssignToRoom(ARoomVolume* InRoom)
+{
+	Room = InRoom;
+}
+
+void AGuardPatrolPath::Claim()
+{
+	if (Room != nullptr)
+	{
+		Room->ClaimPath(this);
+	}
+}
+
+void AGuardPatrolPath::Abandon()
+{
+	if (Room != nullptr)
+	{
+		Room->AbandonPath(this);
+	}
 }
 
 // Called when the game starts or when spawned

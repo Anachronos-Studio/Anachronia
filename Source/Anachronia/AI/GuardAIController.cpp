@@ -4,7 +4,9 @@
 #include "GuardPatrolPath.h"
 #include "GuardPawn.h"
 #include "NavigationSystem.h"
+#include "RoomVolume.h"
 #include "Anachronia/PlayerCharacter/AnachroniaPlayer.h"
+#include "Anachronia/Utility/AnachroniaEventSystem.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "Components/SplineComponent.h"
@@ -14,7 +16,6 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AIPerceptionTypes.h"
 #include "Perception/AISenseConfig_Sight.h"
-#include "Perception/AISenseConfig_Hearing.h"
 
 EGuardState AGuardAIController::CurrentHighestState = EGuardState::Patrol;
 
@@ -49,7 +50,7 @@ void AGuardAIController::BeginPlay()
 void AGuardAIController::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 	float Rate = GuardPawn->SusBaseIncreaseRate;
 	if (bCanSeePlayer)
 	{
@@ -160,7 +161,13 @@ void AGuardAIController::Tick(float DeltaTime)
 		if (BackupTimer <= 0.0f)
 		{
 			BackupTimer += GuardPawn->BackupCallInterval;
-			UAISense_Hearing::ReportNoiseEvent(GetWorld(), GetPawn()->GetActorLocation(), 1.0f, this, GuardPawn->BackupCallRange, FName("Backup"));
+			FAnachroniaNoiseInfo NoiseInfo;
+			NoiseInfo.MaxRange = GuardPawn->BackupCallRange;
+			NoiseInfo.SusMultiplier = 1.0f;
+			NoiseInfo.Instigator = this;
+			NoiseInfo.Location = GetPawn()->GetActorLocation();
+			NoiseInfo.Tag = FName("Backup");
+			UAnachroniaEventSystem::ReportAnachroniaNoise(NoiseInfo);
 			GuardPawn->OnCallForBackup();
 		}
 	}
@@ -182,13 +189,25 @@ void AGuardAIController::OnPossess(APawn* InPawn)
 
 	OriginalRotation = GuardPawn->GetActorRotation();
 	OriginalLocation = GuardPawn->GetActorLocation();
+	OriginalPatrolPath = GuardPawn->PatrolPath;
 	BackupTimer = 0.0f;
 	AttackCooldownTimer = 0.0f;
+	SusValue = 0.0f;
+	Alertness = EAlertness::Neutral;
+	NextPatrolPoint = 0;
+	PatrolDirection = 1;
+	SetState(EGuardState::Patrol);
+	SetActorTickEnabled(true);
+
+	if (GetPatrolPath() != nullptr)
+	{
+		GetPatrolPath()->Claim();
+	}
 
 	RunBehaviorTree(BTAsset);
-	if (GuardPawn->SightConfig == nullptr || GuardPawn->HearingConfig == nullptr)
+	if (GuardPawn->SightConfig == nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Guard perception configs are null! sight: %p, hearing: %p"), GuardPawn->SightConfig, GuardPawn->HearingConfig);
+		UE_LOG(LogTemp, Error, TEXT("Guard perception configs are null! sight: %p"), GuardPawn->SightConfig);
 		UnPossess();
 		return;
 	}
@@ -196,9 +215,9 @@ void AGuardAIController::OnPossess(APawn* InPawn)
 	SetPerceptionComponent(*GuardPawn->PerceptionComponent);
 	GuardPawn->ConfigureSenses();
 	PerceptionComponent->ConfigureSense(*GuardPawn->SightConfig);
-	PerceptionComponent->ConfigureSense(*GuardPawn->HearingConfig);
 	PerceptionComponent->RequestStimuliListenerUpdate(); // This RequestUpdate is the one that seems to actually be needed for perception to work, but the one before ConfigureSense is needed to not get warnings...
 	PerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &AGuardAIController::OnTargetPerceptionUpdated);
+	UAnachroniaEventSystem::GetInstance()->AnachroniaNoiseEvent.AddUObject(this, &AGuardAIController::OnAnachroniaNoise);
 	SetActorTickEnabled(true);
 	Alertness = EAlertness::Neutral;
 
@@ -212,9 +231,9 @@ void AGuardAIController::OnUnPossess()
 	Super::OnUnPossess();
 
 	GuardPawn = nullptr;
-	PlayerRef = nullptr;
 	SetActorTickEnabled(false);
 	PerceptionComponent->OnTargetPerceptionUpdated.RemoveDynamic(this, &AGuardAIController::OnTargetPerceptionUpdated);
+	UAnachroniaEventSystem::GetInstance()->AnachroniaNoiseEvent.RemoveAll(this);
 }
 
 void AGuardAIController::Die()
@@ -224,11 +243,28 @@ void AGuardAIController::Die()
 	SusValue = 0.0f;
 	SetActorTickEnabled(false);
 	PerceptionComponent->OnTargetPerceptionUpdated.RemoveDynamic(this, &AGuardAIController::OnTargetPerceptionUpdated);
+	UAnachroniaEventSystem::GetInstance()->AnachroniaNoiseEvent.RemoveAll(this);
 }
 
 AGuardPawn* AGuardAIController::GetGuardPawn() const
 {
 	return GuardPawn;
+}
+
+// ReSharper disable once CppMemberFunctionMayBeConst
+void AGuardAIController::SetPatrolPath(AGuardPatrolPath* Path)
+{
+	if (GuardPawn->PatrolPath != nullptr)
+	{
+		GuardPawn->PatrolPath->Abandon();
+	}
+	
+	GuardPawn->PatrolPath = Path;
+	
+	if (Path != nullptr)
+	{
+		Path->Claim();
+	}
 }
 
 AGuardPatrolPath* AGuardAIController::GetPatrolPath() const
@@ -309,6 +345,39 @@ FPatrolStop* AGuardAIController::GetCurrentPatrolStopInfo() const
 	}
 
 	return nullptr;
+}
+
+void AGuardAIController::ChooseNewPatrolPath()
+{
+	TArray<AActor*> OverlappingRooms;
+	GuardPawn->GetOverlappingActors(OverlappingRooms, ARoomVolume::StaticClass());
+	bool bFoundNewPath = false;
+	if (OverlappingRooms.Num() > 0)
+	{
+		ARoomVolume* Room = Cast<ARoomVolume>(OverlappingRooms[0]);
+		if (Room != nullptr)
+		{
+			AGuardPatrolPath* NewPath = Room->FindFreePath();
+			if (NewPath != nullptr)
+			{
+				SetPatrolPath(NewPath);
+				UE_LOG(LogTemp, Display, TEXT("Lost player, now %s will patrol %s instead because this room is sus"), *GetName(), *NewPath->GetName());
+				bFoundNewPath = true;
+			}
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Display, TEXT("Lost player and not in a room."));
+	}
+
+	if (!bFoundNewPath)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Lost player, but no free patrol paths in this room so %s will go back to original path %s"), *GetName(), OriginalPatrolPath ? *OriginalPatrolPath->GetName() : TEXT("null"))
+		SetPatrolPath(OriginalPatrolPath);
+	}
+
+	FindClosestPatrolPoint();
 }
 
 bool AGuardAIController::IsSusEnough(ESusLevel Level) const
@@ -443,6 +512,30 @@ ESusLevel AGuardAIController::GetSusLevel() const
 	return ESusLevel::NotSus;
 }
 
+void AGuardAIController::Respawn()
+{
+	AGuardPawn* PawnToPossess = GuardPawn;
+	UnPossess();
+	GuardPawn = PawnToPossess;
+	PawnToPossess->SetActorLocation(OriginalLocation);
+	PawnToPossess->SetActorRotation(OriginalRotation);
+	SetPatrolPath(OriginalPatrolPath);
+	PawnToPossess->CurrentHealth = GuardPawn->MaxHealth;
+	
+	Possess(PawnToPossess);
+
+	PlayerRef = Cast<AAnachroniaPlayer>(UGameplayStatics::GetPlayerCharacter(GetWorld(), 0));
+	if (PlayerRef == nullptr)
+	{
+		UE_LOG(LogTemp, Error, TEXT("Could not find a AnachroniaPlayer actor in the world!"));
+	}
+
+	GuardPawn->Respawn();
+
+	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGuardAIController::StaticClass(), AllGuards);
+	GetBlackboardComponent()->SetValueAsObject("Player", PlayerRef);
+}
+
 bool AGuardAIController::IsVulnerableToStealthTakeDown() const
 {
 	return !bCanSeePlayer && Alertness != EAlertness::AlarmedKnowing;
@@ -494,73 +587,83 @@ void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 			GetBlackboardComponent()->SetValueAsBool(TEXT("HasLineOfSight"), bCanSeePlayer);
 		}
 	}
-	else if (Stimulus.Type == UAISense::GetSenseID<UAISense_Hearing>())
-	{
-		UE_LOG(LogTemp, Display, TEXT("It's noise"));
-		const float Distance = FVector::Distance(Stimulus.StimulusLocation, GetPawn()->GetActorLocation());
-		float DistanceFactor = FMath::Clamp(Distance / GuardPawn->HearingMaxRadius, 0.0f, 1.0f);
+}
 
-		FCollisionObjectQueryParams ObjectQueryParams(ECC_TO_BITFIELD(ECC_WorldStatic) | ECC_TO_BITFIELD(ECC_WorldDynamic));
-		FCollisionQueryParams CollisionQueryParams(SCENE_QUERY_STAT(AILineOfSight), true, this);
-		FHitResult HitResult;
-		const bool bHit = GetWorld()->LineTraceSingleByObjectType(HitResult, Stimulus.StimulusLocation, Stimulus.ReceiverLocation, ObjectQueryParams, CollisionQueryParams);
+void AGuardAIController::OnAnachroniaNoise(FAnachroniaNoiseInfo NoiseInfo)
+{
+	UE_LOG(LogTemp, Display, TEXT("Heard noise!!"));
+
+	const float SqrDistance = FVector::DistSquared(NoiseInfo.Location, GetPawn()->GetActorLocation());
+	if (SqrDistance > FMath::Square(NoiseInfo.MaxRange))
+	{
+		UE_LOG(LogTemp, Display, TEXT("But it was too far away... :("));
+		return;
+	}
 	
-		//if (bHit)
-		//{
-		//	UE_LOG(LogTemp, Display, TEXT("Occluded!"));
-		//	DistanceFactor *= GuardPawn->HearingOcclusionDamp;
-		//	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
-		//	float PathLength;
-		//	ENavigationQueryResult::Type Result = NavSys->GetPathLength(GetWorld(), Stimulus.StimulusLocation, Stimulus.ReceiverLocation, PathLength);
-		//	if (Result == ENavigationQueryResult::Success)
-		//	{
-		//		UE_LOG(LogTemp, Display, TEXT("There is a path with length: %f"), PathLength);
-		//		float PathFindDistanceFactor = FMath::Clamp(PathLength / GuardPawn->HearingMaxRadius, 0.0f, 1.0f);
-		//		if (PathFindDistanceFactor < DistanceFactor)
-		//		{
-		//			UE_LOG(LogTemp, Display, TEXT("Pathfind was closer than going through wall"));
-		//			DistanceFactor = PathFindDistanceFactor;
-		//		}
-		//	}
-		//}
-		
-		if (Stimulus.Tag == FName(TEXT("Backup")))
+	float Distance = FMath::Sqrt(SqrDistance);
+	float DistanceFactor = FMath::Clamp(Distance / NoiseInfo.MaxRange, 0.0f, 1.0f);
+	UE_LOG(LogTemp, Display, TEXT("Dist factor: %f"), DistanceFactor);
+
+	FCollisionObjectQueryParams ObjectQueryParams(ECC_TO_BITFIELD(ECC_WorldStatic) | ECC_TO_BITFIELD(ECC_WorldDynamic));
+	FCollisionQueryParams CollisionQueryParams(SCENE_QUERY_STAT(AILineOfSight), true, this);
+	FHitResult HitResult;
+	const bool bHit = GetWorld()->LineTraceSingleByObjectType(HitResult, NoiseInfo.Location, GetPawn()->GetActorLocation(), ObjectQueryParams, CollisionQueryParams);
+
+	//if (bHit)
+	//{
+	//	UE_LOG(LogTemp, Display, TEXT("Occluded!"));
+	//	DistanceFactor *= GuardPawn->HearingOcclusionDamp;
+	//	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
+	//	float PathLength;
+	//	ENavigationQueryResult::Type Result = NavSys->GetPathLength(GetWorld(), Stimulus.StimulusLocation, Stimulus.ReceiverLocation, PathLength);
+	//	if (Result == ENavigationQueryResult::Success)
+	//	{
+	//		UE_LOG(LogTemp, Display, TEXT("There is a path with length: %f"), PathLength);
+	//		float PathFindDistanceFactor = FMath::Clamp(PathLength / GuardPawn->HearingMaxRadius, 0.0f, 1.0f);
+	//		if (PathFindDistanceFactor < DistanceFactor)
+	//		{
+	//			UE_LOG(LogTemp, Display, TEXT("Pathfind was closer than going through wall"));
+	//			DistanceFactor = PathFindDistanceFactor;
+	//		}
+	//	}
+	//}
+	
+	if (NoiseInfo.Tag == FName(TEXT("Backup")))
+	{
+		if (NoiseInfo.Instigator != this)
 		{
-			if (Actor != this)
+			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("I heard your request for backup, comrade!"));
+			AGuardAIController* GuardInDistress = Cast<AGuardAIController>(NoiseInfo.Instigator);
+			SusValue = 1.0f;
+			GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", PlayerRef->GetActorLocation());
+			const FVector PredictedLocation = PlayerRef->GetActorLocation() + PlayerRef->GetVelocity() * 100.0f;
+			GetBlackboardComponent()->SetValueAsVector("PredictedPlayerLocation", PredictedLocation);
+		}
+	}
+	else if (Alertness != EAlertness::AlarmedKnowing)
+	{
+		const bool InstantDistract = NoiseInfo.Tag == FName(TEXT("Noisemaker"));
+		if (DistanceFactor >= GuardPawn->HearingFarThreshold && Alertness == EAlertness::Neutral && !InstantDistract)
+		{
+			// Ignore, noise wasn't suspicious enough
+			return;
+		}
+
+		if (SusValue < GuardPawn->HearingMaxSus)
+		{
+			if (InstantDistract)
 			{
-				GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("I heard your request for backup, comrade!"));
-				AGuardAIController* GuardInDistress = Cast<AGuardAIController>(Actor);
-				SusValue = 1.0f;
-				GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", PlayerRef->GetActorLocation());
-				const FVector PredictedLocation = PlayerRef->GetActorLocation() + PlayerRef->GetVelocity() * 100.0f;
-				GetBlackboardComponent()->SetValueAsVector("PredictedPlayerLocation", PredictedLocation);
+				SusValue = GuardPawn->HearingMaxSus;
+			}
+			else
+			{
+				SusValue = FMath::Min(SusValue + (1.0f - DistanceFactor) * GuardPawn->HearingSusIncreaseMultiplier * NoiseInfo.SusMultiplier, GuardPawn->HearingMaxSus);
 			}
 		}
-		else if (Alertness != EAlertness::AlarmedKnowing)
+
+		if (State != EGuardState::Inspect && !IsSusEnough(ESusLevel::Busted))
 		{
-			const bool InstantDistract = Stimulus.Tag == FName(TEXT("Noisemaker"));
-			if (DistanceFactor >= GuardPawn->HearingFarThreshold && Alertness == EAlertness::Neutral && !InstantDistract)
-			{
-				// Ignore, noise wasn't suspicious enough
-				return;
-			}
-
-			if (SusValue < GuardPawn->HearingMaxSus)
-			{
-				if (InstantDistract)
-				{
-					SusValue = GuardPawn->HearingMaxSus;
-				}
-				else
-				{
-					SusValue = FMath::Min(SusValue + (1.0f - DistanceFactor) * GuardPawn->HearingSusIncreaseMultiplier, GuardPawn->HearingMaxSus);
-				}
-			}
-
-			if (State != EGuardState::Inspect && !IsSusEnough(ESusLevel::Busted))
-			{
-				GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", Stimulus.StimulusLocation);
-			}
+			GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", NoiseInfo.Location);
 		}
 	}
 }

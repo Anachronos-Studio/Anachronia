@@ -9,8 +9,9 @@
 #include "Perception/AIPerceptionComponent.h"
 #include "AIController.h"
 #include "DrawDebugHelpers.h"
-#include "Perception/AISenseConfig_Hearing.h"
 #include "Perception/AISenseConfig_Sight.h"
+
+#define ECC_Guard ECC_GameTraceChannel2
 
 // Sets default values
 AGuardPawn::AGuardPawn()
@@ -20,7 +21,8 @@ AGuardPawn::AGuardPawn()
 
 	AutoPossessAI = EAutoPossessAI::PlacedInWorldOrSpawned;
 	AIControllerClass = AGuardAIController::StaticClass();
-	GetCapsuleComponent()->SetCollisionProfileName("Pawn");
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Pawn"));
+	GetCapsuleComponent()->SetCollisionObjectType(ECC_Guard);
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->MaxWalkSpeed = 300.0f;
 	GetCharacterMovement()->bOrientRotationToMovement = false;
@@ -34,9 +36,6 @@ AGuardPawn::AGuardPawn()
 	PerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>("PerceptionComponent");
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>("SightConfig");
 	SightConfig->DetectionByAffiliation.bDetectNeutrals = true;
-	HearingConfig = CreateDefaultSubobject<UAISenseConfig_Hearing>("HearingConfig");
-	HearingConfig->DetectionByAffiliation.bDetectNeutrals = true;
-	HearingConfig->DetectionByAffiliation.bDetectFriendlies = true;
 }
 
 // Called when the game starts or when spawned
@@ -44,21 +43,7 @@ void AGuardPawn::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	if (bStartOnPath && PatrolPath != nullptr)
-	{
-		const int32 Point = PatrolPath->FindClosestPointToWorldLocation(GetActorLocation());
-		USplineComponent* Spline = PatrolPath->GetSpline();
-		const FVector NewLocation = Spline->GetLocationAtSplinePoint(Point, ESplineCoordinateSpace::World);
-		const FRotator NewRotation = Spline->GetRotationAtSplinePoint(Point, ESplineCoordinateSpace::World);
-		SetActorLocation(NewLocation);
-		if (GetController())
-		{
-			GetController()->SetControlRotation(NewRotation);
-			GetGuardAI()->MakeThisOriginalRotation();
-		}
-		
-		SetActorRotation(NewRotation);
-	}
+	Respawn();
 
 	//SetDamageToCurrentHealth(1000.0f, false);
 }
@@ -93,16 +78,39 @@ void AGuardPawn::GetActorEyesViewPoint(FVector& Location, FRotator& Rotation) co
 
 void AGuardPawn::ConfigureSenses()
 {
-	if (SightConfig == nullptr || HearingConfig == nullptr)
+	if (SightConfig == nullptr)
 	{
-		UE_LOG(LogTemp, Error, TEXT("Told to configure senses, but senses are null. See: %p, Hear: %p"), SightConfig, HearingConfig);
+		UE_LOG(LogTemp, Error, TEXT("Told to configure senses, but senses are null. See: %p"), SightConfig);
 		return;
 	}
 	SightConfig->SightRadius = SightRadius;
 	SightConfig->LoseSightRadius = LoseSightRadius;
 	SightConfig->PeripheralVisionAngleDegrees = PeripheralVisionHalfAngle;
-	HearingConfig->HearingRange = HearingMaxRadius;
 	PerceptionComponent->RequestStimuliListenerUpdate();
+}
+
+void AGuardPawn::Respawn()
+{
+	if (bStartOnPath && PatrolPath != nullptr)
+	{
+		const int32 Point = PatrolPath->FindClosestPointToWorldLocation(GetActorLocation());
+		USplineComponent* Spline = PatrolPath->GetSpline();
+		const FVector NewLocation = Spline->GetLocationAtSplinePoint(Point, ESplineCoordinateSpace::World);
+		const FRotator NewRotation = Spline->GetRotationAtSplinePoint(Point, ESplineCoordinateSpace::World);
+		SetActorLocation(NewLocation);
+		if (GetController())
+		{
+			GetController()->SetControlRotation(NewRotation);
+			GetGuardAI()->MakeThisOriginalRotation();
+		}
+
+		SetActorRotation(NewRotation);
+	}
+
+	CurrentHealth = MaxHealth;
+
+	GetCharacterMovement()->SetMovementMode(GetCharacterMovement()->DefaultLandMovementMode);
+	GetCapsuleComponent()->SetSimulatePhysics(false);
 }
 
 void AGuardPawn::SetDamageToCurrentHealth(float Damage, bool bNonLethal)

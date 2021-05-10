@@ -19,6 +19,7 @@
 #include "LightDetector.h"
 #include "Components/ChildActorComponent.h"
 #include "../EquippableItems/BaseEquipItem.h"
+#include "../Utility/AnachroniaSaveGame.h"
 
 
 
@@ -298,8 +299,8 @@ bool AAnachroniaPlayer::CanBeSeenFrom(const FVector& ObserverLocation, FVector& 
 		const FVector TargetLocation = GetActorLocation() + FVector(0.0f, 0.0f, ZOffset);
 		
 		FHitResult HitResult;
-		const bool bHit = GetWorld()->LineTraceSingleByObjectType(HitResult, ObserverLocation, TargetLocation,
-			FCollisionObjectQueryParams(ECC_TO_BITFIELD(ECC_WorldStatic) | ECC_TO_BITFIELD(ECC_WorldDynamic)),
+		const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, ObserverLocation, TargetLocation,
+			ECC_Visibility,
 			FCollisionQueryParams(SCENE_QUERY_STAT(AILineOfSight), true, IgnoreActor));
 
 		NumberOfLoSChecksPerformed++;
@@ -348,3 +349,25 @@ float AAnachroniaPlayer::CalculateLuminance(const FVector& V) {
 //	FColor *BrightestColor = &ColorBuffer[100];
 //	return *BrightestColor;
 //}
+
+
+void AAnachroniaPlayer::SaveGame() {
+	UAnachroniaSaveGame* SaveGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::CreateSaveGameObject(UAnachroniaSaveGame::StaticClass()));
+
+	SaveGameInstance->CharacterStats.Health = CurrentHealth;
+	SaveGameInstance->CharacterStats.MaxHealth = MaxHealth;
+	SaveGameInstance->CharacterStats.ImperialMarks = ImperialMarks;
+	SaveGameInstance->CharacterStats.Score = PlayerScore;
+
+	UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex);
+}
+void AAnachroniaPlayer::LoadGame() {
+	UAnachroniaSaveGame* LoadGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::CreateSaveGameObject(UAnachroniaSaveGame::StaticClass()));
+
+	LoadGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::LoadGameFromSlot(LoadGameInstance->SaveSlotName, LoadGameInstance->UserIndex));
+
+	CurrentHealth = LoadGameInstance->CharacterStats.Health;
+	MaxHealth = LoadGameInstance->CharacterStats.MaxHealth;
+	ImperialMarks = LoadGameInstance->CharacterStats.ImperialMarks;
+	PlayerScore = LoadGameInstance->CharacterStats.Score;
+}

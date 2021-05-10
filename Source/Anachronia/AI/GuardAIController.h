@@ -5,6 +5,7 @@
 #include "Perception/AIPerceptionTypes.h"
 #include "GuardAIController.generated.h"
 
+struct FAnachroniaNoiseInfo;
 class AAnachroniaPlayer;
 struct FPatrolStop;
 class AGuardPatrolPath;
@@ -61,12 +62,14 @@ public:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	AGuardPawn* GetGuardPawn() const;
+	void SetPatrolPath(AGuardPatrolPath* Path);
 	AGuardPatrolPath* GetPatrolPath() const;
 	FVector GetCurrentPatrolGoal() const;
 	float GetAlertnessValue(EAlertness AlertnessLevel) const;
 	void PickNextPatrolPoint();
 	void FindClosestPatrolPoint();
 	FPatrolStop* GetCurrentPatrolStopInfo() const;
+	void ChooseNewPatrolPath();
 	bool IsSusEnough(ESusLevel Level) const;
 	void MakeThisOriginalRotation();
 	void ResetRotation();
@@ -82,6 +85,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FORCEINLINE AAnachroniaPlayer* GetPlayer() const { return PlayerRef; }
+
+	UFUNCTION(BlueprintCallable)
+	void Respawn();
 
 	UFUNCTION(BlueprintCallable)
 	bool IsVulnerableToStealthTakeDown() const;
@@ -121,6 +127,10 @@ private:
 
 	FRotator OriginalRotation;
 	FVector OriginalLocation;
+
+	UPROPERTY()
+	AGuardPatrolPath* OriginalPatrolPath;
+	
 	float AttackCooldownTimer;
 	float BackupTimer;
 	
@@ -137,6 +147,8 @@ private:
 	
 	UFUNCTION()
 	void OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus);
+
+	void OnAnachroniaNoise(FAnachroniaNoiseInfo NoiseInfo);
 	
 	FORCEINLINE bool ShouldShowDebug() const;
 };

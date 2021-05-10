@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "GuardPatrolPath.generated.h"
 
+class ARoomVolume;
 class USplineComponent;
 
 USTRUCT()
@@ -32,6 +33,11 @@ public:
 	AGuardPatrolPath();
 
 	FORCEINLINE USplineComponent* GetSpline() const { return SplineComponent; }
+	FORCEINLINE ARoomVolume* GetRoom() const { return Room; }
+	
+	void AssignToRoom(ARoomVolume* InRoom);
+	void Claim();
+	void Abandon();
 
 protected:
 	// Called when the game starts or when spawned
@@ -39,6 +45,10 @@ protected:
 
 	UPROPERTY(VisibleAnywhere)
 	USplineComponent* SplineComponent;
+
+	// Which room this patrol path belongs to (can be none). Readonly, paths are assigned to rooms from the RoomVolume
+	UPROPERTY(Category = "Spline|Patrol", VisibleInstanceOnly, BlueprintReadOnly, Transient)
+	ARoomVolume* Room;
 
 	
 public:
