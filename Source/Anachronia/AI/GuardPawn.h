@@ -178,10 +178,14 @@ public:
 	UPROPERTY(Category = "Guard|Hearing perception", EditAnywhere, BlueprintReadWrite)
 	float HearingSusIncreaseMultiplier = 0.5f;
 
-	// How much to multiply sound loudness with when occluded
-	UPROPERTY(/*Category = "Guard|Hearing perception", EditAnywhere, BlueprintReadWrite*/)
+	// How much to multiply sound loudness (effectively its range) when occluded by one obstacle
+	UPROPERTY(Category = "Guard|Hearing perception", EditAnywhere, BlueprintReadWrite)
 	float HearingOcclusionDamp = 0.5f;
 
+	// How much to multiply remaining sound loudness with when occluded by a second obstacle
+	UPROPERTY(Category = "Guard|Hearing perception", EditAnywhere, BlueprintReadWrite)
+	float HearingDoubleOcclusionDamp = 0.0f;
+	
 	/* *****************************
 	 * Call for backup
 	 */

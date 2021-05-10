@@ -17,6 +17,8 @@
 #include "Perception/AIPerceptionTypes.h"
 #include "Perception/AISenseConfig_Sight.h"
 
+#define ECC_SoundTrace ECC_GameTraceChannel3
+
 EGuardState AGuardAIController::CurrentHighestState = EGuardState::Patrol;
 
 AGuardAIController::AGuardAIController()
@@ -602,31 +604,49 @@ void AGuardAIController::OnAnachroniaNoise(FAnachroniaNoiseInfo NoiseInfo)
 	
 	float Distance = FMath::Sqrt(SqrDistance);
 	float DistanceFactor = FMath::Clamp(Distance / NoiseInfo.MaxRange, 0.0f, 1.0f);
-	UE_LOG(LogTemp, Display, TEXT("Dist factor: %f"), DistanceFactor);
+	float Loudness = 1.0f - DistanceFactor;
+	UE_LOG(LogTemp, Display, TEXT("Loudness: %f"), Loudness);
 
-	FCollisionObjectQueryParams ObjectQueryParams(ECC_TO_BITFIELD(ECC_WorldStatic) | ECC_TO_BITFIELD(ECC_WorldDynamic));
-	FCollisionQueryParams CollisionQueryParams(SCENE_QUERY_STAT(AILineOfSight), true, this);
-	FHitResult HitResult;
-	const bool bHit = GetWorld()->LineTraceSingleByObjectType(HitResult, NoiseInfo.Location, GetPawn()->GetActorLocation(), ObjectQueryParams, CollisionQueryParams);
+	TArray<FVector> TraceStartLocations;
+	TArray<FVector> TraceEndLocations;
+	const FVector MyLocation = GetPawn()->GetActorLocation();
+	TraceStartLocations.Add(NoiseInfo.Location);
+	TraceEndLocations.Add(MyLocation);
+	
+	const float HeadHeight = GetGuardPawn()->GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	TraceStartLocations.Add(NoiseInfo.Location + FVector(0.0f, 0.0f, HeadHeight));
+	TraceEndLocations.Add(MyLocation + FVector(0.0f, 0.0f, HeadHeight));
 
-	//if (bHit)
-	//{
-	//	UE_LOG(LogTemp, Display, TEXT("Occluded!"));
-	//	DistanceFactor *= GuardPawn->HearingOcclusionDamp;
-	//	UNavigationSystemV1* NavSys = UNavigationSystemV1::GetCurrent(GetWorld());
-	//	float PathLength;
-	//	ENavigationQueryResult::Type Result = NavSys->GetPathLength(GetWorld(), Stimulus.StimulusLocation, Stimulus.ReceiverLocation, PathLength);
-	//	if (Result == ENavigationQueryResult::Success)
-	//	{
-	//		UE_LOG(LogTemp, Display, TEXT("There is a path with length: %f"), PathLength);
-	//		float PathFindDistanceFactor = FMath::Clamp(PathLength / GuardPawn->HearingMaxRadius, 0.0f, 1.0f);
-	//		if (PathFindDistanceFactor < DistanceFactor)
-	//		{
-	//			UE_LOG(LogTemp, Display, TEXT("Pathfind was closer than going through wall"));
-	//			DistanceFactor = PathFindDistanceFactor;
-	//		}
-	//	}
-	//}
+	// (these might cause issues if noise is located right next to a wall (since the trace might then start inside it or even on the other side)
+	//const FVector Tangent = FVector::CrossProduct(GetPawn()->GetActorForwardVector(), FVector::UpVector);
+	//const float TangentLength = 1.0f;
+	//TraceStartLocations.Add(NoiseInfo.Location + Tangent * TangentLength);
+	//TraceStartLocations.Add(NoiseInfo.Location - Tangent * TangentLength);
+	//TraceStartLocations.Add(MyLocation + Tangent * TangentLength);
+	//TraceStartLocations.Add(MyLocation - Tangent * TangentLength);
+		
+	int32 NumHits = 2;
+	const int32 NumLocations = FMath::Min(TraceStartLocations.Num(), TraceEndLocations.Num());
+	for (int32 i = 0; i < NumLocations; i++)
+	{
+		const int32 NewNumHits = LineTraceSound(TraceStartLocations[i], TraceEndLocations[i]);
+		if (NewNumHits < NumHits)
+		{
+			NumHits = NewNumHits;
+		}
+	}
+	
+	if (NumHits >= 1)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Noise trace hit"));
+		Loudness *= GuardPawn->HearingOcclusionDamp;
+		if (NumHits >= 2)
+		{
+			UE_LOG(LogTemp, Display, TEXT("...twice!"));
+			Loudness *= GuardPawn->HearingDoubleOcclusionDamp;
+		}
+		UE_LOG(LogTemp, Display, TEXT("New dist factor: %f"), Loudness);
+	}
 	
 	if (NoiseInfo.Tag == FName(TEXT("Backup")))
 	{
@@ -643,7 +663,7 @@ void AGuardAIController::OnAnachroniaNoise(FAnachroniaNoiseInfo NoiseInfo)
 	else if (Alertness != EAlertness::AlarmedKnowing)
 	{
 		const bool InstantDistract = NoiseInfo.Tag == FName(TEXT("Noisemaker"));
-		if (DistanceFactor >= GuardPawn->HearingFarThreshold && Alertness == EAlertness::Neutral && !InstantDistract)
+		if ((1.0f - Loudness) >= GuardPawn->HearingFarThreshold && Alertness == EAlertness::Neutral && !InstantDistract)
 		{
 			// Ignore, noise wasn't suspicious enough
 			return;
@@ -657,7 +677,7 @@ void AGuardAIController::OnAnachroniaNoise(FAnachroniaNoiseInfo NoiseInfo)
 			}
 			else
 			{
-				SusValue = FMath::Min(SusValue + (1.0f - DistanceFactor) * GuardPawn->HearingSusIncreaseMultiplier * NoiseInfo.SusMultiplier, GuardPawn->HearingMaxSus);
+				SusValue = FMath::Min(SusValue + Loudness * GuardPawn->HearingSusIncreaseMultiplier * NoiseInfo.SusMultiplier, GuardPawn->HearingMaxSus);
 			}
 		}
 
@@ -665,6 +685,31 @@ void AGuardAIController::OnAnachroniaNoise(FAnachroniaNoiseInfo NoiseInfo)
 		{
 			GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", NoiseInfo.Location);
 		}
+	}
+}
+
+int32 AGuardAIController::LineTraceSound(FVector Start, FVector End) const
+{
+	FCollisionQueryParams CollisionQueryParams(SCENE_QUERY_STAT(AILineOfHearing), true, this);
+	FHitResult HitResult;
+	GetWorld()->LineTraceSingleByChannel(HitResult, Start, End, ECC_SoundTrace, CollisionQueryParams);
+	if (HitResult.IsValidBlockingHit())
+	{
+		CollisionQueryParams.AddIgnoredActor(HitResult.Actor.Get());
+		GetWorld()->LineTraceSingleByChannel(HitResult, HitResult.Location, End, ECC_SoundTrace, CollisionQueryParams);
+		if (HitResult.IsValidBlockingHit())
+		{
+			return 2;
+		}
+		else
+		{
+			return 1;
+		}
+
+	}
+	else
+	{
+		return 0;
 	}
 }
 
