@@ -21,6 +21,9 @@ struct FCharacterStats {
 
 	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
 	int32 Score;
+
+	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
+	TArray<FName> ReadBooksNames;
 };
 
 /**

@@ -20,6 +20,7 @@
 #include "Components/ChildActorComponent.h"
 #include "../EquippableItems/BaseEquipItem.h"
 #include "../Utility/AnachroniaSaveGame.h"
+//#include "../Utility/Achievements.h"
 
 
 
@@ -358,6 +359,7 @@ void AAnachroniaPlayer::SaveGame() {
 	SaveGameInstance->CharacterStats.MaxHealth = MaxHealth;
 	SaveGameInstance->CharacterStats.ImperialMarks = ImperialMarks;
 	SaveGameInstance->CharacterStats.Score = PlayerScore;
+	SaveGameInstance->CharacterStats.ReadBooksNames = PlayerReadBooksNames;
 
 	UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex);
 }
@@ -370,4 +372,5 @@ void AAnachroniaPlayer::LoadGame() {
 	MaxHealth = LoadGameInstance->CharacterStats.MaxHealth;
 	ImperialMarks = LoadGameInstance->CharacterStats.ImperialMarks;
 	PlayerScore = LoadGameInstance->CharacterStats.Score;
+	PlayerReadBooksNames = LoadGameInstance->CharacterStats.ReadBooksNames;
 }
