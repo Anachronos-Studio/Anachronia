@@ -9,6 +9,7 @@
 #include "AnachroniaPlayer.generated.h"
 
 class ABaseEquipItem;
+//class UAchievementsBase;
 UCLASS()
 class ANACHRONIA_API AAnachroniaPlayer : public ACharacter, public IAISightTargetInterface
 {
@@ -42,6 +43,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = EquippableItems)
 	class UChildActorComponent* EquippableItem;
+
+
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
 	//class UChildActorComponent* Detector;
@@ -156,11 +159,21 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = MainAttributes)
 	float BluntDamage;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Scoring)
+	// Save game data related below
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scoring & Achievements")
 	int32 PlayerScore;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Scoring)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scoring & Achievements")
 	int32 ImperialMarks;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
+	TArray<FName> PlayerReadBooksNames;
+
+	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, "Scoring & Achievements")
+	TArray<UAchievementsBase*> PlayerAchievements;*/
+
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
+	//TMap<FName, TSubclassOf<UAchievementsBase>> PlayerAchievementsMap;
 protected:
 
 	/** Handles moving forward/backward */
