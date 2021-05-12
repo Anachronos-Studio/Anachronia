@@ -33,6 +33,9 @@ public:
 	void OnDeath(bool bNonLethalDeath);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Guard")
+	void OnDamaged(float NewHealth, float OldHealth);
+	
+	UFUNCTION(BlueprintImplementableEvent, Category = "Guard")
 	void OnSusLevelIncreased(ESusLevel NewSusLevel, ESusLevel OldSusLevel);
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Guard")
@@ -40,6 +43,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Guard")
 	void OnCallForBackup();
+
+	UFUNCTION(BlueprintImplementableEvent, Category = "Guard")
+	void OnAttack();
 
 	void Respawn();
 	
