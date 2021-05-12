@@ -24,6 +24,7 @@ ABaseEquipItem::ABaseEquipItem()
 
     SkeletalMesh = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("SkeletalMesh"));
     SkeletalMesh->SetupAttachment(RootPlaceholder);
+	SkeletalMesh->BoundsScale = 10.0f; // Makes sure it's not incorrectly occlusion culled when inside a wall but rendered on top by material
     
     // PM to Designers: Override these values in editor!!!
     BaseWeaponDamage = 1.f;
