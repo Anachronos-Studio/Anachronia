@@ -30,6 +30,7 @@ AGuardPawn::AGuardPawn()
 	GetCharacterMovement()->bUseRVOAvoidance = true;
 	GetCharacterMovement()->AvoidanceConsiderationRadius = 250.0f;
 	GetCharacterMovement()->AvoidanceWeight = 0.5f;
+	Tags.Add(TEXT("Guard"));
 
 	GetMesh()->SetRelativeLocation(FVector(0.0f, 0.0f, -GetCapsuleComponent()->GetUnscaledCapsuleHalfHeight()));
 
@@ -111,6 +112,41 @@ void AGuardPawn::Respawn()
 
 	GetCharacterMovement()->SetMovementMode(GetCharacterMovement()->DefaultLandMovementMode);
 	GetCapsuleComponent()->SetSimulatePhysics(false);
+}
+
+bool AGuardPawn::CanBeSeenFrom(const FVector& ObserverLocation, FVector& OutSeenLocation,
+	int32& NumberOfLoSChecksPerformed, float& OutSightStrength, const AActor* IgnoreActor) const
+{
+	if (GetGuardAI()->GetState() != EGuardState::Dead)
+	{
+		return false; // Guards only have reason to be able to see dead guards
+	}
+
+	const float HalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	const float ZOffsetList[]{ HalfHeight, 0.0f, -HalfHeight };
+
+	for (float ZOffset : ZOffsetList)
+	{
+		const FVector TargetLocation = GetActorLocation() + GetActorUpVector() * ZOffset;
+
+		FHitResult HitResult;
+		const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, ObserverLocation, TargetLocation,
+			ECC_Visibility,
+			FCollisionQueryParams(SCENE_QUERY_STAT(AILineOfSight), true, IgnoreActor));
+
+		NumberOfLoSChecksPerformed++;
+
+		if (!bHit || (HitResult.Actor.IsValid() && HitResult.Actor->IsOwnedBy(this)))
+		{
+			// If this trace was blacked by nothing, or blocked by target itself (somehow), we can be seen
+			OutSeenLocation = TargetLocation;
+			OutSightStrength = 1.0f;
+			return true;
+		}
+	}
+
+	OutSightStrength = 0.0f;
+	return false;
 }
 
 void AGuardPawn::SetDamageToCurrentHealth(float Damage, bool bNonLethal)

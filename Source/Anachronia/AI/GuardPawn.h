@@ -5,6 +5,8 @@
 #include "CoreMinimal.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/Character.h"
+#include "Perception/AISightTargetInterface.h"
+
 #include "GuardPawn.generated.h"
 
 enum class ESusLevel : uint8;
@@ -16,8 +18,9 @@ class AGuardPatrolPath;
 class UGuardPawnMovementComponent;
 
 UCLASS()
-class ANACHRONIA_API AGuardPawn : public ACharacter
+class ANACHRONIA_API AGuardPawn : public ACharacter, public IAISightTargetInterface
 {
+private:
 	GENERATED_BODY()
 
 public:
@@ -47,9 +50,13 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Guard")
 	void OnAttack();
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Guard")
+	void OnSawDeadGuardBody();
+
 	void Respawn();
 	
-public:
+	virtual bool CanBeSeenFrom(const FVector& ObserverLocation, FVector& OutSeenLocation, int32& NumberOfLoSChecksPerformed, float& OutSightStrength, const AActor* IgnoreActor) const override;
+
 	UFUNCTION(BlueprintCallable, Category = "Guard")
 	void SetDamageToCurrentHealth(float Damage, bool bNonLethal);
 	
