@@ -9,7 +9,7 @@
 #include "AnachroniaPlayer.generated.h"
 
 class ABaseEquipItem;
-class UAchievementsBase;
+//class UAchievementsBase;
 UCLASS()
 class ANACHRONIA_API AAnachroniaPlayer : public ACharacter, public IAISightTargetInterface
 {
@@ -172,8 +172,8 @@ public:
 	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, "Scoring & Achievements")
 	TArray<UAchievementsBase*> PlayerAchievements;*/
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
-	TMap<FString, TSubclassOf<UAchievementsBase>> PlayerAchievementsMap;
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
+	//TMap<FName, TSubclassOf<UAchievementsBase>> PlayerAchievementsMap;
 protected:
 
 	/** Handles moving forward/backward */
