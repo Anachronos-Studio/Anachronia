@@ -532,6 +532,8 @@ void AGuardAIController::Respawn()
 		UE_LOG(LogTemp, Error, TEXT("Could not find a AnachroniaPlayer actor in the world!"));
 	}
 
+	GuardCorpsesSeen.Empty();
+
 	GuardPawn->Respawn();
 
 	UGameplayStatics::GetAllActorsOfClass(GetWorld(), AGuardAIController::StaticClass(), AllGuards);
@@ -587,6 +589,28 @@ void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 			UE_LOG(LogTemp, Display, TEXT("'twas the player!"));
 			bCanSeePlayer = Stimulus.WasSuccessfullySensed();
 			GetBlackboardComponent()->SetValueAsBool(TEXT("HasLineOfSight"), bCanSeePlayer);
+		}
+		else if (Actor->ActorHasTag(FName(TEXT("Guard"))))
+		{
+			UE_LOG(LogTemp, Display, TEXT("'twas another guard!"))
+			AGuardPawn* DeadBody = Cast<AGuardPawn>(Actor);
+			if (DeadBody != nullptr)
+			{
+				if (DeadBody->GetGuardAI() && DeadBody->GetGuardAI()->GetState() == EGuardState::Dead)
+				{
+					if (GuardCorpsesSeen.Contains(DeadBody))
+					{
+						// already seen this body
+						UE_LOG(LogTemp, Display, TEXT("But I've already seen this corpse"));
+					}
+					else
+					{
+						GEngine->AddOnScreenDebugMessage(-1, 2.0f, FColor::Yellow, TEXT("Oh shit, a dead coworker!"));
+						DeadBody->OnSawDeadGuardBody();
+						GuardCorpsesSeen.Add(DeadBody);
+					}
+				}
+			}
 		}
 	}
 }

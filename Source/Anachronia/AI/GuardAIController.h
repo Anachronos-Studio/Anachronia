@@ -139,6 +139,9 @@ private:
 
 	UPROPERTY()
 	TArray<AActor*> AllGuards;
+
+	UPROPERTY()
+	TArray<AGuardPawn*> GuardCorpsesSeen;
 	
 	static EGuardState CurrentHighestState;
 
