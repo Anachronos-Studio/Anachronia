@@ -173,9 +173,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
 	TArray<FName> PlayerReadBooksNames;
 
-	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, "Scoring & Achievements")
-	TArray<UAchievementsBase*> PlayerAchievements;*/
-
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
 	TMap<FName, TSubclassOf<UAchievement>> PlayerAchievementsMap;
 protected:
@@ -301,6 +298,8 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void SaveAchievementsStatus(UAnachroniaSaveGame* SaveGameInstance);
-
+	UFUNCTION(BlueprintCallable)
 	void LoadAchievementsStatus(UAnachroniaSaveGame* LoadGameInstance);
+
+	void InitiateAchievements(UAnachroniaSaveGame* SaveGameInstance);
 };
