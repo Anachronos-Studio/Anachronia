@@ -197,8 +197,10 @@ void AAnachroniaPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 
 	// Bind movement events
-	PlayerInputComponent->BindAxis("MoveForward", this, &AAnachroniaPlayer::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &AAnachroniaPlayer::MoveRight);
+	if (!bCannotMove) {
+		PlayerInputComponent->BindAxis("MoveForward", this, &AAnachroniaPlayer::MoveForward);
+		PlayerInputComponent->BindAxis("MoveRight", this, &AAnachroniaPlayer::MoveRight);
+	}
 
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
@@ -361,7 +363,7 @@ void AAnachroniaPlayer::SaveGame() {
 	SaveGameInstance->CharacterStats.Score = PlayerScore;
 	SaveGameInstance->CharacterStats.ReadBooksNames = PlayerReadBooksNames;
 
-	
+	SaveAchievementsStatus(SaveGameInstance);
 
 	UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex);
 }
@@ -369,6 +371,8 @@ void AAnachroniaPlayer::LoadGame() {
 	UAnachroniaSaveGame* LoadGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::CreateSaveGameObject(UAnachroniaSaveGame::StaticClass()));
 
 	LoadGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::LoadGameFromSlot(LoadGameInstance->SaveSlotName, LoadGameInstance->UserIndex));
+
+	LoadAchievementsStatus(LoadGameInstance);
 
 	CurrentHealth = LoadGameInstance->CharacterStats.Health;
 	MaxHealth = LoadGameInstance->CharacterStats.MaxHealth;
@@ -385,14 +389,33 @@ void AAnachroniaPlayer::ActivateAchievement(FName Name) {
 
 void AAnachroniaPlayer::SaveAchievementsStatus(UAnachroniaSaveGame* SaveGameInstance) {
 	for (auto& AchievementElement : PlayerAchievementsMap) {
-		for (auto AchievementName : SaveGameInstance->CharacterStats.AchievementName) {
+		if (SaveGameInstance->CharacterStats.AchievementName.Num() <= 0)
+			InitiateAchievements(SaveGameInstance);
+		for (int32 i = 0; i < SaveGameInstance->CharacterStats.AchievementName.Num(); i++) {
+			FName AchievementName = SaveGameInstance->CharacterStats.AchievementName[i];
 			if (AchievementName == AchievementElement.Key) {
-				//SaveGameInstance->CharacterStats.AchievementsAreActivated.IndexOfByKey(AchievementName);
 				UAchievement* PlayerAchievementObject = AchievementElement.Value.GetDefaultObject();
-				PlayerAchievementObject->bIsAchieved;
-				//SaveGameInstance->CharacterStats.AchievementsAreActivated.Find(1) = PlayerAchievementObject->bIsAchieved;
-				//SaveGameInstance->CharacterStats.AchievementName.IndexOfByKey(AchievementName) = AchievementName;
+				SaveGameInstance->CharacterStats.AchievementsAreActivated[i] = PlayerAchievementObject->bIsAchieved;
 			}
 		}
 	}
+}
+
+void AAnachroniaPlayer::LoadAchievementsStatus(UAnachroniaSaveGame* LoadGameInstance) {
+	for (int32 i = 0; i < LoadGameInstance->CharacterStats.AchievementName.Num(); i++) {
+		FName AchievementName = LoadGameInstance->CharacterStats.AchievementName[i];
+		for (auto& AchievementElement : PlayerAchievementsMap) {
+			if (AchievementName == AchievementElement.Key) {
+				AchievementElement.Value.GetDefaultObject()->bIsAchieved = LoadGameInstance->CharacterStats.AchievementsAreActivated[i];
+			}
+		}
+	}
+}
+
+void AAnachroniaPlayer::InitiateAchievements(UAnachroniaSaveGame* SaveGameInstance) {	
+	int32 i = 0;
+	for (auto& AchievementElement : PlayerAchievementsMap) {
+		SaveGameInstance->CharacterStats.AchievementName.Add(AchievementElement.Value.GetDefaultObject()->Name);
+		SaveGameInstance->CharacterStats.AchievementsAreActivated.Add(AchievementElement.Value.GetDefaultObject()->bIsAchieved);
+	}	
 }
