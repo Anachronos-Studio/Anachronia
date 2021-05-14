@@ -24,6 +24,17 @@ struct FCharacterStats {
 
 	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
 	TArray<FName> ReadBooksNames;
+
+	//TMap<FName, TSubclassOf<class ABaseEquipItem>> Items;
+
+	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
+	TArray<FName> EquippableItems;
+
+	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
+	TArray<FName> AchievementName;
+
+	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
+	TArray<bool> AchievementsAreActivated;
 };
 
 /**
@@ -46,4 +57,6 @@ public:
 
 	UPROPERTY(VisibleAnywhere, Category = Basic)
 	FCharacterStats CharacterStats;
+
+
 };

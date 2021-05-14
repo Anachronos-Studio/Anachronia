@@ -9,7 +9,8 @@
 #include "AnachroniaPlayer.generated.h"
 
 class ABaseEquipItem;
-//class UAchievementsBase;
+class UAchievement;
+class UAnachroniaSaveGame;
 UCLASS()
 class ANACHRONIA_API AAnachroniaPlayer : public ACharacter, public IAISightTargetInterface
 {
@@ -172,8 +173,8 @@ public:
 	/*UPROPERTY(EditAnywhere, BlueprintReadWrite, "Scoring & Achievements")
 	TArray<UAchievementsBase*> PlayerAchievements;*/
 
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
-	//TMap<FName, TSubclassOf<UAchievementsBase>> PlayerAchievementsMap;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
+	TMap<FName, TSubclassOf<UAchievement>> PlayerAchievementsMap;
 protected:
 
 	/** Handles moving forward/backward */
@@ -291,4 +292,11 @@ public:
 	void SaveGame();
 	UFUNCTION(BlueprintCallable)
 	void LoadGame();
+
+	UFUNCTION(BlueprintCallable)
+	void ActivateAchievement(FName Name);
+
+	UFUNCTION(BlueprintCallable)
+	void SaveAchievementsStatus(UAnachroniaSaveGame* SaveGameInstance);
+
 };

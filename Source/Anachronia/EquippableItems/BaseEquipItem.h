@@ -16,6 +16,9 @@ public:
     // Sets default values for this pawn's properties
     ABaseEquipItem();
 
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = SaveData)
+    FName ItemName;
+
     UPROPERTY(VisibleAnywhere)
     class USceneComponent* RootPlaceholder;
 
