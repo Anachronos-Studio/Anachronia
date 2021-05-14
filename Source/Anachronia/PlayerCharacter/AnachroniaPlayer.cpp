@@ -20,7 +20,7 @@
 #include "Components/ChildActorComponent.h"
 #include "../EquippableItems/BaseEquipItem.h"
 #include "../Utility/AnachroniaSaveGame.h"
-//#include "../Utility/AchievementsBase.h"
+#include "../Utility/Achievement.h"
 
 
 
@@ -361,6 +361,8 @@ void AAnachroniaPlayer::SaveGame() {
 	SaveGameInstance->CharacterStats.Score = PlayerScore;
 	SaveGameInstance->CharacterStats.ReadBooksNames = PlayerReadBooksNames;
 
+	
+
 	UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex);
 }
 void AAnachroniaPlayer::LoadGame() {
@@ -373,4 +375,24 @@ void AAnachroniaPlayer::LoadGame() {
 	ImperialMarks = LoadGameInstance->CharacterStats.ImperialMarks;
 	PlayerScore = LoadGameInstance->CharacterStats.Score;
 	PlayerReadBooksNames = LoadGameInstance->CharacterStats.ReadBooksNames;
+}
+
+void AAnachroniaPlayer::ActivateAchievement(FName Name) {
+	if (PlayerAchievementsMap.Contains(Name)) {
+		PlayerAchievementsMap.Find(Name)->GetDefaultObject()->bIsAchieved = true;
+	}
+}
+
+void AAnachroniaPlayer::SaveAchievementsStatus(UAnachroniaSaveGame* SaveGameInstance) {
+	for (auto& AchievementElement : PlayerAchievementsMap) {
+		for (auto AchievementName : SaveGameInstance->CharacterStats.AchievementName) {
+			if (AchievementName == AchievementElement.Key) {
+				//SaveGameInstance->CharacterStats.AchievementsAreActivated.IndexOfByKey(AchievementName);
+				UAchievement* PlayerAchievementObject = AchievementElement.Value.GetDefaultObject();
+				PlayerAchievementObject->bIsAchieved;
+				//SaveGameInstance->CharacterStats.AchievementsAreActivated.Find(1) = PlayerAchievementObject->bIsAchieved;
+				//SaveGameInstance->CharacterStats.AchievementName.IndexOfByKey(AchievementName) = AchievementName;
+			}
+		}
+	}
 }
