@@ -54,7 +54,7 @@ void AGuardAIController::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 	
 	float Rate = GuardPawn->SusBaseIncreaseRate;
-	if (bCanSeePlayer)
+	if (bCanSeePlayer && PlayerRef)
 	{
 		Rate *= GetAlertnessValue(Alertness);
 		
@@ -619,6 +619,12 @@ void AGuardAIController::OnAnachroniaNoise(FAnachroniaNoiseInfo NoiseInfo)
 {
 	UE_LOG(LogTemp, Display, TEXT("Heard noise!!"));
 
+	if (NoiseInfo.MaxRange == 0)
+	{
+		UE_LOG(LogTemp, Display, TEXT("0-ranged noise"));
+		return;
+	}
+	
 	const float SqrDistance = FVector::DistSquared(NoiseInfo.Location, GetPawn()->GetActorLocation());
 	if (SqrDistance > FMath::Square(NoiseInfo.MaxRange))
 	{
@@ -629,7 +635,7 @@ void AGuardAIController::OnAnachroniaNoise(FAnachroniaNoiseInfo NoiseInfo)
 	float Distance = FMath::Sqrt(SqrDistance);
 	float DistanceFactor = FMath::Clamp(Distance / NoiseInfo.MaxRange, 0.0f, 1.0f);
 	float Loudness = 1.0f - DistanceFactor;
-	UE_LOG(LogTemp, Display, TEXT("Loudness: %f"), Loudness);
+	//UE_LOG(LogTemp, Display, TEXT("Loudness: %f"), Loudness);
 
 	TArray<FVector> TraceStartLocations;
 	TArray<FVector> TraceEndLocations;
@@ -662,14 +668,14 @@ void AGuardAIController::OnAnachroniaNoise(FAnachroniaNoiseInfo NoiseInfo)
 	
 	if (NumHits >= 1)
 	{
-		UE_LOG(LogTemp, Display, TEXT("Noise trace hit"));
+		//UE_LOG(LogTemp, Display, TEXT("Noise trace hit"));
 		Loudness *= GuardPawn->HearingOcclusionDamp;
 		if (NumHits >= 2)
 		{
 			UE_LOG(LogTemp, Display, TEXT("...twice!"));
 			Loudness *= GuardPawn->HearingDoubleOcclusionDamp;
 		}
-		UE_LOG(LogTemp, Display, TEXT("New dist factor: %f"), Loudness);
+		//UE_LOG(LogTemp, Display, TEXT("New dist factor: %f"), Loudness);
 	}
 	
 	if (NoiseInfo.Tag == FName(TEXT("Backup")))
