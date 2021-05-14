@@ -128,13 +128,15 @@ void AGuardAIController::Tick(float DeltaTime)
 
 	if (ShouldShowDebug())
 	{
-		const FString Msg = FString::Printf(TEXT("Sus: %3.0f%% [%s]\nAlertness: %s\nMain state: %s\n%s\nHighest state: %s"),
+		const FString Msg = FString::Printf(TEXT("Sus: %3.0f%% [%s]\nAlertness: %s\nMain state: %s\n%s\nHighest state: %s\nHP: %f/%f"),
 			SusValue * 100.0f,
 			*StaticEnum<ESusLevel>()->GetValueAsString(GetSusLevel()),
 			*StaticEnum<EAlertness>()->GetValueAsString(Alertness),
 			*StaticEnum<EGuardState>()->GetValueAsString(State),
 			bCanSeePlayer ? TEXT("Player in sight") : TEXT("Can't see player"),
-			*StaticEnum<EGuardState>()->GetValueAsString(CurrentHighestState)
+			*StaticEnum<EGuardState>()->GetValueAsString(CurrentHighestState),
+			GuardPawn->CurrentHealth,
+			GuardPawn->MaxHealth
 		);
 		GEngine->AddOnScreenDebugMessage(419, 1.0f, FColor::White, Msg);
 
