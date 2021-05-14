@@ -27,17 +27,19 @@ EBTNodeResult::Type UBTTask_GuardPatrolReachedGoal::ExecuteTask(UBehaviorTreeCom
 	{
 		// Guard reached their goal, do they intend to stop and wait here?
 		FBTPatrolTaskMemory* MyMemory = (FBTPatrolTaskMemory*)NodeMemory;
+		
+		if (Guard->GetPatrolPath() == nullptr)
+		{
+			// No need to constantly switch between moveto and wait tasks when no patrol path exists, just wait a fixed small amount instead of 0 seconds
+			MyMemory->RemainingStopTime = 5.0f;
+			return EBTNodeResult::InProgress;
+		}
+		
 		FPatrolStop* Stop = Guard->GetCurrentPatrolStopInfo();
 		if (Stop != nullptr)
 		{
 			Guard->PickNextPatrolPoint();
 			MyMemory->RemainingStopTime = Stop->Duration;
-			return EBTNodeResult::InProgress;
-		}
-		else
-		{
-			// No need to constantly switch between moveto and wait tasks when no patrol path exists, just wait a fixed small amount instead of 0 seconds
-			MyMemory->RemainingStopTime = 5.0f;
 			return EBTNodeResult::InProgress;
 		}
 	}
