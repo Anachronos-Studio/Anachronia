@@ -668,14 +668,14 @@ void AGuardAIController::OnAnachroniaNoise(FAnachroniaNoiseInfo NoiseInfo)
 	
 	if (NumHits >= 1)
 	{
-		//UE_LOG(LogTemp, Display, TEXT("Noise trace hit"));
+		UE_LOG(LogTemp, Display, TEXT("Noise trace hit"));
 		Loudness *= GuardPawn->HearingOcclusionDamp;
 		if (NumHits >= 2)
 		{
 			UE_LOG(LogTemp, Display, TEXT("...twice!"));
 			Loudness *= GuardPawn->HearingDoubleOcclusionDamp;
 		}
-		//UE_LOG(LogTemp, Display, TEXT("New dist factor: %f"), Loudness);
+		UE_LOG(LogTemp, Display, TEXT("New dist factor: %f"), Loudness);
 	}
 	
 	if (NoiseInfo.Tag == FName(TEXT("Backup")))
