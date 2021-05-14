@@ -2,6 +2,7 @@
 
 #include "AnachroniaSaveGame.h"
 #include "../Anachronia.h"
+#include "../EquippableItems/BaseEquipItem.h"
 
 UAnachroniaSaveGame::UAnachroniaSaveGame() {
 	SaveSlotName = TEXT("Lucie");
