@@ -116,6 +116,9 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
 	float PlayerCrouchedSpeed;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = BasicAttributes)
+	bool bCannotMove = false;
+
 	// Stealth properties below
 
 	/** This value will determine the overall visibility of the player to the AI */
@@ -299,4 +302,5 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void SaveAchievementsStatus(UAnachroniaSaveGame* SaveGameInstance);
 
+	void LoadAchievementsStatus(UAnachroniaSaveGame* LoadGameInstance);
 };

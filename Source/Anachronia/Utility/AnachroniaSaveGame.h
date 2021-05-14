@@ -33,7 +33,7 @@ struct FCharacterStats {
 	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
 	TArray<FName> AchievementName;
 
-	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
+	UPROPERTY(VisibleAnywhere, Category = Basic)
 	TArray<bool> AchievementsAreActivated;
 };
 
