@@ -197,8 +197,10 @@ void AAnachroniaPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCo
 
 
 	// Bind movement events
-	PlayerInputComponent->BindAxis("MoveForward", this, &AAnachroniaPlayer::MoveForward);
-	PlayerInputComponent->BindAxis("MoveRight", this, &AAnachroniaPlayer::MoveRight);
+	if (!bCannotMove) {
+		PlayerInputComponent->BindAxis("MoveForward", this, &AAnachroniaPlayer::MoveForward);
+		PlayerInputComponent->BindAxis("MoveRight", this, &AAnachroniaPlayer::MoveRight);
+	}
 
 	// We have 2 versions of the rotation bindings to handle different kinds of devices differently
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
@@ -385,13 +387,23 @@ void AAnachroniaPlayer::ActivateAchievement(FName Name) {
 
 void AAnachroniaPlayer::SaveAchievementsStatus(UAnachroniaSaveGame* SaveGameInstance) {
 	for (auto& AchievementElement : PlayerAchievementsMap) {
-		for (auto AchievementName : SaveGameInstance->CharacterStats.AchievementName) {
+
+		for (int32 i = 0; i < SaveGameInstance->CharacterStats.AchievementName.Num(); i++) {
+			FName AchievementName = SaveGameInstance->CharacterStats.AchievementName[i];
 			if (AchievementName == AchievementElement.Key) {
-				//SaveGameInstance->CharacterStats.AchievementsAreActivated.IndexOfByKey(AchievementName);
 				UAchievement* PlayerAchievementObject = AchievementElement.Value.GetDefaultObject();
-				PlayerAchievementObject->bIsAchieved;
-				//SaveGameInstance->CharacterStats.AchievementsAreActivated.Find(1) = PlayerAchievementObject->bIsAchieved;
-				//SaveGameInstance->CharacterStats.AchievementName.IndexOfByKey(AchievementName) = AchievementName;
+				SaveGameInstance->CharacterStats.AchievementsAreActivated[i] = PlayerAchievementObject->bIsAchieved;
+			}
+		}
+	}
+}
+
+void AAnachroniaPlayer::LoadAchievementsStatus(UAnachroniaSaveGame* SaveGameInstance) {
+	for (int32 i = 0; i < SaveGameInstance->CharacterStats.AchievementName.Num(); i++) {
+		FName AchievementName = SaveGameInstance->CharacterStats.AchievementName[i];
+		for (auto& AchievementElement : PlayerAchievementsMap) {
+			if (AchievementName == AchievementElement.Key) {
+
 			}
 		}
 	}
