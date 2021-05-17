@@ -5,6 +5,7 @@
 
 #include "GuardAIController.h"
 #include "GuardPawn.h"
+#include "BehaviorTree/BlackboardComponent.h"
 
 UBTTask_InspectLookAround::UBTTask_InspectLookAround()
 {
@@ -19,6 +20,11 @@ EBTNodeResult::Type UBTTask_InspectLookAround::ExecuteTask(UBehaviorTreeComponen
 	MyMemory->OriginalRotation = GetGuardController(OwnerComp)->GetControlRotation();
 	TurnToLook(OwnerComp, MyMemory);
 	UE_LOG(LogTemp, Display, TEXT("Execute look around"));
+	if (OwnerComp.GetBlackboardComponent()->GetValueAsBool("SawBody"))
+	{
+		OwnerComp.GetBlackboardComponent()->SetValueAsBool("SawBody", false);
+		GetGuardPawn(OwnerComp)->OnInspectDeadGuardBody();
+	}
 	return EBTNodeResult::InProgress;
 }
 
