@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Perception/AISightTargetInterface.h"
 #include "Templates/UnrealTemplate.h"
+#include "UObject/WeakObjectPtrTemplates.h"
 #include "AnachroniaPlayer.generated.h"
 
 class ABaseEquipItem;
@@ -173,8 +174,10 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
 	TArray<FName> PlayerReadBooksNames;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scoring & Achievements")
 	TMap<FName, TSubclassOf<UAchievement>> PlayerAchievementsMap;
+
+
 protected:
 
 	/** Handles moving forward/backward */
