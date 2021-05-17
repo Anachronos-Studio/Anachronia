@@ -129,19 +129,22 @@ bool AGuardPawn::CanBeSeenFrom(const FVector& ObserverLocation, FVector& OutSeen
 	{
 		const FVector TargetLocation = GetActorLocation() + GetActorUpVector() * ZOffset;
 
-		FHitResult HitResult;
-		const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, ObserverLocation, TargetLocation,
-			ECC_Visibility,
-			FCollisionQueryParams(SCENE_QUERY_STAT(AILineOfSight), true, IgnoreActor));
-
-		NumberOfLoSChecksPerformed++;
-
-		if (!bHit || (HitResult.Actor.IsValid() && HitResult.Actor->IsOwnedBy(this)))
+		if (FVector::Distance(ObserverLocation, TargetLocation) <= BodyCanBeSeenFromRange)
 		{
-			// If this trace was blacked by nothing, or blocked by target itself (somehow), we can be seen
-			OutSeenLocation = TargetLocation;
-			OutSightStrength = 1.0f;
-			return true;
+			FHitResult HitResult;
+			const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, ObserverLocation, TargetLocation,
+				ECC_Visibility,
+				FCollisionQueryParams(SCENE_QUERY_STAT(AILineOfSight), true, IgnoreActor));
+
+			NumberOfLoSChecksPerformed++;
+
+			if (!bHit || (HitResult.Actor.IsValid() && HitResult.Actor->IsOwnedBy(this)))
+			{
+				// If this trace was blacked by nothing, or blocked by target itself (somehow), we can be seen
+				OutSeenLocation = TargetLocation;
+				OutSightStrength = 1.0f;
+				return true;
+			}
 		}
 	}
 

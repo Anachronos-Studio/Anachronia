@@ -53,6 +53,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Guard")
 	void OnSawDeadGuardBody();
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Guard")
+	void OnInspectDeadGuardBody();
+
 	void Respawn();
 	
 	virtual bool CanBeSeenFrom(const FVector& ObserverLocation, FVector& OutSeenLocation, int32& NumberOfLoSChecksPerformed, float& OutSightStrength, const AActor* IgnoreActor) const override;
@@ -171,6 +174,9 @@ public:
 	UPROPERTY(Category = "Guard|Sight perception", EditAnywhere, BlueprintReadWrite)
 	float SusDistanceRateMultiplier = 1.0f;
 
+	UPROPERTY(Category = "Guard|Sight perception", EditAnywhere, BlueprintReadWrite)
+	float BodyCanBeSeenFromRange = 2000.0f;
+	
 	/* *****************************
 	 * Hearing perception
 	 */
