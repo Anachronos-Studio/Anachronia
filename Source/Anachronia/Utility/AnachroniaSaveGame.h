@@ -58,5 +58,5 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Basic)
 	FCharacterStats CharacterStats;
 
-
+	
 };
