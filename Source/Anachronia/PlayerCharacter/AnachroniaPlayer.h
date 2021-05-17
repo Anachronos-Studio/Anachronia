@@ -178,6 +178,7 @@ public:
 	TMap<FName, TSubclassOf<UAchievement>> PlayerAchievementsMap;
 
 
+
 protected:
 
 	/** Handles moving forward/backward */

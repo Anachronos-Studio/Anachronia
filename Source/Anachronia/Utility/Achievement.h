@@ -47,4 +47,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	FName GetAchievementName() { return Name; }
+
+	UFUNCTION(BlueprintCallable)
+	void SetAchievementTrue() {
+		bIsAchieved = true;
+	}
 };
