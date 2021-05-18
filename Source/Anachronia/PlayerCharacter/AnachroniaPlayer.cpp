@@ -354,6 +354,7 @@ float AAnachroniaPlayer::CalculateLuminance(const FVector& V) {
 //}
 
 
+
 void AAnachroniaPlayer::SaveGame() {
 	UAnachroniaSaveGame* SaveGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::CreateSaveGameObject(UAnachroniaSaveGame::StaticClass()));
 
@@ -388,6 +389,13 @@ void AAnachroniaPlayer::ActivateAchievement(FName Name) {
 	if (PlayerAchievementsMap.Contains(Name)) {
 		PlayerAchievementsMap.Find(Name)->GetDefaultObject()->bIsAchieved = true;
 	}
+}
+
+
+void AAnachroniaPlayer::DisableAchievement(FName Name) {
+	if (PlayerAchievementsMap.Contains(Name)) {
+		PlayerAchievementsMap.Find(Name)->GetDefaultObject()->bIsAchieved = false;
+	}	
 }
 
 void AAnachroniaPlayer::SaveAchievementsStatus(UAnachroniaSaveGame* SaveGameInstance) {

@@ -26,7 +26,7 @@ public:
 	FString Description;
 
 	/** Checkbox wether the Achievement is achieved or not*/
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scoring & Achievements")
 	bool bIsAchieved;
 
 	/** Set the image for the Achievement */

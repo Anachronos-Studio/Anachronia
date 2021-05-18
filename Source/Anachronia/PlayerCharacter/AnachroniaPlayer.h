@@ -179,6 +179,7 @@ public:
 
 
 
+
 protected:
 
 	/** Handles moving forward/backward */
@@ -297,8 +298,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void LoadGame();
 
+	/** Set the achievement to true*/
 	UFUNCTION(BlueprintCallable)
 	void ActivateAchievement(FName Name);
+	/** Use this to set the  achievement false*/
+	UFUNCTION(BlueprintCallable)
+	void DisableAchievement(FName Name);
 
 	UFUNCTION(BlueprintCallable)
 	void SaveAchievementsStatus(UAnachroniaSaveGame* SaveGameInstance);
