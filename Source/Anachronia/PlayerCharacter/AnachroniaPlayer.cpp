@@ -354,8 +354,12 @@ float AAnachroniaPlayer::CalculateLuminance(const FVector& V) {
 //}
 
 
+
 void AAnachroniaPlayer::SaveGame() {
 	UAnachroniaSaveGame* SaveGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::CreateSaveGameObject(UAnachroniaSaveGame::StaticClass()));
+
+	if (SaveGameInstance->CharacterStats.AchievementName.Num() <= 0)
+		InitiateAchievements(SaveGameInstance);
 
 	SaveGameInstance->CharacterStats.Health = CurrentHealth;
 	SaveGameInstance->CharacterStats.MaxHealth = MaxHealth;
@@ -387,10 +391,16 @@ void AAnachroniaPlayer::ActivateAchievement(FName Name) {
 	}
 }
 
+
+void AAnachroniaPlayer::DisableAchievement(FName Name) {
+	if (PlayerAchievementsMap.Contains(Name)) {
+		PlayerAchievementsMap.Find(Name)->GetDefaultObject()->bIsAchieved = false;
+	}	
+}
+
 void AAnachroniaPlayer::SaveAchievementsStatus(UAnachroniaSaveGame* SaveGameInstance) {
 	for (auto& AchievementElement : PlayerAchievementsMap) {
-		if (SaveGameInstance->CharacterStats.AchievementName.Num() <= 0)
-			InitiateAchievements(SaveGameInstance);
+
 		for (int32 i = 0; i < SaveGameInstance->CharacterStats.AchievementName.Num(); i++) {
 			FName AchievementName = SaveGameInstance->CharacterStats.AchievementName[i];
 			if (AchievementName == AchievementElement.Key) {
@@ -413,7 +423,6 @@ void AAnachroniaPlayer::LoadAchievementsStatus(UAnachroniaSaveGame* LoadGameInst
 }
 
 void AAnachroniaPlayer::InitiateAchievements(UAnachroniaSaveGame* SaveGameInstance) {	
-	int32 i = 0;
 	for (auto& AchievementElement : PlayerAchievementsMap) {
 		SaveGameInstance->CharacterStats.AchievementName.Add(AchievementElement.Value.GetDefaultObject()->Name);
 		SaveGameInstance->CharacterStats.AchievementsAreActivated.Add(AchievementElement.Value.GetDefaultObject()->bIsAchieved);

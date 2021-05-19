@@ -112,6 +112,8 @@ void AGuardPawn::Respawn()
 
 	GetCharacterMovement()->SetMovementMode(GetCharacterMovement()->DefaultLandMovementMode);
 	GetCapsuleComponent()->SetSimulatePhysics(false);
+	GetCapsuleComponent()->SetGenerateOverlapEvents(true);
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Pawn"));
 }
 
 bool AGuardPawn::CanBeSeenFrom(const FVector& ObserverLocation, FVector& OutSeenLocation,
@@ -129,19 +131,22 @@ bool AGuardPawn::CanBeSeenFrom(const FVector& ObserverLocation, FVector& OutSeen
 	{
 		const FVector TargetLocation = GetActorLocation() + GetActorUpVector() * ZOffset;
 
-		FHitResult HitResult;
-		const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, ObserverLocation, TargetLocation,
-			ECC_Visibility,
-			FCollisionQueryParams(SCENE_QUERY_STAT(AILineOfSight), true, IgnoreActor));
-
-		NumberOfLoSChecksPerformed++;
-
-		if (!bHit || (HitResult.Actor.IsValid() && HitResult.Actor->IsOwnedBy(this)))
+		if (FVector::Distance(ObserverLocation, TargetLocation) <= BodyCanBeSeenFromRange)
 		{
-			// If this trace was blacked by nothing, or blocked by target itself (somehow), we can be seen
-			OutSeenLocation = TargetLocation;
-			OutSightStrength = 1.0f;
-			return true;
+			FHitResult HitResult;
+			const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, ObserverLocation, TargetLocation,
+				ECC_Visibility,
+				FCollisionQueryParams(SCENE_QUERY_STAT(AILineOfSight), true, IgnoreActor));
+
+			NumberOfLoSChecksPerformed++;
+
+			if (!bHit || (HitResult.Actor.IsValid() && HitResult.Actor->IsOwnedBy(this)))
+			{
+				// If this trace was blacked by nothing, or blocked by target itself (somehow), we can be seen
+				OutSeenLocation = TargetLocation;
+				OutSightStrength = 1.0f;
+				return true;
+			}
 		}
 	}
 
@@ -164,6 +169,8 @@ void AGuardPawn::SetDamageToCurrentHealth(float Damage, bool bNonLethal)
 	{
 		// Die
 		CurrentHealth = 0.0f;
+		GetCapsuleComponent()->SetGenerateOverlapEvents(false);
+		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 		OnDeath(bNonLethal);
 		GetGuardAI()->Die();
 	}

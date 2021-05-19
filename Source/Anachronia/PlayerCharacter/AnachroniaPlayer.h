@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "Perception/AISightTargetInterface.h"
 #include "Templates/UnrealTemplate.h"
+#include "UObject/WeakObjectPtrTemplates.h"
 #include "AnachroniaPlayer.generated.h"
 
 class ABaseEquipItem;
@@ -173,8 +174,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
 	TArray<FName> PlayerReadBooksNames;
 
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scoring & Achievements")
 	TMap<FName, TSubclassOf<UAchievement>> PlayerAchievementsMap;
+
+
+
+
 protected:
 
 	/** Handles moving forward/backward */
@@ -293,8 +298,12 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void LoadGame();
 
+	/** Set the achievement to true*/
 	UFUNCTION(BlueprintCallable)
 	void ActivateAchievement(FName Name);
+	/** Use this to set the  achievement false*/
+	UFUNCTION(BlueprintCallable)
+	void DisableAchievement(FName Name);
 
 	UFUNCTION(BlueprintCallable)
 	void SaveAchievementsStatus(UAnachroniaSaveGame* SaveGameInstance);
