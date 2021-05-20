@@ -174,11 +174,14 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
 	TArray<FName> PlayerReadBooksNames;
 
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scoring & Achievements")
+	//TMap<FName, TSubclassOf<UAchievement>> PlayerAchievementsMap;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scoring & Achievements")
+	//TMap<FName, UAchievement*> PlayerAchievementMap;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Scoring & Achievements")
-	TMap<FName, TSubclassOf<UAchievement>> PlayerAchievementsMap;
-
-
-
+	class UAchievementContainer* AchievementContainer = CreateDefaultSubobject<UAchievementContainer>(TEXT("AchievementContainer"));
+	
 
 protected:
 
@@ -299,16 +302,16 @@ public:
 	void LoadGame();
 
 	/** Set the achievement to true*/
-	UFUNCTION(BlueprintCallable)
-	void ActivateAchievement(FName Name);
+	//UFUNCTION(BlueprintCallable)
+	//void ActivateAchievement(FName Name);
 	/** Use this to set the  achievement false*/
-	UFUNCTION(BlueprintCallable)
-	void DisableAchievement(FName Name);
+	//UFUNCTION(BlueprintCallable)
+	//void DisableAchievement(FName Name);
 
-	UFUNCTION(BlueprintCallable)
-	void SaveAchievementsStatus(UAnachroniaSaveGame* SaveGameInstance);
-	UFUNCTION(BlueprintCallable)
-	void LoadAchievementsStatus(UAnachroniaSaveGame* LoadGameInstance);
+	//UFUNCTION(BlueprintCallable)
+	//void SaveAchievementsStatus(UAnachroniaSaveGame* SaveGameInstance);
+	//UFUNCTION(BlueprintCallable)
+	//void LoadAchievementsStatus(UAnachroniaSaveGame* LoadGameInstance);
 
-	void InitiateAchievements(UAnachroniaSaveGame* SaveGameInstance);
+	//void InitiateAchievements(UAnachroniaSaveGame* SaveGameInstance);
 };
