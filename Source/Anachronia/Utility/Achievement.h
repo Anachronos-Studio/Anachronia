@@ -15,11 +15,13 @@ class ANACHRONIA_API UAchievement : public UUserWidget
 	GENERATED_BODY()
 	
 public:
-
-	
-	/** Set Achievement name here */
+	/** Unique identifier for this achievement. Don't change this after picking an initial name */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
-	FName Name;
+	FName IdName;
+	
+	/** Set Achievement name shown to players here */
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
+	FString DisplayName;
 
 	/** Set the description to the achievement*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
@@ -35,7 +37,7 @@ public:
 
 	/** Array of names of goals */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
-	TArray<FName> GoalNames;
+	TArray<FString> GoalNames;
 
 	/** Array of goal booleans */
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
@@ -46,10 +48,8 @@ public:
 	bool MultipleGoals;
 
 	UFUNCTION(BlueprintCallable)
-	FName GetAchievementName() { return Name; }
+	FString GetAchievementName() { return DisplayName; }
 
 	UFUNCTION(BlueprintCallable)
-	void SetAchievementTrue() {
-		bIsAchieved = true;
-	}
+	void LoadFromSaveGame();
 };
