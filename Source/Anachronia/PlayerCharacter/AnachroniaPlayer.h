@@ -143,7 +143,7 @@ public:
 
 	/** Min value for the Player Visibility */
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = StealthLevelAttributes)
-	float VisibilityMinValue;
+	float LuminanceMinValue;
 
 
 	// Player Main Attributes below
@@ -271,10 +271,10 @@ public:
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
 	void SetMotionLevel(float Value) { PlayerMotionLevel = Value; }
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
-	void SetVisibility(float L, float M, float MinValue) { 	
+	void SetVisibility(float L, float M, float LumMinValue) {
 		float Temp;
-		if(L <= MinValue)
-			L = MinValue;
+		if(L <= LumMinValue)
+			L = LumMinValue;
 		Temp = L * M;
 		PlayerVisibility = Temp; 
 	}
