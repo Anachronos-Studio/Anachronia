@@ -90,5 +90,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void AddEquipItem(FName Name);
 
+	UFUNCTION(BlueprintCallable)
 	void AddReadBooks(FName Name);
 };
