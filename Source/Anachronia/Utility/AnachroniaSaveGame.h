@@ -36,10 +36,16 @@ struct FCharacterStats
 	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
 	int32 Score;
 
+	//TMap<FName, TSubclassOf<class ABaseEquipItem>> Items;
+
+};
+
+USTRUCT(BlueprintType)
+struct FCharacterItems {
+	GENERATED_BODY()
+
 	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
 	TArray<FName> ReadBooksNames;
-
-	//TMap<FName, TSubclassOf<class ABaseEquipItem>> Items;
 
 	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
 	TArray<FName> EquippableItems;
