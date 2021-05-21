@@ -21,14 +21,17 @@
 #include "../EquippableItems/BaseEquipItem.h"
 #include "../Utility/AnachroniaSaveGame.h"
 #include "../Utility/Achievement.h"
-
+#include "../Utility/AchievementContainer.h"
 
 
 // Sets default values
 AAnachroniaPlayer::AAnachroniaPlayer()
-{
+{	
 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+
+	
+	//AchievementContainer = CreateDefaultSubobject<UAchievementContainer>(TEXT("AchievementContainer"));
 
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(55.f, 96.0f);
@@ -358,16 +361,16 @@ float AAnachroniaPlayer::CalculateLuminance(const FVector& V) {
 void AAnachroniaPlayer::SaveGame() {
 	UAnachroniaSaveGame* SaveGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::CreateSaveGameObject(UAnachroniaSaveGame::StaticClass()));
 
-	if (SaveGameInstance->CharacterStats.AchievementName.Num() <= 0)
-		InitiateAchievements(SaveGameInstance);
+	//if (SaveGameInstance->CharacterStats.AchievementName.Num() <= 0)
+	//	InitiateAchievements(SaveGameInstance);
 
 	SaveGameInstance->CharacterStats.Health = CurrentHealth;
 	SaveGameInstance->CharacterStats.MaxHealth = MaxHealth;
 	SaveGameInstance->CharacterStats.ImperialMarks = ImperialMarks;
 	SaveGameInstance->CharacterStats.Score = PlayerScore;
-	SaveGameInstance->CharacterStats.ReadBooksNames = PlayerReadBooksNames;
+	//SaveGameInstance->CharacterStats.ReadBooksNames = PlayerReadBooksNames;
 
-	SaveAchievementsStatus(SaveGameInstance);
+	/*SaveAchievementsStatus(SaveGameInstance);*/
 
 	UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex);
 }
@@ -376,55 +379,55 @@ void AAnachroniaPlayer::LoadGame() {
 
 	LoadGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::LoadGameFromSlot(LoadGameInstance->SaveSlotName, LoadGameInstance->UserIndex));
 
-	LoadAchievementsStatus(LoadGameInstance);
+	/*LoadAchievementsStatus(LoadGameInstance);*/
 
 	CurrentHealth = LoadGameInstance->CharacterStats.Health;
 	MaxHealth = LoadGameInstance->CharacterStats.MaxHealth;
 	ImperialMarks = LoadGameInstance->CharacterStats.ImperialMarks;
 	PlayerScore = LoadGameInstance->CharacterStats.Score;
-	PlayerReadBooksNames = LoadGameInstance->CharacterStats.ReadBooksNames;
+	//PlayerReadBooksNames = LoadGameInstance->CharacterStats.ReadBooksNames;
 }
 
-void AAnachroniaPlayer::ActivateAchievement(FName Name) {
-	if (PlayerAchievementsMap.Contains(Name)) {
-		PlayerAchievementsMap.Find(Name)->GetDefaultObject()->bIsAchieved = true;
-	}
-}
-
-
-void AAnachroniaPlayer::DisableAchievement(FName Name) {
-	if (PlayerAchievementsMap.Contains(Name)) {
-		PlayerAchievementsMap.Find(Name)->GetDefaultObject()->bIsAchieved = false;
-	}	
-}
-
-void AAnachroniaPlayer::SaveAchievementsStatus(UAnachroniaSaveGame* SaveGameInstance) {
-	for (auto& AchievementElement : PlayerAchievementsMap) {
-
-		for (int32 i = 0; i < SaveGameInstance->CharacterStats.AchievementName.Num(); i++) {
-			FName AchievementName = SaveGameInstance->CharacterStats.AchievementName[i];
-			if (AchievementName == AchievementElement.Key) {
-				UAchievement* PlayerAchievementObject = AchievementElement.Value.GetDefaultObject();
-				SaveGameInstance->CharacterStats.AchievementsAreActivated[i] = PlayerAchievementObject->bIsAchieved;
-			}
-		}
-	}
-}
-
-void AAnachroniaPlayer::LoadAchievementsStatus(UAnachroniaSaveGame* LoadGameInstance) {
-	for (int32 i = 0; i < LoadGameInstance->CharacterStats.AchievementName.Num(); i++) {
-		FName AchievementName = LoadGameInstance->CharacterStats.AchievementName[i];
-		for (auto& AchievementElement : PlayerAchievementsMap) {
-			if (AchievementName == AchievementElement.Key) {
-				AchievementElement.Value.GetDefaultObject()->bIsAchieved = LoadGameInstance->CharacterStats.AchievementsAreActivated[i];
-			}
-		}
-	}
-}
-
-void AAnachroniaPlayer::InitiateAchievements(UAnachroniaSaveGame* SaveGameInstance) {	
-	for (auto& AchievementElement : PlayerAchievementsMap) {
-		SaveGameInstance->CharacterStats.AchievementName.Add(AchievementElement.Value.GetDefaultObject()->Name);
-		SaveGameInstance->CharacterStats.AchievementsAreActivated.Add(AchievementElement.Value.GetDefaultObject()->bIsAchieved);
-	}	
-}
+//void AAnachroniaPlayer::ActivateAchievement(FName Name) {
+//	if (PlayerAchievementsMap.Contains(Name)) {
+//		PlayerAchievementsMap.Find(Name)->GetDefaultObject()->bIsAchieved = true;
+//	}
+//}
+//
+//
+//void AAnachroniaPlayer::DisableAchievement(FName Name) {
+//	if (PlayerAchievementsMap.Contains(Name)) {
+//		PlayerAchievementsMap.Find(Name)->GetDefaultObject()->bIsAchieved = false;
+//	}	
+//}
+//
+//void AAnachroniaPlayer::SaveAchievementsStatus(UAnachroniaSaveGame* SaveGameInstance) {
+//	for (auto& AchievementElement : PlayerAchievementsMap) {
+//
+//		for (int32 i = 0; i < SaveGameInstance->CharacterStats.AchievementName.Num(); i++) {
+//			FName AchievementName = SaveGameInstance->CharacterStats.AchievementName[i];
+//			if (AchievementName == AchievementElement.Key) {
+//				UAchievement* PlayerAchievementObject = AchievementElement.Value.GetDefaultObject();
+//				SaveGameInstance->CharacterStats.AchievementsAreActivated[i] = PlayerAchievementObject->bIsAchieved;
+//			}
+//		}
+//	}
+//}
+//
+//void AAnachroniaPlayer::LoadAchievementsStatus(UAnachroniaSaveGame* LoadGameInstance) {
+//	for (int32 i = 0; i < LoadGameInstance->CharacterStats.AchievementName.Num(); i++) {
+//		FName AchievementName = LoadGameInstance->CharacterStats.AchievementName[i];
+//		for (auto& AchievementElement : PlayerAchievementsMap) {
+//			if (AchievementName == AchievementElement.Key) {
+//				AchievementElement.Value.GetDefaultObject()->bIsAchieved = LoadGameInstance->CharacterStats.AchievementsAreActivated[i];
+//			}
+//		}
+//	}
+//}
+//
+//void AAnachroniaPlayer::InitiateAchievements(UAnachroniaSaveGame* SaveGameInstance) {	
+//	for (auto& AchievementElement : PlayerAchievementsMap) {
+//		SaveGameInstance->CharacterStats.AchievementName.Add(AchievementElement.Value.GetDefaultObject()->Name);
+//		SaveGameInstance->CharacterStats.AchievementsAreActivated.Add(AchievementElement.Value.GetDefaultObject()->bIsAchieved);
+//	}	
+//}

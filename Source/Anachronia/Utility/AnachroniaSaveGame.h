@@ -6,8 +6,22 @@
 #include "GameFramework/SaveGame.h"
 #include "AnachroniaSaveGame.generated.h"
 
+
 USTRUCT(BlueprintType)
-struct FCharacterStats {
+struct FAchievementData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(VisibleAnywhere, Category = Achievements)
+	bool bAchieved;
+
+	UPROPERTY(VisibleAnywhere, Category = Achievements)
+	TArray<bool> SubGoalsAchieved;
+};
+
+USTRUCT(BlueprintType)
+struct FCharacterStats
+{
 	GENERATED_BODY()
 
 	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
@@ -22,19 +36,19 @@ struct FCharacterStats {
 	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
 	int32 Score;
 
+	//TMap<FName, TSubclassOf<class ABaseEquipItem>> Items;
+
+};
+
+USTRUCT(BlueprintType)
+struct FCharacterItems {
+	GENERATED_BODY()
+
 	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
 	TArray<FName> ReadBooksNames;
 
-	//TMap<FName, TSubclassOf<class ABaseEquipItem>> Items;
-
 	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
 	TArray<FName> EquippableItems;
-
-	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
-	TArray<FName> AchievementName;
-
-	UPROPERTY(VisibleAnywhere, Category = Basic)
-	TArray<bool> AchievementsAreActivated;
 };
 
 /**
@@ -58,5 +72,15 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Basic)
 	FCharacterStats CharacterStats;
 
-	
+	UPROPERTY(VisibleAnywhere, Category = Basic)
+	TMap<FName, FAchievementData> Achievements;
+
+	UFUNCTION(BlueprintCallable)
+	static void AchieveAchievement(FName AchievementName);
+
+	UFUNCTION(BlueprintCallable)
+	static void AchieveSubGoal(FName AchievementName, int GoalIndex);
+
+	UFUNCTION(BlueprintCallable)
+	static bool IsAchievementAchieved(FName IdName);
 };
