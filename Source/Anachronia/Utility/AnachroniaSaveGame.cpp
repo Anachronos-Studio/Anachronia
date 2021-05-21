@@ -50,3 +50,10 @@ bool UAnachroniaSaveGame::IsAchievementAchieved(FName IdName)
 	}
 }
 
+void UAnachroniaSaveGame::AddEquipItem(FName Name) {
+	CharacterItems.EquippableItems.AddUnique(Name);
+}
+
+void UAnachroniaSaveGame::AddReadBooks(FName Name) {
+	CharacterItems.ReadBooksNames.AddUnique(Name);
+}
