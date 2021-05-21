@@ -21,7 +21,7 @@
 #include "../EquippableItems/BaseEquipItem.h"
 #include "../Utility/AnachroniaSaveGame.h"
 #include "../Utility/Achievement.h"
-//#include "../Utility/AchievementContainer.h"
+#include "../Utility/AchievementContainer.h"
 
 
 // Sets default values
@@ -368,7 +368,7 @@ void AAnachroniaPlayer::SaveGame() {
 	SaveGameInstance->CharacterStats.MaxHealth = MaxHealth;
 	SaveGameInstance->CharacterStats.ImperialMarks = ImperialMarks;
 	SaveGameInstance->CharacterStats.Score = PlayerScore;
-	SaveGameInstance->CharacterStats.ReadBooksNames = PlayerReadBooksNames;
+	//SaveGameInstance->CharacterStats.ReadBooksNames = PlayerReadBooksNames;
 
 	/*SaveAchievementsStatus(SaveGameInstance);*/
 
@@ -385,7 +385,7 @@ void AAnachroniaPlayer::LoadGame() {
 	MaxHealth = LoadGameInstance->CharacterStats.MaxHealth;
 	ImperialMarks = LoadGameInstance->CharacterStats.ImperialMarks;
 	PlayerScore = LoadGameInstance->CharacterStats.Score;
-	PlayerReadBooksNames = LoadGameInstance->CharacterStats.ReadBooksNames;
+	//PlayerReadBooksNames = LoadGameInstance->CharacterStats.ReadBooksNames;
 }
 
 //void AAnachroniaPlayer::ActivateAchievement(FName Name) {
