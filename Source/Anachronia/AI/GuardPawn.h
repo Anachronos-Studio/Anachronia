@@ -56,6 +56,9 @@ public:
 	UFUNCTION(BlueprintImplementableEvent, Category = "Guard")
 	void OnInspectDeadGuardBody();
 
+	UFUNCTION(BlueprintImplementableEvent, Category = "Guard")
+	void OnRespawn();
+	
 	void Respawn();
 	
 	virtual bool CanBeSeenFrom(const FVector& ObserverLocation, FVector& OutSeenLocation, int32& NumberOfLoSChecksPerformed, float& OutSightStrength, const AActor* IgnoreActor) const override;

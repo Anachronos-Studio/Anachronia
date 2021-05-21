@@ -273,7 +273,7 @@ public:
 			Temp = 0.1f;
 		else 
 			Temp = L * M;
-		PlayerVisibility = L * M; 
+		PlayerVisibility = Temp; 
 	}
 	//void SetVisibility(float L, float M) { PlayerVisibility = (L + M) / 2.f; }
 
