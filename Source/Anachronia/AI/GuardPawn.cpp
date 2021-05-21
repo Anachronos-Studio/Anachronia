@@ -114,6 +114,8 @@ void AGuardPawn::Respawn()
 	GetCapsuleComponent()->SetSimulatePhysics(false);
 	GetCapsuleComponent()->SetGenerateOverlapEvents(true);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Pawn"));
+
+	OnRespawn();
 }
 
 bool AGuardPawn::CanBeSeenFrom(const FVector& ObserverLocation, FVector& OutSeenLocation,
@@ -171,6 +173,7 @@ void AGuardPawn::SetDamageToCurrentHealth(float Damage, bool bNonLethal)
 		CurrentHealth = 0.0f;
 		GetCapsuleComponent()->SetGenerateOverlapEvents(false);
 		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
+		GetCharacterMovement()->DisableMovement();
 		OnDeath(bNonLethal);
 		GetGuardAI()->Die();
 	}
@@ -178,7 +181,6 @@ void AGuardPawn::SetDamageToCurrentHealth(float Damage, bool bNonLethal)
 
 void AGuardPawn::OnDeath_Implementation(bool bNonLethalDeath)
 {
-	GetCharacterMovement()->DisableMovement();
 	GetCapsuleComponent()->SetSimulatePhysics(true);
 	const FVector HeadLocation = GetActorLocation() + FVector::UpVector * GetCapsuleComponent()->GetScaledCapsuleHalfHeight() * 0.5f;
 	FVector Force = GetActorForwardVector() * 40000.0f;
