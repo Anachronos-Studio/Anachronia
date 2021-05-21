@@ -75,6 +75,9 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Basic)
 	TMap<FName, FAchievementData> Achievements;
 
+	UPROPERTY(VisibleAnywhere, Category = Basic)
+	FCharacterItems CharacterItems;
+
 	UFUNCTION(BlueprintCallable)
 	static void AchieveAchievement(FName AchievementName);
 
@@ -83,4 +86,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static bool IsAchievementAchieved(FName IdName);
+
+	UFUNCTION(BlueprintCallable)
+	void AddEquipItem(FName Name);
+
+	void AddReadBooks(FName Name);
 };
