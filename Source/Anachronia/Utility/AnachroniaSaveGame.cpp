@@ -12,7 +12,7 @@ UAnachroniaSaveGame::UAnachroniaSaveGame() {
 
 void UAnachroniaSaveGame::AchieveAchievement(FName AchievementName)
 {
-	UAnachroniaSaveGame* SaveGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::CreateSaveGameObject(UAnachroniaSaveGame::StaticClass()));
+	UAnachroniaSaveGame* SaveGameInstance = LoadSaveGame();
 	FAchievementData Data = SaveGameInstance->Achievements.FindOrAdd(AchievementName);
 	Data.bAchieved = true;
 	SaveGameInstance->Achievements[AchievementName] = Data;
@@ -21,8 +21,7 @@ void UAnachroniaSaveGame::AchieveAchievement(FName AchievementName)
 
 void UAnachroniaSaveGame::AchieveSubGoal(FName AchievementName, int GoalIndex)
 {
-	UAnachroniaSaveGame* SaveGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::CreateSaveGameObject(UAnachroniaSaveGame::StaticClass()));
-	SaveGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::LoadGameFromSlot(SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex));
+	UAnachroniaSaveGame* SaveGameInstance = LoadSaveGame();
 	
 	FAchievementData Data = SaveGameInstance->Achievements.FindOrAdd(AchievementName);
 	Data.SubGoalsAchieved.SetNumZeroed(GoalIndex + 1, false);
@@ -33,9 +32,7 @@ void UAnachroniaSaveGame::AchieveSubGoal(FName AchievementName, int GoalIndex)
 
 bool UAnachroniaSaveGame::IsAchievementAchieved(FName IdName)
 {
-	UAnachroniaSaveGame* LoadGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::CreateSaveGameObject(UAnachroniaSaveGame::StaticClass()));
-
-	LoadGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::LoadGameFromSlot(LoadGameInstance->SaveSlotName, LoadGameInstance->UserIndex));
+	UAnachroniaSaveGame* LoadGameInstance = LoadSaveGame();
 
 	TMap<FName, FAchievementData> AchievementsMap = LoadGameInstance->Achievements;
 
@@ -50,14 +47,34 @@ bool UAnachroniaSaveGame::IsAchievementAchieved(FName IdName)
 	}
 }
 
-void UAnachroniaSaveGame::AddEquipItem(FName Name) {
-	UAnachroniaSaveGame* SaveGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::CreateSaveGameObject(UAnachroniaSaveGame::StaticClass()));
+void UAnachroniaSaveGame::AddEquipItem(FName Name)
+{
+	UAnachroniaSaveGame* SaveGameInstance = LoadSaveGame();
 	SaveGameInstance->CharacterItems.EquippableItems.AddUnique(Name);
 	UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex);
 }
 
-void UAnachroniaSaveGame::AddReadBooks(FName Name) {
-	UAnachroniaSaveGame* SaveGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::CreateSaveGameObject(UAnachroniaSaveGame::StaticClass()));
+void UAnachroniaSaveGame::AddReadBooks(FName Name)
+{
+	UAnachroniaSaveGame* SaveGameInstance = LoadSaveGame();
 	SaveGameInstance->CharacterItems.ReadBooksNames.AddUnique(Name);
 	UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex);
+}
+
+TArray<FName> UAnachroniaSaveGame::GetUnlockedItems()
+{
+	UAnachroniaSaveGame* LoadGameInstance = LoadSaveGame();
+
+	return LoadGameInstance->CharacterItems.EquippableItems;
+}
+
+UAnachroniaSaveGame* UAnachroniaSaveGame::LoadSaveGame()
+{
+	UAnachroniaSaveGame* SaveGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::CreateSaveGameObject(UAnachroniaSaveGame::StaticClass()));
+	if (UGameplayStatics::DoesSaveGameExist(SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex))
+	{
+		SaveGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::LoadGameFromSlot(SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex));
+	}
+
+	return SaveGameInstance;
 }
