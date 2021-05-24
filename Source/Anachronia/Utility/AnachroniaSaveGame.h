@@ -92,4 +92,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static void AddReadBooks(FName Name);
+
+	UFUNCTION(BlueprintCallable)
+	static TArray<FName> GetUnlockedItems();
+
+	static UAnachroniaSaveGame* LoadSaveGame();
 };
