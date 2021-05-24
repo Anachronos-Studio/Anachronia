@@ -88,8 +88,8 @@ public:
 	static bool IsAchievementAchieved(FName IdName);
 
 	UFUNCTION(BlueprintCallable)
-	void AddEquipItem(FName Name);
+	static void AddEquipItem(FName Name);
 
 	UFUNCTION(BlueprintCallable)
-	void AddReadBooks(FName Name);
+	static void AddReadBooks(FName Name);
 };

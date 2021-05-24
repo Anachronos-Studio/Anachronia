@@ -51,9 +51,13 @@ bool UAnachroniaSaveGame::IsAchievementAchieved(FName IdName)
 }
 
 void UAnachroniaSaveGame::AddEquipItem(FName Name) {
-	CharacterItems.EquippableItems.AddUnique(Name);
+	UAnachroniaSaveGame* SaveGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::CreateSaveGameObject(UAnachroniaSaveGame::StaticClass()));
+	SaveGameInstance->CharacterItems.EquippableItems.AddUnique(Name);
+	UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex);
 }
 
 void UAnachroniaSaveGame::AddReadBooks(FName Name) {
-	CharacterItems.ReadBooksNames.AddUnique(Name);
+	UAnachroniaSaveGame* SaveGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::CreateSaveGameObject(UAnachroniaSaveGame::StaticClass()));
+	SaveGameInstance->CharacterItems.ReadBooksNames.AddUnique(Name);
+	UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex);
 }
