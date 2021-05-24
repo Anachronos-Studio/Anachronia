@@ -52,7 +52,6 @@ void UAnachroniaSaveGame::AddEquipItem(FName Name)
 	UAnachroniaSaveGame* SaveGameInstance = LoadSaveGame();
 	SaveGameInstance->CharacterItems.EquippableItems.AddUnique(Name);
 	UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex);
-	UE_LOG(LogTemp, Warning, TEXT("Added item %s"), *Name.ToString());
 }
 
 void UAnachroniaSaveGame::AddReadBooks(FName Name)

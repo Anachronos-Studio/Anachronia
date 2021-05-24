@@ -25,12 +25,6 @@ struct FCharacterStats
 	GENERATED_BODY()
 
 	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
-	float Health;
-
-	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
-	float MaxHealth;
-
-	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
 	int32 ImperialMarks;
 
 	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
@@ -69,13 +63,13 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Basic)
 	uint32 UserIndex;
 
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Basic)
 	FCharacterStats CharacterStats;
 
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Basic)
 	TMap<FName, FAchievementData> Achievements;
 
-	UPROPERTY(VisibleAnywhere, Category = Basic)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Basic)
 	FCharacterItems CharacterItems;
 
 	UFUNCTION(BlueprintCallable)
@@ -96,5 +90,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	static TArray<FName> GetUnlockedItems();
 
+	UFUNCTION(BlueprintCallable)
 	static UAnachroniaSaveGame* LoadSaveGame();
 };
