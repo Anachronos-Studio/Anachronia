@@ -90,6 +90,45 @@ void AGuardPawn::ConfigureSenses()
 	PerceptionComponent->RequestStimuliListenerUpdate();
 }
 
+FRotator AGuardPawn::FindBestDeadRotation()
+{
+	const FRotator OrigRot = GetActorRotation();
+	FRotator BestRotation = OrigRot;
+	float BestTraceTime = 0;
+	const float TraceLength = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	const FVector Start = GetActorLocation();
+	
+	FCollisionQueryParams Params;
+	TArray<AActor*> AttachedActors;
+	GetAttachedActors(AttachedActors);
+	Params.AddIgnoredActors(AttachedActors);
+	
+	for (int i = 0; i < 4; i++)
+	{
+		FRotator Rotation = OrigRot;
+		Rotation.Yaw += i * 45.0f;
+		SetActorRotation(Rotation, ETeleportType::TeleportPhysics);
+		FVector Offset = GetActorUpVector() * TraceLength;
+
+		float TraceTime = 0;
+		FHitResult Hit;
+		GetWorld()->LineTraceSingleByChannel(Hit, Start, Start + Offset, ECC_Visibility, Params);
+		TraceTime += Hit.Time;
+		GetWorld()->LineTraceSingleByChannel(Hit, Start, Start - Offset, ECC_Visibility, Params);
+		TraceTime += Hit.Time;
+
+		UE_LOG(LogTemp, Display, TEXT("Angle: %f w/ time: %f, hit: %s"), Rotation.Yaw, TraceTime, Hit.Actor.IsValid() ? *Hit.Actor->GetName() : TEXT("nullptr"));
+		
+		if (TraceTime > BestTraceTime)
+		{
+			BestTraceTime = TraceTime;
+			BestRotation = Rotation;
+		}
+	}
+
+	return BestRotation;
+}
+
 void AGuardPawn::Respawn()
 {
 	if (bStartOnPath && PatrolPath != nullptr)

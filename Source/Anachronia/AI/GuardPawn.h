@@ -58,6 +58,9 @@ public:
 
 	UFUNCTION(BlueprintImplementableEvent, Category = "Guard")
 	void OnRespawn();
+
+	UFUNCTION(BlueprintCallable, Category = "Guard")
+	FRotator FindBestDeadRotation();
 	
 	void Respawn();
 	
