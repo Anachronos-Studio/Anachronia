@@ -81,6 +81,9 @@ public:
 	UPROPERTY(Category = "Guard", EditAnywhere)
 	bool bDebugInfo = false;
 
+	UPROPERTY(Category = "Guard", EditAnywhere, BlueprintReadWrite, Transient)
+	float Luminance;
+
 	/* *********************
 	 * Movement
 	 */
@@ -182,6 +185,10 @@ public:
 
 	UPROPERTY(Category = "Guard|Sight perception", EditAnywhere, BlueprintReadWrite)
 	float BodyCanBeSeenFromRange = 2000.0f;
+
+	// Final sight range for detecting bodies is lerp(BodyCanBeSeenFromRange, BodyCanBeSeenFromRange * Luminance, BodyCanSeeLuminanceInfluence)
+	UPROPERTY(Category = "Guard|Sight perception", EditAnywhere, BlueprintReadWrite)
+	float BodyCanSeeLuminanceInfluence = 1.0f;
 	
 	/* *****************************
 	 * Hearing perception
