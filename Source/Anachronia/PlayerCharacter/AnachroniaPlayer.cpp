@@ -159,7 +159,7 @@ void AAnachroniaPlayer::Tick(float DeltaTime)
 	//PlayerLuminance = CalculateLuminance(GlobalLuminanceOnPlayer);
 
 	SetLuminance(LightDetectorLevel);
-	SetVisibility(PlayerLuminance, PlayerMotionLevel, LuminanceMinValue);
+	SetVisibility(PlayerLuminance, PlayerMotionLevel, LuminanceImportance, LuminanceMinValue);
 	LightReceiver->SetWorldRotation(FRotator(0.f, 0.f, 0.f));
 	
 	//SceneCaptureTop->CaptureScene();
