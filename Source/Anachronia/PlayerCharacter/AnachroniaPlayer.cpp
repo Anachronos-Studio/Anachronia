@@ -379,6 +379,16 @@ void AAnachroniaPlayer::LoadGame() {
 	//PlayerReadBooksNames = LoadGameInstance->CharacterStats.ReadBooksNames;
 }
 
+void AAnachroniaPlayer::MoveAndSlide(FVector ToLocation, FRotator NewRotation)
+{
+	FVector Delta = ToLocation - GetActorLocation();
+	// Cast to base class because character movement's SlideAlongSurface is protected (and we don't need its special features, anyway)
+	UMovementComponent* Mover = Cast<UMovementComponent>(GetCharacterMovement());
+	FHitResult HitResult;
+	Mover->SafeMoveUpdatedComponent(Delta, NewRotation, true, HitResult);
+	Mover->SlideAlongSurface(Delta, 1.0f - HitResult.Time, HitResult.Normal, HitResult, false);
+}
+
 //void AAnachroniaPlayer::ActivateAchievement(FName Name) {
 //	if (PlayerAchievementsMap.Contains(Name)) {
 //		PlayerAchievementsMap.Find(Name)->GetDefaultObject()->bIsAchieved = true;
