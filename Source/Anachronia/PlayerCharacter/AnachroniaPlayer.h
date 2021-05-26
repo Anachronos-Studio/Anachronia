@@ -316,6 +316,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void LoadGame();
 
+	UFUNCTION(BlueprintCallable)
+	void MoveAndSlide(FVector ToLocation, FRotator NewRotation);
+
 	/** Set the achievement to true*/
 	//UFUNCTION(BlueprintCallable)
 	//void ActivateAchievement(FName Name);
