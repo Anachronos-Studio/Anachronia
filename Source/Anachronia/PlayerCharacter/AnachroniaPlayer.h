@@ -284,7 +284,7 @@ public:
 	void SetVisibility(float L, float M, float I, float LumMinValue) {
 		float Temp;
 		L *= I;
-		if(L <= (LumMinValue * I))
+		if(L <= LumMinValue)
 			L = LumMinValue;
 		Temp = L * M; 
 		PlayerVisibility = Temp; 
