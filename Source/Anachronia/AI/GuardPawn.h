@@ -61,6 +61,9 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = "Guard")
 	FRotator FindBestDeadRotation();
+
+	UFUNCTION(BlueprintCallable, Category = "Guard")
+	TSubclassOf<AActor> FindVoiceLineAsset(TSubclassOf<AActor> BaseAsset, int VoiceIndex);
 	
 	void Respawn();
 	
