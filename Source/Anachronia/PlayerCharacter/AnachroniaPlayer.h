@@ -242,7 +242,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
 	void SetCurrentHealth(float Value) { CurrentHealth = Value; }
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
-	void SetDamageToPlayerCurrentHealth(float DamageValue) { CurrentHealth -= DamageValue; }
+	void SetDamageToPlayerCurrentHealth(float DamageValue);
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
 	float GetCurrentHealth() { return CurrentHealth; }
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
@@ -318,6 +318,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	void MoveAndSlide(FVector ToLocation, FRotator NewRotation);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnTakeDamage();
 
 	/** Set the achievement to true*/
 	//UFUNCTION(BlueprintCallable)

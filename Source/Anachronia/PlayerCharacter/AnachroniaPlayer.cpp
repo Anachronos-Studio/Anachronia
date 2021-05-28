@@ -289,8 +289,14 @@ void  AAnachroniaPlayer::ToggleCrouchOff() {
 	}
 }
 
+void AAnachroniaPlayer::SetDamageToPlayerCurrentHealth(float DamageValue)
+{
+	CurrentHealth -= DamageValue;
+	OnTakeDamage();
+}
+
 bool AAnachroniaPlayer::CanBeSeenFrom(const FVector& ObserverLocation, FVector& OutSeenLocation,
-	int32& NumberOfLoSChecksPerformed, float& OutSightStrength, const AActor* IgnoreActor) const
+                                      int32& NumberOfLoSChecksPerformed, float& OutSightStrength, const AActor* IgnoreActor) const
 {
 	const float HalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 	const float ZOffsetList[]{HalfHeight, 0.0f, -HalfHeight};
