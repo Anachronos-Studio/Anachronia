@@ -129,6 +129,31 @@ FRotator AGuardPawn::FindBestDeadRotation()
 	return BestRotation;
 }
 
+TSubclassOf<AActor> AGuardPawn::FindVoiceLineAsset(TSubclassOf<AActor> BaseAsset, int VoiceIndex)
+{
+	const FString BaseName = BaseAsset->GetName().Replace(TEXT("_C"), TEXT(""));
+	// VL_Guard_1_LarmarAndra
+	const FString LineWithoutGuard = BaseName.RightChop(11);
+	const FString NewName = FString::Printf(TEXT("VL_Guard_%d_%s"), VoiceIndex, *LineWithoutGuard);
+	// Blueprint'/Game/Anachronia/Blueprints/VoiceSystem/VoiceLines_Guards/VL_guard_1/VL_Guard_1_Larmar_andra_1.VL_Guard_1_Larmar_andra_1'
+	const FString NewAssetPath = FString::Printf(TEXT("/Game/Anachronia/Blueprints/VoiceSystem/VoiceLines_Guards/VL_guard_%d/%s.%s_C"), VoiceIndex, *NewName, *NewName);
+
+	UE_LOG(LogTemp, Display, TEXT("Find voiceline: %s -> %s"), *BaseName, *NewAssetPath);
+	
+	const TSubclassOf<AActor> Asset = LoadObject<UClass>(nullptr, *NewAssetPath);
+	if (Asset)
+	{
+		UE_LOG(LogTemp, Display, TEXT("Voiceline found!"));
+	}
+	else
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Red, FString::Printf(TEXT("Voiceline not found. Requested %s, tried to load %s"), *BaseName, *NewAssetPath));
+		UE_LOG(LogTemp, Display, TEXT("Voiceline not found"));
+	}
+	
+	return Asset;
+}
+
 void AGuardPawn::Respawn()
 {
 	if (bStartOnPath && PatrolPath != nullptr)
