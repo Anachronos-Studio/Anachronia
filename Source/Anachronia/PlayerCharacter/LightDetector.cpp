@@ -70,7 +70,7 @@ float ALightDetector::CalculateBrightness() {
 
 	// Process our top and bottom RenderTextures
 	ProcessRenderTexture(detectorTextureTop);
-	ProcessRenderTexture(detectorTextureBottom);
+	//ProcessRenderTexture(detectorTextureBottom);
 
 
 	// At the end we return the brightest pixel we found in the RenderTextures
