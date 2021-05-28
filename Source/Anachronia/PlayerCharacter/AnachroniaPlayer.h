@@ -141,6 +141,15 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = LightDetector)
 	float LightDetectorLevel;
 
+	/** Min value for the Player Visibility */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = StealthLevelAttributes)
+	float LuminanceMinValue;
+
+	/** Multiplier for luminance */
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = StealthLevelAttributes)
+	float LuminanceImportance = 1.f;
+
+
 
 	// Player Main Attributes below
 
@@ -233,7 +242,7 @@ public:
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
 	void SetCurrentHealth(float Value) { CurrentHealth = Value; }
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
-	void SetDamageToPlayerCurrentHealth(float DamageValue) { CurrentHealth -= DamageValue; }
+	void SetDamageToPlayerCurrentHealth(float DamageValue);
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
 	float GetCurrentHealth() { return CurrentHealth; }
 	UFUNCTION(BlueprintCallable, Category = MainAttributes)
@@ -264,17 +273,23 @@ public:
 	// Stealth attributes functions
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
 	void SetLuminance(float Value) { PlayerLuminance = Value; }
+
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
 	void SetMotionLevel(float Value) { PlayerMotionLevel = Value; }
+
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
-	void SetVisibility(float L, float M) { 	
+	void SetLuminanceImportance(float Value) { LuminanceImportance = Value; }
+
+	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
+	void SetVisibility(float L, float M, float I, float LumMinValue) {
 		float Temp;
-		if(XOR(L <= 0.1f,M <= 0.1f))
-			Temp = 0.1f;
-		else 
-			Temp = L * M;
-		PlayerVisibility = L * M; 
+		L *= I;
+		if(L <= (LumMinValue * I))
+			L = LumMinValue;
+		Temp = L * M; 
+		PlayerVisibility = Temp; 
 	}
+
 	//void SetVisibility(float L, float M) { PlayerVisibility = (L + M) / 2.f; }
 
 	UFUNCTION(BlueprintCallable, Category = StealthAttributes)
@@ -300,6 +315,12 @@ public:
 	void SaveGame();
 	UFUNCTION(BlueprintCallable)
 	void LoadGame();
+
+	UFUNCTION(BlueprintCallable)
+	void MoveAndSlide(FVector ToLocation, FRotator NewRotation);
+
+	UFUNCTION(BlueprintImplementableEvent)
+	void OnTakeDamage();
 
 	/** Set the achievement to true*/
 	//UFUNCTION(BlueprintCallable)

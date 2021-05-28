@@ -34,6 +34,12 @@ void ALightDetector::Tick(float DeltaTime)
 }
 
 void ALightDetector::ProcessRenderTexture(UTextureRenderTarget2D* detectorTexture) {
+
+	if (detectorTexture == nullptr)
+	{
+		return;
+	}
+	
 	// Read the pixels from our RenderTexture and store the data into our color array
 	// Note: ReadPixels is allegedly a very slow operation
 	fRenderTarget = detectorTexture->GameThread_GetRenderTargetResource();
@@ -58,17 +64,13 @@ void ALightDetector::ProcessRenderTexture(UTextureRenderTarget2D* detectorTextur
 
 
 float ALightDetector::CalculateBrightness() {
-	// Ensure that the user has actually supplied us with RenderTextures
-	if (detectorTextureTop == nullptr || detectorTextureBottom == nullptr) {
-		return 0.0f;
-	}
 	// Reset our values for the next brightness test
 	currentPixelBrightness = 0;
 	brightnessOutput = 0;
 
 	// Process our top and bottom RenderTextures
 	ProcessRenderTexture(detectorTextureTop);
-	ProcessRenderTexture(detectorTextureBottom);
+	//ProcessRenderTexture(detectorTextureBottom);
 
 
 	// At the end we return the brightest pixel we found in the RenderTextures

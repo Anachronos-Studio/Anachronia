@@ -3,7 +3,6 @@
 
 #include "AnachroniaPlayer.h"
 
-#include "Animation/AnimInstance.h"
 #include "Camera/CameraComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/CapsuleComponent.h"
@@ -11,11 +10,7 @@
 #include "Components/InputComponent.h"
 #include "GameFramework/InputSettings.h"
 #include "GameFramework/CharacterMovementComponent.h"
-#include "GameFramework/PlayerController.h"
-#include "Components/SceneCaptureComponent2D.h"
-#include "Engine/TextureRenderTarget2D.h"
 #include "Kismet/GameplayStatics.h"
-#include "Engine/DirectionalLight.h"
 #include "LightDetector.h"
 #include "Components/ChildActorComponent.h"
 #include "../EquippableItems/BaseEquipItem.h"
@@ -164,7 +159,7 @@ void AAnachroniaPlayer::Tick(float DeltaTime)
 	//PlayerLuminance = CalculateLuminance(GlobalLuminanceOnPlayer);
 
 	SetLuminance(LightDetectorLevel);
-	SetVisibility(PlayerLuminance, PlayerMotionLevel);
+	SetVisibility(PlayerLuminance, PlayerMotionLevel, LuminanceImportance, LuminanceMinValue);
 	LightReceiver->SetWorldRotation(FRotator(0.f, 0.f, 0.f));
 	
 	//SceneCaptureTop->CaptureScene();
@@ -294,8 +289,14 @@ void  AAnachroniaPlayer::ToggleCrouchOff() {
 	}
 }
 
+void AAnachroniaPlayer::SetDamageToPlayerCurrentHealth(float DamageValue)
+{
+	CurrentHealth -= DamageValue;
+	OnTakeDamage();
+}
+
 bool AAnachroniaPlayer::CanBeSeenFrom(const FVector& ObserverLocation, FVector& OutSeenLocation,
-	int32& NumberOfLoSChecksPerformed, float& OutSightStrength, const AActor* IgnoreActor) const
+                                      int32& NumberOfLoSChecksPerformed, float& OutSightStrength, const AActor* IgnoreActor) const
 {
 	const float HalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 	const float ZOffsetList[]{HalfHeight, 0.0f, -HalfHeight};
@@ -364,8 +365,6 @@ void AAnachroniaPlayer::SaveGame() {
 	//if (SaveGameInstance->CharacterStats.AchievementName.Num() <= 0)
 	//	InitiateAchievements(SaveGameInstance);
 
-	SaveGameInstance->CharacterStats.Health = CurrentHealth;
-	SaveGameInstance->CharacterStats.MaxHealth = MaxHealth;
 	SaveGameInstance->CharacterStats.ImperialMarks = ImperialMarks;
 	SaveGameInstance->CharacterStats.Score = PlayerScore;
 	//SaveGameInstance->CharacterStats.ReadBooksNames = PlayerReadBooksNames;
@@ -381,11 +380,19 @@ void AAnachroniaPlayer::LoadGame() {
 
 	/*LoadAchievementsStatus(LoadGameInstance);*/
 
-	CurrentHealth = LoadGameInstance->CharacterStats.Health;
-	MaxHealth = LoadGameInstance->CharacterStats.MaxHealth;
 	ImperialMarks = LoadGameInstance->CharacterStats.ImperialMarks;
 	PlayerScore = LoadGameInstance->CharacterStats.Score;
 	//PlayerReadBooksNames = LoadGameInstance->CharacterStats.ReadBooksNames;
+}
+
+void AAnachroniaPlayer::MoveAndSlide(FVector ToLocation, FRotator NewRotation)
+{
+	FVector Delta = ToLocation - GetActorLocation();
+	// Cast to base class because character movement's SlideAlongSurface is protected (and we don't need its special features, anyway)
+	UMovementComponent* Mover = Cast<UMovementComponent>(GetCharacterMovement());
+	FHitResult HitResult;
+	Mover->SafeMoveUpdatedComponent(Delta, NewRotation, true, HitResult);
+	Mover->SlideAlongSurface(Delta, 1.0f - HitResult.Time, HitResult.Normal, HitResult, false);
 }
 
 //void AAnachroniaPlayer::ActivateAchievement(FName Name) {

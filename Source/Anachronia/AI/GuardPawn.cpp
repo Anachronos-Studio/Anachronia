@@ -90,6 +90,45 @@ void AGuardPawn::ConfigureSenses()
 	PerceptionComponent->RequestStimuliListenerUpdate();
 }
 
+FRotator AGuardPawn::FindBestDeadRotation()
+{
+	const FRotator OrigRot = GetActorRotation();
+	FRotator BestRotation = OrigRot;
+	float BestTraceTime = 0;
+	const float TraceLength = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
+	const FVector Start = GetActorLocation();
+	
+	FCollisionQueryParams Params;
+	TArray<AActor*> AttachedActors;
+	GetAttachedActors(AttachedActors);
+	Params.AddIgnoredActors(AttachedActors);
+	
+	for (int i = 0; i < 4; i++)
+	{
+		FRotator Rotation = OrigRot;
+		Rotation.Yaw += i * 45.0f;
+		SetActorRotation(Rotation, ETeleportType::TeleportPhysics);
+		FVector Offset = GetActorUpVector() * TraceLength;
+
+		float TraceTime = 0;
+		FHitResult Hit;
+		GetWorld()->LineTraceSingleByChannel(Hit, Start, Start + Offset, ECC_Visibility, Params);
+		TraceTime += Hit.Time;
+		GetWorld()->LineTraceSingleByChannel(Hit, Start, Start - Offset, ECC_Visibility, Params);
+		TraceTime += Hit.Time;
+
+		UE_LOG(LogTemp, Display, TEXT("Angle: %f w/ time: %f, hit: %s"), Rotation.Yaw, TraceTime, Hit.Actor.IsValid() ? *Hit.Actor->GetName() : TEXT("nullptr"));
+		
+		if (TraceTime > BestTraceTime)
+		{
+			BestTraceTime = TraceTime;
+			BestRotation = Rotation;
+		}
+	}
+
+	return BestRotation;
+}
+
 void AGuardPawn::Respawn()
 {
 	if (bStartOnPath && PatrolPath != nullptr)
@@ -111,6 +150,7 @@ void AGuardPawn::Respawn()
 	CurrentHealth = MaxHealth;
 
 	GetCharacterMovement()->SetMovementMode(GetCharacterMovement()->DefaultLandMovementMode);
+	GetCharacterMovement()->bUseRVOAvoidance = true;
 	GetCapsuleComponent()->SetSimulatePhysics(false);
 	GetCapsuleComponent()->SetGenerateOverlapEvents(true);
 	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Pawn"));
@@ -121,28 +161,39 @@ void AGuardPawn::Respawn()
 bool AGuardPawn::CanBeSeenFrom(const FVector& ObserverLocation, FVector& OutSeenLocation,
 	int32& NumberOfLoSChecksPerformed, float& OutSightStrength, const AActor* IgnoreActor) const
 {
-	if (GetGuardAI()->GetState() != EGuardState::Dead)
+	if (GetGuardAI()->GetState() != EGuardState::Dead || GetActorEnableCollision() == false)
 	{
-		return false; // Guards only have reason to be able to see dead guards
+		return false; // Guards only have reason to be able to see dead guards, and collision-less guards (e.g. carried) should be invisible
 	}
 
 	const float HalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();
 	const float ZOffsetList[]{ HalfHeight, 0.0f, -HalfHeight };
 
+	const float Range = FMath::Lerp(BodyCanBeSeenFromRange, BodyCanBeSeenFromRange * Luminance, BodyCanSeeLuminanceInfluence);
+
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(AILineOfSight), true, IgnoreActor);
+	TArray<AActor*> AttachedActors;
+	GetAttachedActors(AttachedActors);
+	Params.AddIgnoredActors(AttachedActors);
+	
 	for (float ZOffset : ZOffsetList)
 	{
 		const FVector TargetLocation = GetActorLocation() + GetActorUpVector() * ZOffset;
-
-		if (FVector::Distance(ObserverLocation, TargetLocation) <= BodyCanBeSeenFromRange)
+		
+		if (FVector::Distance(ObserverLocation, TargetLocation) <= Range)
 		{
 			FHitResult HitResult;
 			const bool bHit = GetWorld()->LineTraceSingleByChannel(HitResult, ObserverLocation, TargetLocation,
-				ECC_Visibility,
-				FCollisionQueryParams(SCENE_QUERY_STAT(AILineOfSight), true, IgnoreActor));
+				ECC_Visibility, Params);
 
 			NumberOfLoSChecksPerformed++;
 
-			if (!bHit || (HitResult.Actor.IsValid() && HitResult.Actor->IsOwnedBy(this)))
+			if (bHit)
+			{
+				UE_LOG(LogTemp, Display, TEXT("Blocked by %s"), HitResult.Actor.IsValid() ? *HitResult.Actor->GetName() : TEXT("nullptr"));
+			}
+			
+			if (!bHit)
 			{
 				// If this trace was blacked by nothing, or blocked by target itself (somehow), we can be seen
 				OutSeenLocation = TargetLocation;
@@ -174,6 +225,7 @@ void AGuardPawn::SetDamageToCurrentHealth(float Damage, bool bNonLethal)
 		GetCapsuleComponent()->SetGenerateOverlapEvents(false);
 		GetCapsuleComponent()->SetCollisionResponseToChannel(ECC_Pawn, ECR_Ignore);
 		GetCharacterMovement()->DisableMovement();
+		GetCharacterMovement()->bUseRVOAvoidance = false;
 		OnDeath(bNonLethal);
 		GetGuardAI()->Die();
 	}

@@ -128,7 +128,7 @@ void AGuardAIController::Tick(float DeltaTime)
 
 	if (ShouldShowDebug())
 	{
-		const FString Msg = FString::Printf(TEXT("Sus: %3.0f%% [%s]\nAlertness: %s\nMain state: %s\n%s\nHighest state: %s\nHP: %f/%f"),
+		const FString Msg = FString::Printf(TEXT("Sus: %3.0f%% [%s]\nAlertness: %s\nMain state: %s\n%s\nHighest state: %s\nHP: %f/%f\nLuminance: %f"),
 			SusValue * 100.0f,
 			*StaticEnum<ESusLevel>()->GetValueAsString(GetSusLevel()),
 			*StaticEnum<EAlertness>()->GetValueAsString(Alertness),
@@ -136,7 +136,8 @@ void AGuardAIController::Tick(float DeltaTime)
 			bCanSeePlayer ? TEXT("Player in sight") : TEXT("Can't see player"),
 			*StaticEnum<EGuardState>()->GetValueAsString(CurrentHighestState),
 			GuardPawn->CurrentHealth,
-			GuardPawn->MaxHealth
+			GuardPawn->MaxHealth,
+			GuardPawn->Luminance
 		);
 		GEngine->AddOnScreenDebugMessage(419, 1.0f, FColor::White, Msg);
 
@@ -245,6 +246,7 @@ void AGuardAIController::Die()
 	SetState(EGuardState::Dead);
 	SetAlertness(EAlertness::Dead);
 	SusValue = 0.0f;
+	BrainComponent->StopLogic(TEXT("Died"));
 	SetActorTickEnabled(false);
 	PerceptionComponent->OnTargetPerceptionUpdated.RemoveDynamic(this, &AGuardAIController::OnTargetPerceptionUpdated);
 	UAnachroniaEventSystem::GetInstance()->AnachroniaNoiseEvent.RemoveAll(this);
