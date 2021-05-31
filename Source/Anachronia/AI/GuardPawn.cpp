@@ -239,6 +239,9 @@ void AGuardPawn::SetDamageToCurrentHealth(float Damage, bool bNonLethal)
 		CurrentHealth = 0.0f;
 	}
 	else*/
+
+	const float OldHealth = CurrentHealth;
+	
 	{
 		CurrentHealth -= Damage;
 	}
@@ -253,6 +256,10 @@ void AGuardPawn::SetDamageToCurrentHealth(float Damage, bool bNonLethal)
 		GetCharacterMovement()->bUseRVOAvoidance = false;
 		OnDeath(bNonLethal);
 		GetGuardAI()->Die();
+	}
+	else
+	{
+		OnDamaged(CurrentHealth, OldHealth);
 	}
 }
 

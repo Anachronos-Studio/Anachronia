@@ -711,6 +711,8 @@ void AGuardAIController::OnAnachroniaNoise(FAnachroniaNoiseInfo NoiseInfo)
 
 		if (SusValue < GuardPawn->HearingMaxSus)
 		{
+			const ESusLevel OldSusLevel = GetSusLevel();
+
 			if (InstantDistract)
 			{
 				SusValue = GuardPawn->HearingMaxSus;
@@ -718,6 +720,12 @@ void AGuardAIController::OnAnachroniaNoise(FAnachroniaNoiseInfo NoiseInfo)
 			else
 			{
 				SusValue = FMath::Min(SusValue + Loudness * GuardPawn->HearingSusIncreaseMultiplier * NoiseInfo.SusMultiplier, GuardPawn->HearingMaxSus);
+			}
+
+			const ESusLevel NewSusLevel = GetSusLevel();
+			if (OldSusLevel != NewSusLevel)
+			{
+				GuardPawn->OnSusLevelIncreased(NewSusLevel, OldSusLevel);
 			}
 		}
 
