@@ -78,3 +78,13 @@ UAnachroniaSaveGame* UAnachroniaSaveGame::LoadSaveGame()
 
 	return SaveGameInstance;
 }
+
+TArray<FName> UAnachroniaSaveGame::GetReadBooks() {
+	UAnachroniaSaveGame* SaveGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::CreateSaveGameObject(UAnachroniaSaveGame::StaticClass()));
+	TArray<FName> ReturnValue;
+	if (UGameplayStatics::DoesSaveGameExist(SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex)) {
+		SaveGameInstance = Cast<UAnachroniaSaveGame>(UGameplayStatics::LoadGameFromSlot(SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex));
+		ReturnValue = SaveGameInstance->CharacterItems.ReadBooksNames;
+	}
+	return ReturnValue;
+}
