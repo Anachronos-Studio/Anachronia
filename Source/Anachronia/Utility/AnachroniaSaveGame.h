@@ -88,6 +88,9 @@ public:
 	static void AddReadBooks(FName Name);
 
 	UFUNCTION(BlueprintCallable)
+	static TArray<FName> GetReadBooks();
+
+	UFUNCTION(BlueprintCallable)
 	static TArray<FName> GetUnlockedItems();
 
 	UFUNCTION(BlueprintCallable)
