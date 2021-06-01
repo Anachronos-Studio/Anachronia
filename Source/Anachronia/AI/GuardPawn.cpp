@@ -108,7 +108,7 @@ FRotator AGuardPawn::FindBestDeadRotation()
 		FRotator Rotation = OrigRot;
 		Rotation.Yaw += i * 45.0f;
 		SetActorRotation(Rotation, ETeleportType::TeleportPhysics);
-		FVector Offset = GetActorUpVector() * TraceLength;
+		FVector Offset = GetActorForwardVector() * TraceLength;
 
 		float TraceTime = 0;
 		FHitResult Hit;
