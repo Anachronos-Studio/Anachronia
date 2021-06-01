@@ -234,17 +234,9 @@ bool AGuardPawn::CanBeSeenFrom(const FVector& ObserverLocation, FVector& OutSeen
 
 void AGuardPawn::SetDamageToCurrentHealth(float Damage, bool bNonLethal)
 {
-	/*if (GetGuardAI() && GetGuardAI()->IsVulnerableToStealthTakeDown())
-	{
-		CurrentHealth = 0.0f;
-	}
-	else*/
-
 	const float OldHealth = CurrentHealth;
 	
-	{
-		CurrentHealth -= Damage;
-	}
+	CurrentHealth -= Damage;
 	
 	if (CurrentHealth <= 0.0f)
 	{
