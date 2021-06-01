@@ -16,8 +16,6 @@ EBTNodeResult::Type UBTTask_AttackPlayer::ExecuteTask(UBehaviorTreeComponent& Ow
 {
 	AAnachroniaPlayer* Player = Cast<AAnachroniaPlayer>(OwnerComp.GetBlackboardComponent()->GetValueAsObject("Player"));
 	AGuardPawn* Guard = GetGuardPawn(OwnerComp);
-	Player->SetDamageToPlayerCurrentHealth(Guard->AttackDamage);
-	GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Red, TEXT("Attack!"));
 	Guard->OnAttack();
 
 	return EBTNodeResult::Succeeded;

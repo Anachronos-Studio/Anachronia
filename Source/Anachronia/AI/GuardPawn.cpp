@@ -186,9 +186,11 @@ void AGuardPawn::Respawn()
 bool AGuardPawn::CanBeSeenFrom(const FVector& ObserverLocation, FVector& OutSeenLocation,
 	int32& NumberOfLoSChecksPerformed, float& OutSightStrength, const AActor* IgnoreActor) const
 {
-	if (GetGuardAI()->GetState() != EGuardState::Dead || GetActorEnableCollision() == false)
+	EGuardState State =  GetGuardAI()->GetState();
+	if ((State != EGuardState::Dead && State != EGuardState::Hunt) || GetActorEnableCollision() == false)
 	{
-		return false; // Guards only have reason to be able to see dead guards, and collision-less guards (e.g. carried) should be invisible
+		// Guards only have reason to be able to see dead guards and guards who are hunting the player, and collision-less guards (e.g. carried) should be invisible
+		return false;
 	}
 
 	const float HalfHeight = GetCapsuleComponent()->GetScaledCapsuleHalfHeight();

@@ -109,6 +109,9 @@ protected:
 
 	UPROPERTY(Transient, BlueprintReadOnly, VisibleInstanceOnly)
 	EGuardState State;
+
+	UPROPERTY(Transient, BlueprintReadOnly, VisibleInstanceOnly)
+	float BackupTimer;
 	
 private:
 	UPROPERTY(VisibleInstanceOnly)
@@ -132,7 +135,6 @@ private:
 	AGuardPatrolPath* OriginalPatrolPath;
 	
 	float AttackCooldownTimer;
-	float BackupTimer;
 	
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;

@@ -599,12 +599,12 @@ void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 			if (State != EGuardState::Hunt && State != EGuardState::Inspect)
 			{
 				UE_LOG(LogTemp, Display, TEXT("'twas another guard!"))
-				AGuardPawn* DeadBody = Cast<AGuardPawn>(Actor);
-				if (DeadBody != nullptr)
+				AGuardPawn* OtherGuard = Cast<AGuardPawn>(Actor);
+				if (OtherGuard != nullptr && OtherGuard->GetGuardAI())
 				{
-					if (DeadBody->GetGuardAI() && DeadBody->GetGuardAI()->GetState() == EGuardState::Dead)
+					if (OtherGuard->GetGuardAI()->GetState() == EGuardState::Dead)
 					{
-						if (GuardCorpsesSeen.Contains(DeadBody))
+						if (GuardCorpsesSeen.Contains(OtherGuard))
 						{
 							// already seen this body
 							UE_LOG(LogTemp, Display, TEXT("But I've already seen this corpse"));
@@ -614,10 +614,17 @@ void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 							GuardPawn->OnSawDeadGuardBody();
 							Alertness = EAlertness::AlarmedUnknowing;
 							SusValue = GuardPawn->SusInspectThreshold + 0.05f;
-							GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", DeadBody->GetActorLocation());
+							GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", OtherGuard->GetActorLocation());
 							GetBlackboardComponent()->SetValueAsBool("SawBody", true);
-							GuardCorpsesSeen.Add(DeadBody);
+							GuardCorpsesSeen.Add(OtherGuard);
 						}
+					}
+					else if (OtherGuard->GetGuardAI()->GetState() == EGuardState::Hunt)
+					{
+						SusValue = 1.0f;
+						GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", PlayerRef->GetActorLocation());
+						const FVector PredictedLocation = PlayerRef->GetActorLocation() + PlayerRef->GetVelocity() * 100.0f;
+						GetBlackboardComponent()->SetValueAsVector("PredictedPlayerLocation", PredictedLocation);
 					}
 				}
 			}
