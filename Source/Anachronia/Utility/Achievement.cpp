@@ -20,24 +20,11 @@ void UAchievement::LoadFromSaveGame()
 	{
 		const FAchievementData Data = AchievementsMap[IdName];
 		bIsAchieved = Data.bAchieved;
-		for (int i = 0; i < GoalBools.Num(); i++)
-		{
-			if (i < Data.SubGoalsAchieved.Num())
-			{
-				GoalBools[i] = Data.SubGoalsAchieved[i];
-			}
-			else
-			{
-				GoalBools[i] = false;
-			}
-		}
+		GoalsAchieved = Data.SubGoalsAchieved;
 	}
 	else
 	{
 		bIsAchieved = false;
-		for (int i = 0; i < GoalBools.Num(); i++)
-		{
-			GoalBools[i] = false;
-		}
+		GoalsAchieved.Empty();
 	}
 }

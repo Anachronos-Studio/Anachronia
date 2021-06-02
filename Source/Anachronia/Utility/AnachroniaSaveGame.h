@@ -12,11 +12,11 @@ struct FAchievementData
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, Category = Achievements)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Achievements)
 	bool bAchieved;
 
-	UPROPERTY(VisibleAnywhere, Category = Achievements)
-	TArray<bool> SubGoalsAchieved;
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = Achievements)
+	TArray<int32> SubGoalsAchieved;
 };
 
 USTRUCT(BlueprintType)
@@ -24,10 +24,10 @@ struct FCharacterStats
 {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = SaveGameData)
 	int32 ImperialMarks;
 
-	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = SaveGameData)
 	int32 Score;
 
 	//TMap<FName, TSubclassOf<class ABaseEquipItem>> Items;
@@ -38,10 +38,10 @@ USTRUCT(BlueprintType)
 struct FCharacterItems {
 	GENERATED_BODY()
 
-	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = SaveGameData)
 	TArray<FName> ReadBooksNames;
 
-	UPROPERTY(VisibleAnywhere, Category = SaveGameData)
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = SaveGameData)
 	TArray<FName> EquippableItems;
 };
 
@@ -80,6 +80,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	static bool IsAchievementAchieved(FName IdName);
+
+	UFUNCTION(BlueprintCallable)
+	static TArray<int32> GetAchievedSubGoals(FName IdName);
 
 	UFUNCTION(BlueprintCallable)
 	static void AddEquipItem(FName Name);

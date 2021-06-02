@@ -2,10 +2,10 @@
 
 #include "AnachroniaSaveGame.h"
 #include "../Anachronia.h"
-#include "../EquippableItems/BaseEquipItem.h"
 #include "../Utility/Achievement.h"
 
-UAnachroniaSaveGame::UAnachroniaSaveGame() {
+UAnachroniaSaveGame::UAnachroniaSaveGame()
+{
 	SaveSlotName = TEXT("Lucie");
 	UserIndex = 0;
 }
@@ -24,8 +24,7 @@ void UAnachroniaSaveGame::AchieveSubGoal(FName AchievementName, int GoalIndex)
 	UAnachroniaSaveGame* SaveGameInstance = LoadSaveGame();
 	
 	FAchievementData Data = SaveGameInstance->Achievements.FindOrAdd(AchievementName);
-	Data.SubGoalsAchieved.SetNumZeroed(GoalIndex + 1, false);
-	Data.SubGoalsAchieved[GoalIndex] = true;
+	Data.SubGoalsAchieved.AddUnique(GoalIndex);
 	SaveGameInstance->Achievements[AchievementName] = Data;
 	UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex);
 }
@@ -44,6 +43,23 @@ bool UAnachroniaSaveGame::IsAchievementAchieved(FName IdName)
 	else
 	{
 		return false;
+	}
+}
+
+TArray<int32> UAnachroniaSaveGame::GetAchievedSubGoals(FName IdName)
+{
+	UAnachroniaSaveGame* LoadGameInstance = LoadSaveGame();
+
+	TMap<FName, FAchievementData> AchievementsMap = LoadGameInstance->Achievements;
+
+	if (AchievementsMap.Contains(IdName))
+	{
+		const FAchievementData Data = AchievementsMap[IdName];
+		return Data.SubGoalsAchieved;
+	}
+	else
+	{
+		return TArray<int32>();
 	}
 }
 
