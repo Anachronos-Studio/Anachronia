@@ -94,6 +94,10 @@ void AGuardAIController::Tick(float DeltaTime)
 		if (OldSusLevel != NewSusLevel)
 		{
 			GuardPawn->OnSusLevelIncreased(NewSusLevel, OldSusLevel);
+			if (IsSusEnough(ESusLevel::Busted))
+			{
+				AGuardPawn::bHasPlayerEverBeenSeenByAnyGuard = true;
+			}
 		}
 		
 		if (IsSusEnough(ESusLevel::KindaSus) && PlayerRef)
