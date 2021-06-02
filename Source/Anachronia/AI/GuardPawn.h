@@ -32,6 +32,16 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
+	static bool bHasAnyGuardBeenKilled;
+	static bool bHasPlayerEverBeenSeenByAnyGuard;
+
+public:
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Guard")
+	static bool HasAnyGuardBeenKilled();
+
+	UFUNCTION(BlueprintCallable, BlueprintPure, Category = "Guard")
+	static bool HasPlayerEverBeenSeenByAnyGuard();
+	
 	UFUNCTION(BlueprintNativeEvent, Category = "Guard")
 	void OnDeath(bool bNonLethalDeath);
 

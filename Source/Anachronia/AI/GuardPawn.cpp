@@ -13,6 +13,9 @@
 
 #define ECC_Guard ECC_GameTraceChannel2
 
+bool AGuardPawn::bHasAnyGuardBeenKilled = false;
+bool AGuardPawn::bHasPlayerEverBeenSeenByAnyGuard = false;
+
 // Sets default values
 AGuardPawn::AGuardPawn()
 {
@@ -46,7 +49,20 @@ void AGuardPawn::BeginPlay()
 	
 	Respawn();
 
+	bHasAnyGuardBeenKilled = false;
+	bHasPlayerEverBeenSeenByAnyGuard = false;
+
 	//SetDamageToCurrentHealth(1000.0f, false);
+}
+
+bool AGuardPawn::HasAnyGuardBeenKilled()
+{
+	return bHasAnyGuardBeenKilled;
+}
+
+bool AGuardPawn::HasPlayerEverBeenSeenByAnyGuard()
+{
+	return bHasPlayerEverBeenSeenByAnyGuard;
 }
 
 // Called every frame
@@ -251,6 +267,11 @@ void AGuardPawn::SetDamageToCurrentHealth(float Damage, bool bNonLethal)
 		GetCharacterMovement()->bUseRVOAvoidance = false;
 		OnDeath(bNonLethal);
 		GetGuardAI()->Die();
+
+		if (Damage < 9000.0f) // Hack to be entirely sure that prekilled drunk guard doesn't invalidate no-kill achievement
+		{
+			bHasAnyGuardBeenKilled = true;
+		}
 	}
 	else
 	{
