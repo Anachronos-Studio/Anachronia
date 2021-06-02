@@ -39,13 +39,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
 	TArray<FString> GoalNames;
 
-	/** Array of goal booleans */
-	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
-	TArray<bool> GoalBools;
-
 	/** Checks if it has multiple goals*/
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
 	bool MultipleGoals;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Scoring & Achievements")
+	TArray<int32> GoalsAchieved;
 
 	UFUNCTION(BlueprintCallable)
 	FString GetAchievementName() { return DisplayName; }
