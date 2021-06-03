@@ -104,7 +104,21 @@ void AGuardAIController::Tick(float DeltaTime)
 		{
 			if (State != EGuardState::Inspect) // When inspecting, should not track moving player, so don't update goal location
 			{
-				GetBlackboardComponent()->SetValueAsVector(TEXT("NavigationGoalLocation"), PlayerRef->GetActorLocation());
+				const UNavigationSystemV1* NavSys = FNavigationSystem::GetCurrent<UNavigationSystemV1>(GetWorld());
+				if (NavSys)
+				{
+					const FVector QueryingExtent = FVector(DEFAULT_NAV_QUERY_EXTENT_HORIZONTAL, DEFAULT_NAV_QUERY_EXTENT_HORIZONTAL, DEFAULT_NAV_QUERY_EXTENT_VERTICAL);
+					FNavLocation NavLoc;
+					ANavigationData* MyNavData = NavSys->GetNavDataForProps(GetNavAgentPropertiesRef(), GuardPawn->GetActorLocation());
+					if (NavSys->ProjectPointToNavigation(PlayerRef->GetActorLocation(), NavLoc, QueryingExtent, MyNavData))
+					{
+						GetBlackboardComponent()->SetValueAsVector(TEXT("NavigationGoalLocation"), PlayerRef->GetActorLocation());
+					}
+					else
+					{
+						UE_LOG(LogTemp, Display, TEXT("Player is outside navmesh :("));
+					}
+				}
 			}
 		}
 	}
@@ -129,6 +143,8 @@ void AGuardAIController::Tick(float DeltaTime)
 			GuardPawn->OnSusLevelIncreased(NewSusLevel, OldSusLevel);
 		}
 	}
+
+	GetBlackboardComponent()->SetValueAsBool("Moving", GuardPawn->GetVelocity().Size2D() > 1.0f);
 
 	if (ShouldShowDebug())
 	{
