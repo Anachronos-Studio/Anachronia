@@ -75,6 +75,8 @@ public:
 	void ResetRotation();
 	void SetMovementSpeed(EMovementSpeed NewSpeed);
 	void SetAlertness(EAlertness InAlertness);
+	FORCEINLINE FVector GetLastKnownPlayerLocation() const { return LastKnownPlayerLocation; }
+	FORCEINLINE FVector GetLastKnownPredictedPlayerLocation() const { return LastKnownPredictedPlayerLocation; }
 	FORCEINLINE EAlertness GetAlertness() const { return Alertness; }
 	void SetState(EGuardState InState);
 	FORCEINLINE EGuardState GetState() const { return State; }
@@ -131,6 +133,9 @@ private:
 	FRotator OriginalRotation;
 	FVector OriginalLocation;
 
+	FVector LastKnownPlayerLocation;
+	FVector LastKnownPredictedPlayerLocation;
+
 	UPROPERTY()
 	AGuardPatrolPath* OriginalPatrolPath;
 	
@@ -156,6 +161,8 @@ private:
 	void OnAnachroniaNoise(FAnachroniaNoiseInfo NoiseInfo);
 
 	int32 LineTraceSound(FVector Start, FVector End) const;
+
+	FVector GetPlayerLocation() const;
 	
 	FORCEINLINE bool ShouldShowDebug() const;
 };
