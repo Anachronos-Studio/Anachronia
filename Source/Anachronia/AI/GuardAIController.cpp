@@ -110,9 +110,11 @@ void AGuardAIController::Tick(float DeltaTime)
 					const FVector QueryingExtent = FVector(DEFAULT_NAV_QUERY_EXTENT_HORIZONTAL, DEFAULT_NAV_QUERY_EXTENT_HORIZONTAL, DEFAULT_NAV_QUERY_EXTENT_VERTICAL);
 					FNavLocation NavLoc;
 					ANavigationData* MyNavData = NavSys->GetNavDataForProps(GetNavAgentPropertiesRef(), GuardPawn->GetActorLocation());
-					if (NavSys->ProjectPointToNavigation(PlayerRef->GetActorLocation(), NavLoc, QueryingExtent, MyNavData))
+					if (NavSys->ProjectPointToNavigation(GetPlayerLocation(), NavLoc, QueryingExtent, MyNavData))
 					{
-						GetBlackboardComponent()->SetValueAsVector(TEXT("NavigationGoalLocation"), PlayerRef->GetActorLocation());
+						GetBlackboardComponent()->SetValueAsVector(TEXT("NavigationGoalLocation"), GetPlayerLocation());
+						LastKnownPlayerLocation = GetPlayerLocation();
+						LastKnownPredictedPlayerLocation = GetPlayerLocation() + PlayerRef->GetVelocity() * 100.0f;
 					}
 					else
 					{
@@ -642,8 +644,8 @@ void AGuardAIController::OnTargetPerceptionUpdated(AActor* Actor, FAIStimulus St
 					else if (OtherGuard->GetGuardAI()->GetState() == EGuardState::Hunt)
 					{
 						SusValue = 1.0f;
-						GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", PlayerRef->GetActorLocation());
-						const FVector PredictedLocation = PlayerRef->GetActorLocation() + PlayerRef->GetVelocity() * 100.0f;
+						GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", OtherGuard->GetGuardAI()->GetLastKnownPlayerLocation());
+						const FVector PredictedLocation = OtherGuard->GetGuardAI()->GetLastKnownPredictedPlayerLocation();
 						GetBlackboardComponent()->SetValueAsVector("PredictedPlayerLocation", PredictedLocation);
 					}
 				}
@@ -722,8 +724,8 @@ void AGuardAIController::OnAnachroniaNoise(FAnachroniaNoiseInfo NoiseInfo)
 			GEngine->AddOnScreenDebugMessage(-1, 1.0f, FColor::Cyan, TEXT("I heard your request for backup, comrade!"));
 			AGuardAIController* GuardInDistress = Cast<AGuardAIController>(NoiseInfo.Instigator);
 			SusValue = 1.0f;
-			GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", PlayerRef->GetActorLocation());
-			const FVector PredictedLocation = PlayerRef->GetActorLocation() + PlayerRef->GetVelocity() * 100.0f;
+			GetBlackboardComponent()->SetValueAsVector("NavigationGoalLocation", GuardInDistress->GetLastKnownPlayerLocation());
+			const FVector PredictedLocation = GuardInDistress->GetLastKnownPredictedPlayerLocation();
 			GetBlackboardComponent()->SetValueAsVector("PredictedPlayerLocation", PredictedLocation);
 		}
 	}
@@ -786,6 +788,19 @@ int32 AGuardAIController::LineTraceSound(FVector Start, FVector End) const
 	{
 		return 0;
 	}
+}
+
+FVector AGuardAIController::GetPlayerLocation() const
+{
+	if (PlayerRef == nullptr)
+	{
+		return FVector(0.0f, 0.0f, 0.0f);
+	}
+
+	//const float Offset = PlayerRef->GetCapsuleComponent()->GetScaledCapsuleHalfHeight() - 5.0f;
+	//return PlayerRef->GetActorLocation() + FVector(0.0f, 0.0f, -Offset);
+
+	return PlayerRef->GetActorLocation();
 }
 
 FORCEINLINE bool AGuardAIController::ShouldShowDebug() const
