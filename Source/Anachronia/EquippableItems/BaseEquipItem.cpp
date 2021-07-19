@@ -32,6 +32,10 @@ ABaseEquipItem::ABaseEquipItem()
     // This value below will get it's value by some mathematics
     OutputDamage = 0.f;
 
+    // Change these values in editor to whatever value you want for ranged weapons
+    WeaponRange = 0.f;
+    WeaponAmmo = 0.f;
+    ChargeTime = 0.f;
 }
 
 // Called when the game starts or when spawned
