@@ -45,15 +45,15 @@ public:
     bool bIsWeapon;
 
     /** Optional, only for ranged weapon. this value should be 0 for tools and melee weapons */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attributes)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes|Ranged")
     float WeaponRange;
 
     /** Optional, for weapons that uses ammo... like all ranged weapons (pun intended) */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attributes)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes|Ranged")
     float WeaponAmmo;
 
     /** Optional, for weapons that requires charging of some kind.. usually a magic/energy based ranged weapon */
-    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Attributes)
+    UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Attributes|Ranged")
     float ChargeTime;
 
 protected:
